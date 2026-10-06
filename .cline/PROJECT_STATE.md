@@ -52,8 +52,8 @@
 - PayPal monthly/yearly plan details are loaded server-side; only verified active subscriptions can modify records.
 
 ## Next Steps
-- Add the PayPal sandbox Client ID, secret, and webhook ID to Cloudflare Pages secrets.
-- Complete monthly and yearly sandbox buyer tests.
+- Add the PayPal live Client ID, secret, and webhook ID to Cloudflare Pages secrets.
+- Complete monthly and yearly PayPal checkout tests.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

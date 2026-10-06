@@ -6,7 +6,7 @@ Apply every migration to preview and production. Migration `0007_paypal_billing.
 
 ## PayPal subscriptions
 
-The sandbox uses the existing monthly and yearly plans configured in `wrangler.toml`. The application retrieves their active recurring prices directly from PayPal, so the website currency and amount match checkout.
+Production uses the existing live monthly and yearly plans configured in `wrangler.toml`. The application retrieves their active recurring prices directly from PayPal, so the website currency and amount match checkout.
 
 Configure these Cloudflare Pages secrets and variables:
 
