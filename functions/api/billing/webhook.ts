@@ -1,6 +1,5 @@
 import type { AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
-import { stripe } from "../../_lib/stripe"
 
 function hex(bytes: ArrayBuffer): string {
   return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join("")
@@ -41,20 +40,10 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     const eventCreated = Number(event.created ?? 0)
 
     if (event.type === "checkout.session.completed" && workspaceId && object.subscription) {
-      const subscription = await stripe(context.env, `subscriptions/${object.subscription}`)
-      const items = subscription.items?.data ?? []
-      const baseIds = [context.env.STRIPE_MONTHLY_PRICE_ID, context.env.STRIPE_YEARLY_PRICE_ID]
-      const seatIds = [context.env.STRIPE_MONTHLY_SEAT_PRICE_ID, context.env.STRIPE_YEARLY_SEAT_PRICE_ID]
-      const baseItem = items.find((item: any) => baseIds.includes(item.price?.id)) || items[0]
-      const seatItem = items.find((item: any) => seatIds.includes(item.price?.id))
-      const interval = referenceInterval || baseItem?.price?.recurring?.interval || "month"
-      const currentPeriodEnd = subscription.current_period_end || baseItem?.current_period_end
-      const periodEnd = currentPeriodEnd
-        ? new Date(currentPeriodEnd * 1000).toISOString()
-        : null
-      await context.env.DB.prepare("UPDATE workspaces SET stripe_customer_id=?,stripe_subscription_id=?,stripe_base_item_id=?,stripe_seat_item_id=?,billing_interval=?,subscription_status=?,current_period_end=?,updated_at=? WHERE id=?")
-        .bind(object.customer, object.subscription, baseItem?.id || null, seatItem?.id || null, interval, subscription.status, periodEnd, new Date().toISOString(), workspaceId).run()
-      if (["active", "trialing"].includes(subscription.status)) {
+      const paid = ["paid", "no_payment_required"].includes(object.payment_status)
+      await context.env.DB.prepare("UPDATE workspaces SET stripe_customer_id=?,stripe_subscription_id=?,billing_interval=?,subscription_status=?,updated_at=? WHERE id=?")
+        .bind(object.customer, object.subscription, referenceInterval || object.metadata?.interval || "month", paid ? "active" : "incomplete", new Date().toISOString(), workspaceId).run()
+      if (paid) {
         await context.env.DB.prepare("UPDATE k9_roster SET workspace_id=? WHERE workspace_id IS NULL").bind(workspaceId).run()
       }
     }

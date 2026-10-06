@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { ProtectedRoute } from "./lib/auth"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
+import BillingSuccessPage from "./pages/BillingSuccessPage"
 import ComingSoonPage from "./pages/ComingSoonPage"
 import DashboardPage from "./pages/DashboardPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
@@ -39,6 +40,14 @@ export default function App() {
         element={
           <ProtectedRoute owner allowInactive>
             <SubscriptionPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing/success"
+        element={
+          <ProtectedRoute owner allowInactive>
+            <BillingSuccessPage />
           </ProtectedRoute>
         }
       />
