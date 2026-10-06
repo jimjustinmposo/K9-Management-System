@@ -1,6 +1,6 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { appUrl, json } from "../../_lib/http"
-import { paypal, paypalPlan } from "../../_lib/paypal"
+import { paypal, paypalPlanDetails } from "../../_lib/paypal"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
@@ -8,6 +8,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   try {
     const body = (await context.request.json()) as { interval?: string }
     const interval = body.interval === "year" ? "year" : "month"
+    const plan = await paypalPlanDetails(context.env, interval)
     const workspace = await context.env.DB.prepare(
       "SELECT paypal_subscription_id,subscription_status FROM workspaces WHERE id=?",
     )
@@ -24,7 +25,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
       method: "POST",
       headers: { "PayPal-Request-Id": crypto.randomUUID() },
       body: {
-        plan_id: paypalPlan(context.env, interval),
+        plan_id: plan.id,
         custom_id: `${session.workspace.id}:${interval}`,
         subscriber: { email_address: session.user.email },
         application_context: {
@@ -45,7 +46,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     )
       .bind(
         subscription.id,
-        paypalPlan(context.env, interval),
+        plan.id,
         interval,
         new Date().toISOString(),
         session.workspace.id,

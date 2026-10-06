@@ -5,6 +5,8 @@ pages_build_output_dir = "dist"
 [vars]
 APP_URL = "https://martina-k9-management-system.pages.dev"
 PAYPAL_ENVIRONMENT = "sandbox"
+PAYPAL_MONTHLY_PLAN_ID = "P-5A732455WD357910VNLCM37I"
+PAYPAL_YEARLY_PLAN_ID = "P-34449918MF5203113NLCM3DI"
 
 # Cloudflare Pages project. The D1 binding below is used by
 # `wrangler pages dev` for local development. For production,

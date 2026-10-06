@@ -54,3 +54,49 @@ export function paypalPlan(env: AppEnv, interval: string): string {
   if (!planId) throw new Error(`PayPal ${interval} plan is not configured`)
   return planId
 }
+
+export interface PaypalPlanDetails {
+  id: string
+  name: string
+  value: string
+  currency: string
+  interval: "month" | "year"
+  status: string
+  configured: true
+}
+
+export async function paypalPlanDetails(
+  env: AppEnv,
+  interval: "month" | "year",
+): Promise<PaypalPlanDetails> {
+  const planId = paypalPlan(env, interval)
+  const plan = await paypal(
+    env,
+    `/v1/billing/plans/${encodeURIComponent(planId)}`,
+  )
+  const regularCycle = plan.billing_cycles?.find(
+    (cycle: any) => cycle.tenure_type === "REGULAR",
+  )
+  const expectedUnit = interval === "year" ? "YEAR" : "MONTH"
+  const frequency = regularCycle?.frequency
+  const fixedPrice = regularCycle?.pricing_scheme?.fixed_price
+  if (
+    plan.status !== "ACTIVE" ||
+    frequency?.interval_unit !== expectedUnit ||
+    Number(frequency?.interval_count) !== 1 ||
+    !fixedPrice?.value ||
+    !fixedPrice?.currency_code
+  )
+    throw new Error(
+      `The PayPal ${interval} plan is inactive or has an unexpected billing cycle`,
+    )
+  return {
+    id: plan.id,
+    name: plan.name || `Sentinel ${interval}ly`,
+    value: String(fixedPrice.value),
+    currency: String(fixedPrice.currency_code).toUpperCase(),
+    interval,
+    status: plan.status,
+    configured: true,
+  }
+}

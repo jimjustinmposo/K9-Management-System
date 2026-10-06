@@ -1,6 +1,6 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
-import { paypal } from "../../_lib/paypal"
+import { paypal, paypalPlanDetails } from "../../_lib/paypal"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
@@ -21,13 +21,19 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
       context.env,
       `/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`,
     )
-    const [workspaceId, interval = "month"] = String(
+    const [workspaceId, rawInterval] = String(
       subscription.custom_id || "",
     ).split(":")
+    if (rawInterval !== "month" && rawInterval !== "year")
+      return json({ error: "Invalid PayPal billing interval" }, 400)
+    const interval = rawInterval
     if (workspaceId !== session.workspace.id)
       return json({ error: "This subscription belongs to another workspace" }, 403)
     if (subscription.status !== "ACTIVE")
       return json({ error: `PayPal subscription is ${subscription.status}` }, 409)
+    const expectedPlan = await paypalPlanDetails(context.env, interval)
+    if (subscription.plan_id !== expectedPlan.id)
+      return json({ error: "PayPal returned an unexpected subscription plan" }, 403)
     const renewal = subscription.billing_info?.next_billing_time || null
     await context.env.DB.prepare(
       "UPDATE workspaces SET paypal_payer_id=?,paypal_subscription_id=?,paypal_plan_id=?,billing_interval=?,subscription_status='active',current_period_end=?,updated_at=? WHERE id=?",

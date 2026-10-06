@@ -41,16 +41,19 @@
 - UI conventions: AppShell/Panel components, navy/gold palette, badge styles per status
 
 ## Environment
-- `DATABASE_ID` placeholder in wrangler.toml still needs the real D1 id for deploys
-- Pages Functions D1 binding name: `DB`
+- Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
+- Production URL: `https://martina-k9-management-system.pages.dev`
 
 ## Recent Changes
 - Enabled `/training` route with full TrainingPage (sessions, goals, readiness)
 - Added trainingApi.ts, /api/training/types.ts, /api/training/goals.ts
 - Added 0003 seed migration for 8 training types + 40 assessment criteria
+- Added owner/member authentication and PayPal subscription billing on Cloudflare Pages Functions.
+- PayPal monthly/yearly plan details are loaded server-side; only verified active subscriptions can modify records.
 
 ## Next Steps
-- Apply migrations to Cloudflare D1 (`wrangler d1 migrations apply k9_ops_db`)
+- Add the PayPal sandbox Client ID, secret, and webhook ID to Cloudflare Pages secrets.
+- Complete monthly and yearly sandbox buyer tests.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

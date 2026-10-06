@@ -2,24 +2,12 @@ import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { AppShell, Icon } from "../components/AppShell"
 import { apiRequest } from "../lib/auth"
-
-type Interval = "month" | "year"
-type Plans = Record<Interval, {
-  amount: number
-  currency: string
-  configured: boolean
-}>
-
-function money(amount: number, currency: string) {
-  return `${currency.toUpperCase()} ${new Intl.NumberFormat("en-US", {
-    maximumFractionDigits: 0,
-  }).format(amount / 100)}`
-}
-
-const DISPLAY_PRICES: Record<Interval, { amount: number; currency: string }> = {
-  month: { amount: 15000, currency: "aed" },
-  year: { amount: 162000, currency: "aed" },
-}
+import {
+  type BillingInterval as Interval,
+  type BillingPlans as Plans,
+  formatPlanMoney,
+  isBillingPlan,
+} from "../lib/billing"
 
 const benefits = [
   "Complete K9 profiles and operational records",
@@ -41,17 +29,35 @@ export default function SubscriptionPage() {
       .catch((cause) => setError(cause instanceof Error ? cause.message : "Unable to load plans"))
   }, [])
 
-  const selectedPlan = DISPLAY_PRICES[interval]
-  const monthlyEquivalent = useMemo(
-    () => money(Math.round(DISPLAY_PRICES.year.amount / 12), "aed"),
-    [],
-  )
+  const selectedPlan = plans?.[interval]
+  const chosenPrice = isBillingPlan(selectedPlan)
+    ? formatPlanMoney(selectedPlan.value, selectedPlan.currency)
+    : "—"
+  const { monthlyEquivalent, discountPercent } = useMemo(() => {
+    const month = plans?.month
+    const year = plans?.year
+    if (
+      !isBillingPlan(month) ||
+      !isBillingPlan(year) ||
+      month.currency !== year.currency
+    )
+      return { monthlyEquivalent: "", discountPercent: 0 }
+    const regularAnnual = Number(month.value) * 12
+    const yearly = Number(year.value)
+    return {
+      monthlyEquivalent: formatPlanMoney(yearly / 12, year.currency),
+      discountPercent:
+        regularAnnual > yearly
+          ? Math.round(((regularAnnual - yearly) / regularAnnual) * 100)
+          : 0,
+    }
+  }, [plans])
 
   async function checkout() {
     setSaving(true)
     setError("")
-    if (!plans?.[interval]?.configured) {
-      setError("PayPal billing is being configured. Please try again shortly.")
+    if (!isBillingPlan(selectedPlan)) {
+      setError(selectedPlan?.error || "PayPal billing is being configured. Please try again shortly.")
       setSaving(false)
       return
     }
@@ -66,8 +72,6 @@ export default function SubscriptionPage() {
       setSaving(false)
     }
   }
-
-  const chosenPrice = money(selectedPlan.amount, selectedPlan.currency)
 
   return (
     <AppShell title="Subscription">
@@ -96,7 +100,7 @@ export default function SubscriptionPage() {
           <div className="grid w-full grid-cols-2 gap-2 xl:w-[355px]">
             {(["month", "year"] as const).map((value) => {
               const active = interval === value
-              const price = DISPLAY_PRICES[value]
+              const price = plans?.[value]
               return (
                 <button
                   key={value}
@@ -112,17 +116,23 @@ export default function SubscriptionPage() {
                     {value === "month" ? "1 month" : "1 year"}
                   </span>
                   <strong className="mt-2 block text-lg font-extrabold">
-                    {money(price.amount, price.currency)}
+                    {isBillingPlan(price)
+                      ? formatPlanMoney(price.value, price.currency)
+                      : "—"}
                   </strong>
                   <span className={`mt-0.5 block text-[8px] ${active ? "text-white/60" : "text-muted"}`}>
-                    {value === "month" ? "Billed every month" : `${monthlyEquivalent}/month · billed yearly`}
+                    {value === "month"
+                      ? "Billed every month"
+                      : monthlyEquivalent
+                        ? `${monthlyEquivalent}/month · billed yearly`
+                        : "Billed yearly"}
                   </span>
                   {active && (
                     <span className="absolute right-3 top-3 grid size-4 place-items-center rounded-full bg-gold text-[9px] font-black text-navy">✓</span>
                   )}
-                  {value === "year" && !active && (
+                  {value === "year" && !active && discountPercent > 0 && (
                     <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">
-                      SAVE 10%
+                      SAVE {discountPercent}%
                     </span>
                   )}
                 </button>
@@ -213,7 +223,7 @@ export default function SubscriptionPage() {
                 {error && <p role="alert" className="mb-3 text-[10px] font-bold text-danger">{error}</p>}
                 <button
                   type="button"
-                  disabled={saving}
+                  disabled={saving || !isBillingPlan(selectedPlan)}
                   onClick={() => void checkout()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white shadow-action transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
                 >

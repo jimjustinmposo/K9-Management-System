@@ -6,7 +6,7 @@ Apply every migration to preview and production. Migration `0007_paypal_billing.
 
 ## PayPal subscriptions
 
-Create a PayPal REST app in the PayPal Developer Dashboard, then create one product with monthly and yearly subscription plans. PayPal's standard REST subscriptions do not support AED; choose a supported settlement currency for the PayPal plans and update the checkout disclosure before enabling live billing.
+The sandbox uses the existing monthly and yearly plans configured in `wrangler.toml`. The application retrieves their active recurring prices directly from PayPal, so the website currency and amount match checkout.
 
 Configure these Cloudflare Pages secrets and variables:
 
