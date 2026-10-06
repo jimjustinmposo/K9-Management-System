@@ -21,8 +21,8 @@ const DISPLAY_PRICES: Record<Interval, { amount: number; currency: string }> = {
 }
 
 const STRIPE_PAYMENT_LINKS: Record<Interval, string> = {
-  month: "https://buy.stripe.com/test_14AeV5cDV4Ksf4z2P53Nm00",
-  year: "https://buy.stripe.com/test_cNi6oz7jBdgY9Kf89p3Nm01",
+  month: "https://buy.stripe.com/test_6oU28k6p34wj8363eKeZ200",
+  year: "https://buy.stripe.com/test_cNicMY28N4wjdnqeXseZ201",
 }
 
 const benefits = [

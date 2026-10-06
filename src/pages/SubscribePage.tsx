@@ -8,12 +8,12 @@ const plans: Record<Interval, { amount: string; period: string; link: string }> 
   month: {
     amount: "AED 150",
     period: "month",
-    link: "https://buy.stripe.com/test_14AeV5cDV4Ksf4z2P53Nm00",
+    link: "https://buy.stripe.com/test_6oU28k6p34wj8363eKeZ200",
   },
   year: {
     amount: "AED 1,620",
     period: "year",
-    link: "https://buy.stripe.com/test_cNi6oz7jBdgY9Kf89p3Nm01",
+    link: "https://buy.stripe.com/test_cNicMY28N4wjdnqeXseZ201",
   },
 }
 

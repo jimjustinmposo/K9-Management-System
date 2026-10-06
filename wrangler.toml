@@ -4,6 +4,8 @@ pages_build_output_dir = "dist"
 
 [vars]
 APP_URL = "https://martina-k9-management-system.pages.dev"
+STRIPE_MONTHLY_PRICE_ID = "price_1UNUU61VCi1VuhHPAuqN5cv9"
+STRIPE_YEARLY_PRICE_ID = "price_1UNUUA1VCi1VuhHPhOoupEHa"
 
 # Cloudflare Pages project. The D1 binding below is used by
 # `wrangler pages dev` for local development. For production,
