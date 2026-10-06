@@ -1,0 +1,90 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", sans-serif;
+
+  --color-canvas: #f3f5f6;
+  --color-surface: #ffffff;
+  --color-ink: #172127;
+  --color-muted: #758188;
+  --color-slate: #48575f;
+  --color-line: #e4e9eb;
+  --color-line-strong: #cbd3d7;
+
+  --color-navy: #13262d;
+  --color-navy-light: #1b343d;
+  --color-gold: #d7ad58;
+
+  --color-positive: #278268;
+  --color-positive-soft: #e5f3ed;
+  --color-warning: #a96c21;
+  --color-warning-soft: #f9eedc;
+  --color-danger: #bd504a;
+  --color-danger-soft: #fae9e7;
+  --color-info: #39748f;
+  --color-info-soft: #e5f0f4;
+  --color-violet: #6f669b;
+  --color-violet-soft: #eeecf6;
+
+  --color-k9-one: #3f6672;
+  --color-k9-two: #736b5a;
+  --color-k9-three: #725758;
+  --color-k9-four: #516f66;
+
+  --shadow-nav: 0 8px 22px rgb(0 0 0 / 0.16);
+  --shadow-action: 0 7px 16px rgb(19 38 45 / 0.16);
+  --shadow-filter: 0 1px 4px rgb(19 38 45 / 0.1);
+  --shadow-status: 0 0 0 4px rgb(39 130 104 / 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-canvas);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-canvas);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-gold) 50%, transparent);
+  outline-offset: 2px;
+}
+
+.bg-compliance {
+  background: conic-gradient(
+    var(--color-positive) 0deg 295deg,
+    var(--color-line) 295deg 360deg
+  );
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--color-line-strong);
+}

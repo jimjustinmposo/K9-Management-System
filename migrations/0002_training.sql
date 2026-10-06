@@ -1,0 +1,3 @@
+-- Retired: the original training schema has been removed.
+-- This filename is retained for migration history compatibility.
+-- Existing databases are reset by 0004_remove_training.sql.

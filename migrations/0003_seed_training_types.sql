@@ -1,0 +1,2 @@
+-- Retired: the original training seed content has been removed.
+-- This filename is retained for migration history compatibility.
