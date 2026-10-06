@@ -1,19 +1,17 @@
 import { useState } from "react"
 import AuthLayout, { primaryButton } from "../components/AuthLayout"
-import { useAuth } from "../lib/auth"
+import { apiRequest, useAuth } from "../lib/auth"
 
 type Interval = "month" | "year"
 
-const plans: Record<Interval, { amount: string; period: string; link: string }> = {
+const plans: Record<Interval, { amount: string; period: string }> = {
   month: {
     amount: "AED 150",
     period: "month",
-    link: "https://buy.stripe.com/test_6oU28k6p34wj8363eKeZ200",
   },
   year: {
     amount: "AED 1,620",
     period: "year",
-    link: "https://buy.stripe.com/test_cNicMY28N4wjdnqeXseZ201",
   },
 }
 
@@ -21,18 +19,22 @@ export default function SubscribePage() {
   const { session, logout } = useAuth()
   const [interval, setInterval] = useState<Interval>("month")
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState("")
   const plan = plans[interval]
 
-  function checkout() {
+  async function checkout() {
     setSaving(true)
-    const url = new URL(plan.link)
-    if (session?.workspace.id) {
-      url.searchParams.set(
-        "client_reference_id",
-        `${session.workspace.id}:${interval}`,
-      )
+    setError("")
+    try {
+      const result = await apiRequest("/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ interval }),
+      })
+      window.location.assign(result.data.url)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to open PayPal")
+      setSaving(false)
     }
-    window.location.assign(url.toString())
   }
 
   return (
@@ -84,13 +86,15 @@ export default function SubscribePage() {
           <li>✓ Owner plus 3 member accounts</li>
           <li>✓ Full K9 operations workspace</li>
           <li>✓ Secure role-based access</li>
-          <li>✓ Monthly or yearly secure Stripe billing</li>
+          <li>✓ Monthly or yearly secure PayPal billing</li>
         </ul>
       </div>
 
+      {error && <p role="alert" className="mt-4 text-xs font-bold text-danger">{error}</p>}
+
       <button
         type="button"
-        onClick={checkout}
+        onClick={() => void checkout()}
         disabled={saving}
         className={`${primaryButton} mt-5`}
       >

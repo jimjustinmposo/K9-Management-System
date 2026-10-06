@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import AuthLayout from "../components/AuthLayout"
-import { useAuth } from "../lib/auth"
+import { apiRequest, useAuth } from "../lib/auth"
 
 export default function BillingSuccessPage() {
   const [searchParams] = useSearchParams()
@@ -10,26 +10,28 @@ export default function BillingSuccessPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    const sessionId = searchParams.get("session_id")
-    if (!sessionId) {
-      setError("Stripe did not return a Checkout Session ID.")
+    const subscriptionId = searchParams.get("subscription_id")
+    if (!subscriptionId) {
+      setError("PayPal did not return a subscription ID.")
       return
     }
-    let attempts = 0
-    const check = window.setInterval(async () => {
-      attempts += 1
-      const response = await fetch("/api/auth/session", { cache: "no-store" })
-      const result = await response.json().catch(() => ({}))
-      if (response.ok && result.data?.subscription?.writable) {
-        window.clearInterval(check)
+    let cancelled = false
+    async function confirm() {
+      try {
+        await apiRequest("/api/billing/confirm", {
+          method: "POST",
+          body: JSON.stringify({ subscriptionId }),
+        })
+        if (cancelled) return
         await refresh()
         navigate("/", { replace: true, state: { subscriptionActivated: true } })
-      } else if (attempts >= 15) {
-        window.clearInterval(check)
-        setError("Payment succeeded, but Stripe has not confirmed the subscription yet. Please refresh in a moment.")
+      } catch (cause) {
+        if (!cancelled)
+          setError(cause instanceof Error ? cause.message : "PayPal could not confirm the subscription.")
       }
-    }, 1000)
-    return () => window.clearInterval(check)
+    }
+    void confirm()
+    return () => { cancelled = true }
   }, [navigate, refresh, searchParams])
 
   return (

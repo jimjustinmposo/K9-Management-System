@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { useLocation } from "react-router-dom"
 import { AppShell, Icon } from "../components/AppShell"
-import { apiRequest, useAuth } from "../lib/auth"
+import { apiRequest } from "../lib/auth"
 
 type Interval = "month" | "year"
 type Plans = Record<Interval, {
-  base: { amount: number; currency: string }
-  seat: { amount: number; currency: string }
+  amount: number
+  currency: string
+  configured: boolean
 }>
 
 function money(amount: number, currency: string) {
@@ -20,11 +21,6 @@ const DISPLAY_PRICES: Record<Interval, { amount: number; currency: string }> = {
   year: { amount: 162000, currency: "aed" },
 }
 
-const STRIPE_PAYMENT_LINKS: Record<Interval, string> = {
-  month: "https://buy.stripe.com/test_6oU28k6p34wj8363eKeZ200",
-  year: "https://buy.stripe.com/test_cNicMY28N4wjdnqeXseZ201",
-}
-
 const benefits = [
   "Complete K9 profiles and operational records",
   "Training, medical, and certification tracking",
@@ -33,7 +29,6 @@ const benefits = [
 ]
 
 export default function SubscriptionPage() {
-  const { session } = useAuth()
   const location = useLocation()
   const [plans, setPlans] = useState<Plans | null>(null)
   const [interval, setInterval] = useState<Interval>("month")
@@ -52,17 +47,24 @@ export default function SubscriptionPage() {
     [],
   )
 
-  function checkout() {
+  async function checkout() {
     setSaving(true)
     setError("")
-    const url = new URL(STRIPE_PAYMENT_LINKS[interval])
-    if (session?.workspace.id) {
-      url.searchParams.set(
-        "client_reference_id",
-        `${session.workspace.id}:${interval}`,
-      )
+    if (!plans?.[interval]?.configured) {
+      setError("PayPal billing is being configured. Please try again shortly.")
+      setSaving(false)
+      return
     }
-    window.location.assign(url.toString())
+    try {
+      const result = await apiRequest("/api/billing/checkout", {
+        method: "POST",
+        body: JSON.stringify({ interval }),
+      })
+      window.location.assign(result.data.url)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Unable to open PayPal")
+      setSaving(false)
+    }
   }
 
   const chosenPrice = money(selectedPlan.amount, selectedPlan.currency)
@@ -180,11 +182,7 @@ export default function SubscriptionPage() {
                 <p className="mt-4 flex items-center gap-2 text-[9px] text-muted">
                   <Icon name="users" className="size-3.5" /> Owner plus 3 member accounts included
                 </p>
-                {plans?.[interval]?.seat && (
-                  <p className="mt-2 text-[9px] text-muted">
-                    Extra members: {money(plans[interval].seat.amount, plans[interval].seat.currency)} / {interval}
-                  </p>
-                )}
+                <p className="mt-2 text-[9px] text-muted">Three member accounts are included.</p>
               </div>
             </div>
           </section>
@@ -216,13 +214,13 @@ export default function SubscriptionPage() {
                 <button
                   type="button"
                   disabled={saving}
-                  onClick={checkout}
+                  onClick={() => void checkout()}
                   className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white shadow-action transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? "Opening checkout…" : "Continue to secure checkout"} <span className="text-gold">→</span>
                 </button>
                 <p className="mt-3 flex items-center justify-center gap-2 text-[8px] text-muted">
-                  <Icon name="shield" className="size-3 text-positive" /> Secure payment powered by Stripe
+                  <Icon name="shield" className="size-3 text-positive" /> Secure payment powered by PayPal
                 </p>
               </div>
             </section>
@@ -234,7 +232,7 @@ export default function SubscriptionPage() {
               <div>
                 <p className="text-[10px] font-extrabold">Simple, secure billing</p>
                 <p className="mt-1 text-[8px] leading-4 text-muted">
-                  Your plan renews automatically. Update payment details or cancel from your billing settings.
+                  Your plan renews automatically. Manage the subscription from your PayPal account.
                 </p>
               </div>
             </section>

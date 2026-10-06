@@ -1,90 +1,110 @@
 import type { AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
-
-function hex(bytes: ArrayBuffer): string {
-  return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, "0")).join("")
-}
-
-function equalHex(left: string, right: string): boolean {
-  if (left.length !== right.length) return false
-  let difference = 0
-  for (let index = 0; index < left.length; index += 1) difference |= left.charCodeAt(index) ^ right.charCodeAt(index)
-  return difference === 0
-}
-
-async function validSignature(raw: string, header: string, secret: string): Promise<boolean> {
-  const parts = header.split(",").map((part) => part.split("=", 2))
-  const timestamp = Number(parts.find(([key]) => key === "t")?.[1])
-  const signatures = parts.filter(([key]) => key === "v1").map(([, value]) => value)
-  if (!timestamp || Math.abs(Date.now() / 1000 - timestamp) > 300 || !signatures.length) return false
-  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"])
-  const expected = hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${timestamp}.${raw}`)))
-  return signatures.some((signature) => equalHex(expected, signature))
-}
+import { paypal } from "../../_lib/paypal"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
-  const raw = await context.request.text()
-  const signature = context.request.headers.get("Stripe-Signature") ?? ""
-  if (!context.env.STRIPE_WEBHOOK_SECRET || !(await validSignature(raw, signature, context.env.STRIPE_WEBHOOK_SECRET))) return json({ error: "Invalid webhook signature" }, 400)
+  const event = (await context.request.json()) as any
+  if (!context.env.PAYPAL_WEBHOOK_ID)
+    return json({ error: "PayPal webhook is not configured" }, 503)
+  const verification = await paypal(
+    context.env,
+    "/v1/notifications/verify-webhook-signature",
+    {
+      method: "POST",
+      body: {
+        auth_algo: context.request.headers.get("PAYPAL-AUTH-ALGO"),
+        cert_url: context.request.headers.get("PAYPAL-CERT-URL"),
+        transmission_id: context.request.headers.get("PAYPAL-TRANSMISSION-ID"),
+        transmission_sig: context.request.headers.get("PAYPAL-TRANSMISSION-SIG"),
+        transmission_time: context.request.headers.get("PAYPAL-TRANSMISSION-TIME"),
+        webhook_id: context.env.PAYPAL_WEBHOOK_ID,
+        webhook_event: event,
+      },
+    },
+  )
+  if (verification.verification_status !== "SUCCESS")
+    return json({ error: "Invalid PayPal webhook signature" }, 400)
 
-  const event = JSON.parse(raw)
-  const claimed = await context.env.DB.prepare("INSERT OR IGNORE INTO stripe_events (id,event_type,processed_at,status,created_at) VALUES (?,?,?,?,?)")
-    .bind(event.id, event.type, new Date().toISOString(), "processing", new Date().toISOString()).run()
+  const claimed = await context.env.DB.prepare(
+    "INSERT OR IGNORE INTO payment_events (id,event_type,status,processed_at,created_at) VALUES (?,?,?,?,?)",
+  )
+    .bind(event.id, event.event_type, "processing", new Date().toISOString(), event.create_time)
+    .run()
   if (claimed.meta?.changes === 0) return json({ received: true })
 
   try {
-    const object = event.data.object
-    const clientReference = String(object.client_reference_id || "")
-    const [referenceWorkspaceId, referenceInterval] = clientReference.split(":")
-    let workspaceId = object.metadata?.workspace_id || referenceWorkspaceId
-    const eventCreated = Number(event.created ?? 0)
-
-    if (event.type === "checkout.session.completed" && workspaceId && object.subscription) {
-      const paid = ["paid", "no_payment_required"].includes(object.payment_status)
-      await context.env.DB.prepare("UPDATE workspaces SET stripe_customer_id=?,stripe_subscription_id=?,billing_interval=?,subscription_status=?,updated_at=? WHERE id=?")
-        .bind(object.customer, object.subscription, referenceInterval || object.metadata?.interval || "month", paid ? "active" : "incomplete", new Date().toISOString(), workspaceId).run()
-      if (paid) {
-        await context.env.DB.prepare("UPDATE k9_roster SET workspace_id=? WHERE workspace_id IS NULL").bind(workspaceId).run()
-      }
+    const resource = event.resource || {}
+    const subscriptionId = resource.id?.startsWith("I-")
+      ? resource.id
+      : resource.billing_agreement_id
+    let workspace: { id: string } | null = null
+    if (subscriptionId) {
+      workspace = await context.env.DB.prepare(
+        "SELECT id FROM workspaces WHERE paypal_subscription_id=? LIMIT 1",
+      )
+        .bind(subscriptionId)
+        .first<{ id: string }>()
     }
-
-    if (event.type.startsWith("customer.subscription.") && !workspaceId) {
-      const workspace = await context.env.DB.prepare("SELECT id FROM workspaces WHERE stripe_subscription_id=? OR stripe_customer_id=? LIMIT 1")
-        .bind(object.id, object.customer).first<{ id: string }>()
-      workspaceId = workspace?.id
+    if (workspace && event.event_type === "BILLING.SUBSCRIPTION.ACTIVATED") {
+      await context.env.DB.prepare(
+        "UPDATE workspaces SET subscription_status='active',current_period_end=?,paypal_payer_id=?,paypal_last_event_time=?,updated_at=? WHERE id=? AND COALESCE(paypal_last_event_time,'')<=?",
+      )
+        .bind(
+          resource.billing_info?.next_billing_time || null,
+          resource.subscriber?.payer_id || null,
+          event.create_time,
+          new Date().toISOString(),
+          workspace.id,
+          event.create_time,
+        )
+        .run()
     }
-
-    if (event.type.startsWith("customer.subscription.") && workspaceId) {
-      const baseIds = [context.env.STRIPE_MONTHLY_PRICE_ID, context.env.STRIPE_YEARLY_PRICE_ID]
-      const seatIds = [context.env.STRIPE_MONTHLY_SEAT_PRICE_ID, context.env.STRIPE_YEARLY_SEAT_PRICE_ID]
-      const items = object.items?.data ?? []
-      const baseItem = items.find((item: any) => baseIds.includes(item.price?.id))
-      const seatItem = items.find((item: any) => seatIds.includes(item.price?.id))
-      const interval = baseItem?.price?.recurring?.interval || "month"
-      const currentPeriodEnd = object.current_period_end || baseItem?.current_period_end
-      const periodEnd = currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null
-      const updated = await context.env.DB.prepare(`UPDATE workspaces SET stripe_customer_id=?,stripe_subscription_id=?,stripe_base_item_id=?,stripe_seat_item_id=?,billing_interval=?,subscription_status=?,current_period_end=?,stripe_last_event_created=?,updated_at=? WHERE id=? AND stripe_last_event_created<=?`)
-        .bind(object.customer, object.id, baseItem?.id || null, seatItem?.id || null, interval, object.status, periodEnd, eventCreated, new Date().toISOString(), workspaceId, eventCreated).run()
-      if (updated.meta?.changes && ["active", "trialing"].includes(object.status)) {
-        await context.env.DB.prepare("UPDATE k9_roster SET workspace_id=? WHERE workspace_id IS NULL").bind(workspaceId).run()
-      }
+    if (workspace && event.event_type === "PAYMENT.SALE.COMPLETED") {
+      const subscription = await paypal(
+        context.env,
+        `/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`,
+      )
+      if (subscription.status === "ACTIVE")
+        await context.env.DB.prepare(
+          "UPDATE workspaces SET subscription_status='active',current_period_end=?,paypal_last_event_time=?,updated_at=? WHERE id=? AND COALESCE(paypal_last_event_time,'')<=?",
+        )
+          .bind(
+            subscription.billing_info?.next_billing_time || null,
+            event.create_time,
+            new Date().toISOString(),
+            workspace.id,
+            event.create_time,
+          )
+          .run()
     }
-
-    const subscriptionId = typeof object.subscription === "string" ? object.subscription : object.subscription?.id
-    if (subscriptionId && ["invoice.payment_failed", "invoice.payment_action_required"].includes(event.type)) {
-      await context.env.DB.prepare("UPDATE workspaces SET subscription_status='past_due',stripe_last_event_created=?,updated_at=? WHERE stripe_subscription_id=? AND stripe_last_event_created<=?")
-        .bind(eventCreated, new Date().toISOString(), subscriptionId, eventCreated).run()
+    if (
+      workspace &&
+      [
+        "BILLING.SUBSCRIPTION.CANCELLED",
+        "BILLING.SUBSCRIPTION.SUSPENDED",
+        "BILLING.SUBSCRIPTION.EXPIRED",
+        "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
+      ].includes(event.event_type)
+    ) {
+      const status = event.event_type.endsWith("PAYMENT.FAILED")
+        ? "past_due"
+        : event.event_type.split(".").at(-1)?.toLowerCase()
+      await context.env.DB.prepare(
+        "UPDATE workspaces SET subscription_status=?,paypal_last_event_time=?,updated_at=? WHERE id=? AND COALESCE(paypal_last_event_time,'')<=?",
+      )
+        .bind(status, event.create_time, new Date().toISOString(), workspace.id, event.create_time)
+        .run()
     }
-    if (subscriptionId && ["invoice.paid", "invoice.payment_succeeded"].includes(event.type)) {
-      await context.env.DB.prepare("UPDATE workspaces SET subscription_status='active',stripe_last_event_created=?,updated_at=? WHERE stripe_subscription_id=? AND stripe_last_event_created<=? AND subscription_status IN ('past_due','unpaid','incomplete')")
-        .bind(eventCreated, new Date().toISOString(), subscriptionId, eventCreated).run()
-    }
-
-    await context.env.DB.prepare("UPDATE stripe_events SET status='completed',processed_at=?,error=NULL WHERE id=?")
-      .bind(new Date().toISOString(), event.id).run()
+    await context.env.DB.prepare(
+      "UPDATE payment_events SET status='completed',processed_at=?,error=NULL WHERE id=?",
+    )
+      .bind(new Date().toISOString(), event.id)
+      .run()
     return json({ received: true })
   } catch (error) {
-    await context.env.DB.prepare("DELETE FROM stripe_events WHERE id=?").bind(event.id).run()
-    return json({ error: "Webhook processing failed", detail: String(error) }, 500)
+    await context.env.DB.prepare("DELETE FROM payment_events WHERE id=?")
+      .bind(event.id)
+      .run()
+    return json({ error: "PayPal webhook processing failed", detail: String(error) }, 500)
   }
 }

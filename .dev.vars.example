@@ -1,11 +1,9 @@
-STRIPE_SECRET_KEY=sk_test_replace_me
-STRIPE_WEBHOOK_SECRET=whsec_replace_me
-STRIPE_MONTHLY_PRICE_ID=price_replace_me
-STRIPE_YEARLY_PRICE_ID=price_replace_me
-STRIPE_MONTHLY_SEAT_PRICE_ID=price_replace_me
-STRIPE_YEARLY_SEAT_PRICE_ID=price_replace_me
-# Leave false until Stripe Tax has an active registration and the products have a confirmed SaaS tax code.
-STRIPE_TAX_ENABLED=false
+PAYPAL_CLIENT_ID=replace_me
+PAYPAL_CLIENT_SECRET=replace_me
+PAYPAL_WEBHOOK_ID=replace_me
+PAYPAL_MONTHLY_PLAN_ID=P-replace_me
+PAYPAL_YEARLY_PLAN_ID=P-replace_me
+PAYPAL_ENVIRONMENT=sandbox
 RESEND_API_KEY=re_replace_me
 RESEND_FROM_EMAIL=Sentinel <accounts@example.com>
 APP_URL=http://localhost:8443

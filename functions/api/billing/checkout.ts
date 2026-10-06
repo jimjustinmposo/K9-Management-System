@@ -1,76 +1,61 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { appUrl, json } from "../../_lib/http"
-import { stripe, stripePrice } from "../../_lib/stripe"
+import { paypal, paypalPlan } from "../../_lib/paypal"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
   if (isResponse(session)) return session
   try {
-    const body = (await context.request.json()) as any
+    const body = (await context.request.json()) as { interval?: string }
     const interval = body.interval === "year" ? "year" : "month"
     const workspace = await context.env.DB.prepare(
-      "SELECT * FROM workspaces WHERE id=?",
+      "SELECT paypal_subscription_id,subscription_status FROM workspaces WHERE id=?",
     )
       .bind(session.workspace.id)
       .first<any>()
     if (
-      workspace.stripe_subscription_id &&
-      ["active", "trialing", "past_due"].includes(workspace.subscription_status)
+      workspace?.paypal_subscription_id &&
+      workspace.subscription_status === "active"
     )
       return json({ error: "This workspace already has a subscription" }, 409)
-    let customerId = workspace.stripe_customer_id
-    if (!customerId) {
-      const params = new URLSearchParams({
-        email: session.user.email,
-        name: session.workspace.name,
-        "metadata[workspace_id]": session.workspace.id,
-      })
-      const customer = await stripe(context.env, "customers", {
-        method: "POST",
-        body: params,
-      })
-      customerId = customer.id
-      await context.env.DB.prepare(
-        "UPDATE workspaces SET stripe_customer_id=?,updated_at=? WHERE id=?",
-      )
-        .bind(customerId, new Date().toISOString(), session.workspace.id)
-        .run()
-    }
+
     const base = appUrl(context.request, context.env.APP_URL)
-    const params = new URLSearchParams({
-      mode: "subscription",
-      integration_identifier: `sentinel_k9_${randomLetters(8)}`,
-      customer: customerId,
-      "line_items[0][price]": stripePrice(context.env, interval),
-      "line_items[0][quantity]": "1",
-      success_url: `${base}/subscription?checkout=success`,
-      cancel_url: `${base}/subscribe?checkout=cancelled`,
-      client_reference_id: session.workspace.id,
-      "subscription_data[metadata][workspace_id]": session.workspace.id,
-      "metadata[workspace_id]": session.workspace.id,
-      "metadata[interval]": interval,
-    })
-    if (context.env.STRIPE_TAX_ENABLED === "true") {
-      params.set("automatic_tax[enabled]", "true")
-      params.set("billing_address_collection", "required")
-      params.set("customer_update[address]", "auto")
-      params.set("customer_update[name]", "auto")
-    }
-    const checkout = await stripe(context.env, "checkout/sessions", {
+    const subscription = await paypal(context.env, "/v1/billing/subscriptions", {
       method: "POST",
-      body: params,
+      headers: { "PayPal-Request-Id": crypto.randomUUID() },
+      body: {
+        plan_id: paypalPlan(context.env, interval),
+        custom_id: `${session.workspace.id}:${interval}`,
+        subscriber: { email_address: session.user.email },
+        application_context: {
+          brand_name: "Sentinel K9 Operations",
+          user_action: "SUBSCRIBE_NOW",
+          shipping_preference: "NO_SHIPPING",
+          return_url: `${base}/billing/success`,
+          cancel_url: `${base}/subscription?checkout=cancelled`,
+        },
+      },
     })
-    return json({ data: { url: checkout.url } })
+    const approvalUrl = subscription.links?.find(
+      (link: any) => link.rel === "approve",
+    )?.href
+    if (!approvalUrl) throw new Error("PayPal approval URL was not returned")
+    await context.env.DB.prepare(
+      "UPDATE workspaces SET paypal_subscription_id=?,paypal_plan_id=?,billing_interval=?,subscription_status='approval_pending',updated_at=? WHERE id=?",
+    )
+      .bind(
+        subscription.id,
+        paypalPlan(context.env, interval),
+        interval,
+        new Date().toISOString(),
+        session.workspace.id,
+      )
+      .run()
+    return json({ data: { url: approvalUrl } })
   } catch (error) {
     return json(
-      { error: "Unable to start checkout", detail: String(error) },
+      { error: "Unable to start PayPal checkout", detail: String(error) },
       500,
     )
   }
-}
-
-function randomLetters(length: number): string {
-  const alphabet = "abcdefghijklmnopqrstuvwxyz"
-  const bytes = crypto.getRandomValues(new Uint8Array(length))
-  return [...bytes].map((byte) => alphabet[byte % alphabet.length]).join("")
 }

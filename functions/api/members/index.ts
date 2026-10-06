@@ -7,7 +7,6 @@ import {
 } from "../../_lib/auth"
 import { sendEmail } from "../../_lib/email"
 import { appUrl, clean, id, json } from "../../_lib/http"
-import { stripe, stripePrice } from "../../_lib/stripe"
 
 async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
   const members = await db
@@ -23,44 +22,6 @@ async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
     .bind(workspaceId, new Date().toISOString())
     .first<any>()
   return Number(members?.count ?? 0) + Number(pending?.count ?? 0)
-}
-
-async function setExtraSeats(
-  env: AppEnv,
-  workspace: any,
-  quantity: number,
-): Promise<string | null> {
-  const paid = Math.max(0, quantity - 3)
-  if (!workspace.stripe_subscription_id)
-    throw new Error("An active subscription is required")
-  if (!workspace.stripe_seat_item_id && paid > 0) {
-    const item = await stripe(env, "subscription_items", {
-      method: "POST",
-      body: new URLSearchParams({
-        subscription: workspace.stripe_subscription_id,
-        price: stripePrice(env, workspace.billing_interval, true),
-        quantity: String(paid),
-        proration_behavior: "always_invoice",
-      }),
-    })
-    return item.id
-  }
-  if (workspace.stripe_seat_item_id && paid === 0) {
-    await stripe(env, `subscription_items/${workspace.stripe_seat_item_id}`, {
-      method: "DELETE",
-      body: new URLSearchParams({ proration_behavior: "create_prorations" }),
-    })
-    return null
-  }
-  if (workspace.stripe_seat_item_id)
-    await stripe(env, `subscription_items/${workspace.stripe_seat_item_id}`, {
-      method: "POST",
-      body: new URLSearchParams({
-        quantity: String(paid),
-        proration_behavior: "always_invoice",
-      }),
-    })
-  return workspace.stripe_seat_item_id ?? null
 }
 
 export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
@@ -83,7 +44,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
     data: {
       members: members.results,
       invitations: invites.results,
-      seats: { included: 3, used, extra: Math.max(0, used - 3) },
+      seats: { included: 3, used, extra: 0 },
     },
   })
 }
@@ -116,20 +77,10 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
         .first()
     )
       return json({ error: "An invitation is already pending" }, 409)
-    const workspace = await context.env.DB.prepare(
-      "SELECT * FROM workspaces WHERE id=?",
-    )
-      .bind(session.workspace.id)
-      .first<any>()
     const nextCount =
       (await seatCount(context.env.DB, session.workspace.id)) + 1
-    const seatItemId = await setExtraSeats(context.env, workspace, nextCount)
-    if (seatItemId !== workspace.stripe_seat_item_id)
-      await context.env.DB.prepare(
-        "UPDATE workspaces SET stripe_seat_item_id=?,updated_at=? WHERE id=?",
-      )
-        .bind(seatItemId, new Date().toISOString(), session.workspace.id)
-        .run()
+    if (nextCount > 3)
+      return json({ error: "Your plan includes 3 member accounts" }, 409)
     const token = randomToken()
     const now = new Date()
     const inviteId = id()
@@ -156,16 +107,6 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     } catch (error) {
       await context.env.DB.prepare("DELETE FROM invitations WHERE id=?")
         .bind(inviteId)
-        .run()
-      const rollbackItemId = await setExtraSeats(
-        context.env,
-        { ...workspace, stripe_seat_item_id: seatItemId },
-        nextCount - 1,
-      )
-      await context.env.DB.prepare(
-        "UPDATE workspaces SET stripe_seat_item_id=?,updated_at=? WHERE id=?",
-      )
-        .bind(rollbackItemId, new Date().toISOString(), session.workspace.id)
         .run()
       throw error
     }
