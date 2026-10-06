@@ -2,12 +2,6 @@ import { json } from "./http"
 
 export interface AppEnv {
   DB: D1Database
-  PAYPAL_CLIENT_ID?: string
-  PAYPAL_CLIENT_SECRET?: string
-  PAYPAL_WEBHOOK_ID?: string
-  PAYPAL_MONTHLY_PLAN_ID?: string
-  PAYPAL_YEARLY_PLAN_ID?: string
-  PAYPAL_ENVIRONMENT?: "sandbox" | "live"
   RESEND_API_KEY?: string
   RESEND_FROM_EMAIL?: string
   APP_URL?: string
@@ -144,13 +138,13 @@ export async function getSession(
   if (!token) return null
   const row = await db
     .prepare(`SELECT u.id user_id, u.email, u.name user_name, w.id workspace_id, w.name workspace_name,
-    m.role, w.subscription_status, w.billing_interval, w.current_period_end, w.paypal_subscription_id
+    m.role, w.subscription_status, w.billing_interval, w.current_period_end
     FROM sessions s JOIN users u ON u.id=s.user_id JOIN memberships m ON m.user_id=u.id
     JOIN workspaces w ON w.id=m.workspace_id WHERE s.token_hash=? AND s.expires_at>?`)
     .bind(await hashToken(token), new Date().toISOString())
     .first<any>()
   if (!row) return null
-  const hasSubscription = Boolean(row.paypal_subscription_id)
+  const hasSubscription = false
   const writable = hasSubscription && ["active", "trialing"].includes(row.subscription_status)
   const owner = row.role === "owner"
   return {
