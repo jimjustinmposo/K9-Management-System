@@ -369,7 +369,12 @@ export default function DashboardPage() {
             </button>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
-                Wednesday Â· May 14, 2025
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                })}
               </p>
               <h1 className="mt-0.5 text-xl font-extrabold tracking-tight md:text-2xl">
                 {activeNav}
@@ -507,7 +512,7 @@ export default function DashboardPage() {
             ))}
           </section>
 
-          <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.8fr)]">
+          <div className="mt-5 grid gap-5">
             <Panel className="overflow-hidden">
               <PanelHeader
                 eyebrow="Live status"
@@ -634,33 +639,6 @@ export default function DashboardPage() {
               </Link>
             </Panel>
 
-            <Panel className="overflow-hidden">
-              <PanelHeader
-                eyebrow=" "
-                title=" "
-              />
-              <div className="min-h-[280px] px-5 py-2" />
-            </Panel>
-          </div>
-
-          <div className="mt-5 grid gap-5">
-            <Panel className="overflow-hidden">
-              <PanelHeader
-                eyebrow=" "
-                title=" "
-              />
-              <div className="min-h-[180px]" />
-            </Panel>
-          </div>
-
-          <div className="mt-5 grid gap-5">
-            <Panel className="overflow-hidden">
-              <PanelHeader
-                eyebrow=" "
-                title=" "
-              />
-              <div className="min-h-[120px] p-5" />
-            </Panel>
           </div>
 
           <footer className="mt-7 flex flex-col gap-2 border-t border-line pt-5 text-[10px] font-semibold text-muted sm:flex-row sm:items-center sm:justify-between">
