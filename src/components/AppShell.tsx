@@ -207,18 +207,20 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
         </nav>
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</div>
-              <div className="min-w-0 flex-1 basis-32">
-                <p className="break-words text-xs font-bold">{session?.user.name}</p>
-                <p className="text-[10px] capitalize text-white/60">{session?.role}</p>
+            <div className="flex flex-col items-stretch gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid size-9 shrink-0 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</div>
+                <div className="min-w-0 flex-1">
+                  <p className="break-words text-xs font-bold">{session?.user.name}</p>
+                  <p className="text-[10px] capitalize text-white/60">{session?.role}</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => void logout()}
                 title="Log out"
                 aria-label="Log out"
-                className="flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-bold text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 <Icon name="logout" className="size-[18px]" />
                 <span>Log out</span>
