@@ -18,7 +18,8 @@ export type IconName =
   | "chevron"
   | "cross"
   | "menu"
-  | "more";
+  | "more"
+  | "logout";
 
 export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, React.ReactNode> = {
@@ -89,6 +90,12 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
     chevron: <path d="m9 18 6-6-6-6" />,
     cross: <path d="m6 6 12 12M18 6 6 18" />,
     menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+    logout: (
+      <>
+        <path d="M10 17l5-5-5-5M15 12H3" />
+        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+      </>
+    ),
     more: (
       <>
         <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
@@ -206,7 +213,16 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 <p className="truncate text-xs font-bold">{session?.user.name}</p>
                 <p className="truncate text-[10px] capitalize text-white/45">{session?.role}</p>
               </div>
-              <button type="button" onClick={() => void logout()} title="Sign out" className="text-white/40 hover:text-white"><Icon name="cross" className="size-4" /></button>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                title="Log out"
+                aria-label="Log out"
+                className="flex shrink-0 items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                <Icon name="logout" className="size-[18px]" />
+                <span>Log out</span>
+              </button>
             </div>
           </div>
         </div>
@@ -224,7 +240,9 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             </div>
           </div>
         </header>
-        <SubscriptionStatusBar />
+        <div className="sticky top-20 z-20">
+          <SubscriptionStatusBar />
+        </div>
         <main className="p-4 md:p-7 lg:p-8">{children}</main>
       </div>
     </div>
