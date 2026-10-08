@@ -106,11 +106,7 @@ export function ProtectedRoute({
   if (owner && session.role !== "owner") return <Navigate to="/" replace />
   if (requireWritable && !session.subscription.writable)
     return (
-      <Navigate
-        to="/subscription"
-        state={{ subscriptionRequired: true }}
-        replace
-      />
+      <Navigate to="/" replace />
     )
   return children
 }

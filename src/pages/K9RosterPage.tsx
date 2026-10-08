@@ -83,7 +83,7 @@ export default function K9RosterPage() {
           </p>
           {loadError && <p className="mt-2 text-xs font-bold text-warning">{loadError}</p>}
         </div>
-        {(session?.permissions.create || !session?.subscription.writable) && <Link to="/k9-roster/new"
+        {session?.permissions.create && <Link to="/k9-roster/new"
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-action transition hover:bg-navy-light">
           <span className="text-lg leading-none text-gold">+</span>
           Add new record
@@ -120,7 +120,7 @@ export default function K9RosterPage() {
             <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted">
               Add your first K9 profile to start building the Cloudflare-connected roster.
             </p>
-            {(session?.permissions.create || !session?.subscription.writable) && <Link to="/k9-roster/new"
+            {session?.permissions.create && <Link to="/k9-roster/new"
               className="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-xs font-bold text-white">
               <span className="text-base leading-none text-gold">+</span> Add new record
             </Link>}

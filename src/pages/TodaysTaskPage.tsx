@@ -230,12 +230,10 @@ export default function TodaysTaskPage() {
               <h3 className="text-sm font-bold">Schedule</h3>
               <button
                 onClick={() => {
-                  if (!session?.subscription.writable) {
-                    navigate("/subscription", { state: { subscriptionRequired: true } })
-                    return
-                  }
+                  if (!session?.permissions.create) return
                   setAdding(true)
                 }}
+                disabled={!session?.permissions.create}
                 className="flex items-center gap-1.5 rounded-full bg-[#e5ebdf] px-3 py-2 text-[10px] font-bold text-[#365e46]"
               >
                 <TaskIcon name="plus" className="size-3.5" />

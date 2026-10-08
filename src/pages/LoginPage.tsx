@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import AuthLayout, { authInput, primaryButton } from "../components/AuthLayout"
 import { apiRequest, useAuth } from "../lib/auth"
 
@@ -7,7 +7,6 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
   const navigate = useNavigate()
-  const location = useLocation()
   const { refresh } = useAuth()
   return (
     <AuthLayout
@@ -30,7 +29,7 @@ export default function LoginPage() {
               }),
             })
             await refresh()
-            navigate((location.state as any)?.from || "/", { replace: true })
+            navigate("/", { replace: true })
           } catch (e) {
             setError(e instanceof Error ? e.message : "Sign in failed")
           } finally {

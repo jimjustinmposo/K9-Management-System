@@ -9,7 +9,6 @@ import K9RosterPage from "./pages/K9RosterPage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import ResetPasswordPage from "./pages/ResetPasswordPage"
-import SubscribePage from "./pages/SubscribePage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import TodaysTaskPage from "./pages/TodaysTaskPage"
 import TrainingPage from "./pages/TrainingPage"
@@ -26,23 +25,9 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
-      <Route
-        path="/subscribe"
-        element={
-          <ProtectedRoute owner allowInactive>
-            <SubscribePage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/subscription"
-        element={
-          <ProtectedRoute owner allowInactive>
-            <SubscriptionPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route path="/account" element={<Navigate to="/subscription" replace />} />
+      <Route path="/subscribe" element={<Navigate to="/" replace />} />
+      <Route path="/subscription" element={<Navigate to="/" replace />} />
+      <Route path="/account" element={<Navigate to="/" replace />} />
       <Route path="/" element={protectedPage(<DashboardPage />)} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />
       <Route

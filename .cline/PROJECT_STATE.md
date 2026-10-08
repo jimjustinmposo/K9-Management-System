@@ -52,7 +52,7 @@
 - Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
 
 ## Next Steps
-- Connect and test the replacement subscription provider.
+- [ ] Connect and test the replacement subscription provider; checkout is disabled and workspaces without valid active-period billing remain view-only.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

@@ -26,7 +26,7 @@ export default function RegisterPage() {
               body: JSON.stringify(Object.fromEntries(form)),
             })
             await refresh()
-            navigate(result.devMode ? "/" : "/subscribe")
+            navigate("/")
           } catch (e) {
             setError(e instanceof Error ? e.message : "Registration failed")
           } finally {

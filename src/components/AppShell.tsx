@@ -141,11 +141,6 @@ export function SubscriptionStatusBar() {
       <span className={`size-2 rounded-full ${active ? "bg-positive" : "bg-warning"}`} />
       <span>{active ? "Subscription active" : "Subscription inactive · View only"}</span>
       {active && renewal && <span className="font-semibold">Renews {renewal}</span>}
-      {!active && session.role === "owner" && (
-        <Link to="/subscription" state={{ subscriptionRequired: true }} className="underline underline-offset-2">
-          Choose a plan
-        </Link>
-      )}
     </div>
   );
 }
@@ -164,7 +159,7 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const { session, logout } = useAuth();
-  const visibleNav = session?.role === "owner" ? [...navItems, { label: "Subscription", to: "/subscription", icon: "shield" as IconName }] : navItems;
+  const visibleNav = navItems;
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       {mobileNav && (

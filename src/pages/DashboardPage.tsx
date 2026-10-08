@@ -612,11 +612,16 @@ export default function DashboardPage() {
                 )}
                 {!rosterLoading && filteredRoster.length === 0 && (
                   <p className="px-5 py-12 text-center text-sm text-muted">
-                    No K9s yet.{" "}
-                    <Link to="/k9-roster/new" className="font-extrabold text-info">
-                      Add the first record
-                    </Link>
-                    .
+                    No K9 records yet.
+                    {session?.permissions.create && (
+                      <>
+                        {" "}
+                        <Link to="/k9-roster/new" className="font-extrabold text-info">
+                          Add the first record
+                        </Link>
+                        .
+                      </>
+                    )}
                   </p>
                 )}
               </div>
