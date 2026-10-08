@@ -11,7 +11,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Sign in to your Sentinel workspace."
+      subtitle="Sign in to your K9 Management System."
     >
       <form
         className="mt-6 space-y-4"

@@ -14,15 +14,17 @@ export default function AuthLayout({
     <main className="grid min-h-screen place-items-center bg-canvas p-4">
       <div className="w-full max-w-md">
         <Link to="/" className="mb-7 flex items-center justify-center gap-3">
-          <span className="grid size-10 place-items-center rounded-xl bg-navy font-black text-gold">
-            S
-          </span>
+          <img
+            src="/logo.png"
+            alt="Mussafah K9 Operation logo"
+            className="size-10 rounded-xl object-contain"
+          />
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[0.2em] text-gold">
-              Sentinel
+              MUSSAFAH
             </span>
             <span className="block text-sm font-black tracking-wide text-navy">
-              K9 OPERATIONS
+              K9 OPERATION
             </span>
           </span>
         </Link>
