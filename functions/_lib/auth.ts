@@ -144,8 +144,7 @@ export async function getSession(
   if (!token) return null
   const row = await db
     .prepare(`SELECT u.id user_id, u.email, u.name user_name, w.id workspace_id, w.name workspace_name,
-    m.role, w.subscription_status, w.billing_interval, w.current_period_end,
-    w.paddle_scheduled_cancel_at
+    m.role, w.subscription_status, w.billing_interval, w.current_period_end
     FROM sessions s JOIN users u ON u.id=s.user_id JOIN memberships m ON m.user_id=u.id
     JOIN workspaces w ON w.id=m.workspace_id WHERE s.token_hash=? AND s.expires_at>?`)
     .bind(await hashToken(token), new Date().toISOString())
