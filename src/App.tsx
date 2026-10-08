@@ -53,10 +53,6 @@ export default function App() {
         element={protectedPage(<ComingSoonPage title="Medical" />)}
       />
       <Route
-        path="/deployments"
-        element={protectedPage(<ComingSoonPage title="Deployments" />)}
-      />
-      <Route
         path="/handlers"
         element={protectedPage(<ComingSoonPage title="Handlers" />)}
       />

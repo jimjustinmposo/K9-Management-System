@@ -140,14 +140,14 @@ export function SubscriptionStatusBar() {
       })
     : null;
   return (
-    <div className={`flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-2 text-center text-[11px] font-bold ${
+    <div className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-md border px-3 py-1.5 text-left ${
       active
-        ? "border-positive/20 bg-positive-soft text-positive"
-        : "border-warning/20 bg-warning-soft text-warning"
+        ? "border-positive/20 bg-positive-soft/70 text-positive"
+        : "border-warning/25 bg-warning-soft/70 text-warning"
     }`}>
-      <span className={`size-2 rounded-full ${active ? "bg-positive" : "bg-warning"}`} />
-      <span>{active ? "Subscription Active · Full access" : "Subscription inactive · View only"}</span>
-      {active && renewal && <span className="font-semibold">Renews {renewal}</span>}
+      <span className={`size-1.5 shrink-0 rounded-full ${active ? "bg-positive" : "bg-warning"}`} />
+      <span className="text-[10px] font-extrabold uppercase tracking-[0.12em]">{active ? "Full access" : "View-only access"}</span>
+      {active && renewal && <span className="hidden border-l border-positive/20 pl-2 text-[10px] font-semibold sm:inline">Renews {renewal}</span>}
     </div>
   );
 }
@@ -158,9 +158,9 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "Today's Task", to: "/todays-task", icon: "task" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Medical", to: "/medical", icon: "heart" },
-  { label: "Deployments", to: "/deployments", icon: "clipboard" },
   { label: "Handlers", to: "/handlers", icon: "users" },
   { label: "Reports", to: "/reports", icon: "reports" },
+  { label: "Subscription", to: "/subscription", icon: "shield" },
 ];
 
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
@@ -187,9 +187,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
           <button type="button" aria-label="Close navigation" onClick={() => setMobileNav(false)} className="text-white/60 lg:hidden">
             <Icon name="cross" />
           </button>
-        </div>
-        <div className="px-4 pt-4">
-          <SubscriptionStatusBar />
         </div>
         <nav className="flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
           <p className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Operations</p>
@@ -240,10 +237,11 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <Icon name="menu" />
             </button>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">Sentinel K9 Operations</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">MUSSAFAH K9 OPERATION</p>
               <h1 className="mt-0.5 text-xl font-extrabold tracking-tight md:text-2xl">{title}</h1>
             </div>
           </div>
+          <SubscriptionStatusBar />
         </header>
         <main className="p-4 md:p-7 lg:p-8">{children}</main>
       </div>

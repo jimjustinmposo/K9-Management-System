@@ -20,7 +20,7 @@
 - [x] Dashboard
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
-- [ ] Medical, Deployments, Handlers, Reports (ComingSoonPage)
+- [ ] Medical, Handlers, Reports (ComingSoonPage)
 
 ## Database
 - `k9_roster` — K9 records (id, dog_name, breed, status, microchip, lineage...)
@@ -56,6 +56,7 @@
 - Added and applied migration 0011 to restore a missing `workspaces` table in local and remote D1; remote `sqlite_master` verification confirms the table exists.
 - Fixed Paddle webhook's subscription-period column and made unmatched workspace updates fail/retry instead of being acknowledged. Production D1 still has no delivered Paddle webhook events; source fix requires deployment and Paddle destination verification.
 - Subscription page now routes canceled/expired subscriptions to a new checkout and offers “Subscribe again”; current subscriptions remain on billing management.
+- Removed the Deployments page/route and added Subscription to the application navigation.
 
 ## Next Steps
 - [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.

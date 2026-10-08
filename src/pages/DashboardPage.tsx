@@ -313,10 +313,6 @@ export default function DashboardPage() {
           </button>
         </div>
 
-        <div className="px-4 pt-4">
-          <SubscriptionStatusBar />
-        </div>
-
         <nav className="flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
           <p className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
             Operations
@@ -382,6 +378,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <SubscriptionStatusBar />
             <div
               className={`hidden items-center overflow-hidden rounded-lg border border-line bg-canvas transition-all sm:flex ${
                 searchOpen ? "w-64" : "w-10"
@@ -667,7 +664,7 @@ export default function DashboardPage() {
           </div>
 
           <footer className="mt-7 flex flex-col gap-2 border-t border-line pt-5 text-[10px] font-semibold text-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>Sentinel K9 Operations Â· Secure command environment</p>
+            <p>MUSSAFAH K9 OPERATION Â· Secure command environment</p>
             <p>Last synchronized today at 07:42 AM</p>
           </footer>
         </main>
