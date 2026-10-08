@@ -128,7 +128,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
         `UPDATE workspaces SET
           paddle_customer_id=?, paddle_subscription_id=?, paddle_price_id=?, paddle_plan=?,
           subscription_status=?, billing_interval=?,
-          current_period_start=?, current_period_end=?, paddle_scheduled_cancel_at=?,
+          paddle_current_period_start=?, current_period_end=?, paddle_scheduled_cancel_at=?,
           paddle_last_synced_at=?, paddle_last_event_at=?, updated_at=?
          WHERE id=? AND (paddle_last_event_at IS NULL OR paddle_last_event_at<=?)`,
       )
