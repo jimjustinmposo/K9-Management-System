@@ -19,7 +19,6 @@ type IconName =
   | "task"
   | "download"
   | "heart"
-  | "logout"
   | "menu"
   | "more"
   | "plus"
@@ -123,12 +122,6 @@ function Icon({
       </>
     ),
     check: <path d="m5 12 4 4L19 6" />,
-    logout: (
-      <>
-        <path d="M10 17l5-5-5-5M15 12H3" />
-        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-      </>
-    ),
     chevron: <path d="m9 18 6-6-6-6" />,
     arrow: <path d="M5 12h14M14 7l5 5-5 5" />,
     cross: <path d="m6 6 12 12M18 6 6 18" />,
@@ -349,11 +342,11 @@ export default function DashboardPage() {
         </nav>
 
         <div className="border-t border-white/10 p-4">
-          <div className="rounded-xl bg-white/5 p-3">
+          <div className="rounded-xl bg-white/5 p-4">
             <div className="flex items-center gap-3">
-              <div className="grid size-9 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0,2).toUpperCase()}</div>
+              <div className="grid size-10 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0,2).toUpperCase()}</div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold">{session?.user.name}</p>
+                <p className="truncate text-xs font-semibold">Account</p>
                 <p className="truncate text-[10px] capitalize text-white/45">{session?.role}</p>
               </div>
               <button
@@ -361,9 +354,12 @@ export default function DashboardPage() {
                 onClick={() => void logout()}
                 title="Log out"
                 aria-label="Log out"
-                className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="flex shrink-0 items-center gap-2 rounded-lg border border-gold/25 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold transition hover:border-gold/45 hover:bg-gold/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
-                <Icon name="logout" className="size-4" />
+                <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10 17l5-5-5-5M15 12H3" />
+                  <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+                </svg>
                 <span>Log out</span>
               </button>
             </div>
@@ -444,7 +440,7 @@ export default function DashboardPage() {
                 </p>
               </div>
               <h2 className="text-2xl font-black tracking-tight md:text-3xl">
-                Good morning, Commander.
+                Good {new Date().getHours() < 12 ? "morning" : "afternoon"} {session?.user.name.trim().split(/\s+/)[0] ?? "there"}.
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
                 Your unit is at <strong className="text-ink">89% readiness</strong>.
