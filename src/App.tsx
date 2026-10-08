@@ -25,8 +25,8 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
-      <Route path="/subscribe" element={<Navigate to="/" replace />} />
-      <Route path="/subscription" element={<Navigate to="/" replace />} />
+      <Route path="/subscribe" element={protectedPage(<SubscriptionPage />)} />
+      <Route path="/subscription" element={protectedPage(<SubscriptionPage />)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
       <Route path="/" element={protectedPage(<DashboardPage />)} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />

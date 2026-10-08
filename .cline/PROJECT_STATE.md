@@ -10,6 +10,7 @@
 - Backend: Cloudflare Pages Functions (functions/api/*) with D1 binding `DB`
 - Database: Cloudflare D1 (`k9_ops_db`), SQL migrations in `migrations/`
 - Storage fallback: localStorage when no Pages Functions backend (plain `vite dev`)
+- Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
 
 ## Architecture
 - `src/lib/k9Api.ts`, `src/lib/trainingApi.ts` call `/api/*` endpoints; on network failure or non-JSON response they fall back to localStorage records.
@@ -50,9 +51,10 @@
 - Added 0003 seed migration for 8 training types + 40 assessment criteria
 - Added owner/member authentication and subscription-based write permissions on Cloudflare Pages Functions.
 - Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
+- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. Subscription routes display checkout; local D1 migration 0010 is applied. Sandbox API accepted configured monthly/yearly price IDs: active USD recurring prices at $41/month and $443/year. Local Pages preview confirmed config and invalid-signature protections; checkout/webhook round-trip remains untested.
 
 ## Next Steps
-- [ ] Connect and test the replacement subscription provider; checkout is disabled and workspaces without valid active-period billing remain view-only.
+- [ ] Complete Paddle Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Deploy migration 0010 remotely only after explicit confirmation; do not enable live payments without approval.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

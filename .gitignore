@@ -3,6 +3,10 @@ dist/
 build/
 .cache/
 .env*
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo

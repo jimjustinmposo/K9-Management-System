@@ -1,3 +1,9 @@
 RESEND_API_KEY=re_replace_me
 RESEND_FROM_EMAIL=Sentinel <accounts@example.com>
-APP_URL=http://localhost:8443
+APP_URL=https://martina-k9-management-system.pages.dev/
+PADDLE_API_KEY=pdl_sdbx_replace_me
+PADDLE_CLIENT_TOKEN=test_replace_me
+PADDLE_ENVIRONMENT=sandbox
+PADDLE_MONTHLY_PRICE_ID=pri_replace_me
+PADDLE_YEARLY_PRICE_ID=pri_replace_me
+PADDLE_WEBHOOK_SECRET=pdl_ntfset_replace_me

@@ -5,6 +5,12 @@ export interface AppEnv {
   RESEND_API_KEY?: string
   RESEND_FROM_EMAIL?: string
   APP_URL?: string
+  PADDLE_API_KEY?: string
+  PADDLE_CLIENT_TOKEN?: string
+  PADDLE_ENVIRONMENT?: "sandbox" | "production"
+  PADDLE_MONTHLY_PRICE_ID?: string
+  PADDLE_YEARLY_PRICE_ID?: string
+  PADDLE_WEBHOOK_SECRET?: string
 }
 
 export interface SessionInfo {
@@ -138,7 +144,8 @@ export async function getSession(
   if (!token) return null
   const row = await db
     .prepare(`SELECT u.id user_id, u.email, u.name user_name, w.id workspace_id, w.name workspace_name,
-    m.role, w.subscription_status, w.billing_interval, w.current_period_end
+    m.role, w.subscription_status, w.billing_interval, w.current_period_end,
+    w.paddle_scheduled_cancel_at
     FROM sessions s JOIN users u ON u.id=s.user_id JOIN memberships m ON m.user_id=u.id
     JOIN workspaces w ON w.id=m.workspace_id WHERE s.token_hash=? AND s.expires_at>?`)
     .bind(await hashToken(token), new Date().toISOString())
@@ -149,7 +156,7 @@ export async function getSession(
   const periodEnd = row.current_period_end
     ? new Date(row.current_period_end).getTime()
     : null
-  const periodIsCurrent = periodEnd === null || periodEnd > Date.now()
+  const periodIsCurrent = periodEnd !== null && periodEnd > Date.now()
   const writable =
     (hasSubscription || subscriptionStatus === "canceled") && periodIsCurrent
   const owner = row.role === "owner"
