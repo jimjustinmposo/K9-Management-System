@@ -150,14 +150,13 @@ export async function getSession(
     .bind(await hashToken(token), new Date().toISOString())
     .first<any>()
   if (!row) return null
-  const subscriptionStatus = row.subscription_status
-  const hasSubscription = ["active", "trialing"].includes(subscriptionStatus)
+  const subscriptionStatus = String(row.subscription_status ?? "").toLowerCase()
+  const hasSubscription = subscriptionStatus === "active"
   const periodEnd = row.current_period_end
     ? new Date(row.current_period_end).getTime()
     : null
   const periodIsCurrent = periodEnd !== null && periodEnd > Date.now()
-  const writable =
-    (hasSubscription || subscriptionStatus === "canceled") && periodIsCurrent
+  const writable = hasSubscription && (periodEnd === null || periodIsCurrent)
   const owner = row.role === "owner"
   return {
     user: { id: row.user_id, email: row.email, name: row.user_name },

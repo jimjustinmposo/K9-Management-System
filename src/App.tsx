@@ -41,7 +41,7 @@ export default function App() {
       <Route
         path="/k9-roster/:id/edit"
         element={
-          <ProtectedRoute owner>
+          <ProtectedRoute owner requireWritable>
             <K9FormPage />
           </ProtectedRoute>
         }

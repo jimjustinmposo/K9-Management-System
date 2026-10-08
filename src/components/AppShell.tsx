@@ -124,7 +124,7 @@ export function PanelHeader({ eyebrow, title, action }: { eyebrow?: string; titl
 export function SubscriptionStatusBar() {
   const { session } = useAuth();
   if (!session) return null;
-  const active = session.subscription.hasSubscription && session.subscription.writable;
+  const active = session.subscription.status.toLowerCase() === "active" && session.subscription.writable;
   const renewal = session.subscription.currentPeriodEnd
     ? new Date(session.subscription.currentPeriodEnd).toLocaleDateString("en-AE", {
         day: "numeric",

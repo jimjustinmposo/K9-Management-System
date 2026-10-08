@@ -50,6 +50,7 @@
 - Added trainingApi.ts, /api/training/types.ts, /api/training/goals.ts
 - Added 0003 seed migration for 8 training types + 40 assessment criteria
 - Added owner/member authentication and subscription-based write permissions on Cloudflare Pages Functions.
+- Paddle `active` status plus an unexpired billing period is the sole condition for write access; inactive workspaces remain view-only, with billing management available to owners.
 - Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
 - Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. D1 migration 0010 is applied locally and remotely. Wrangler confirms the production Pages project currently has no secrets configured, so Paddle checkout remains unavailable until credentials are added.
 

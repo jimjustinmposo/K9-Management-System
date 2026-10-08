@@ -90,7 +90,6 @@ export function ProtectedRoute({
 }: {
   children: ReactNode
   owner?: boolean
-  allowInactive?: boolean
   requireWritable?: boolean
 }) {
   const { session, loading } = useAuth()
@@ -105,9 +104,7 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location.pathname }} replace />
   if (owner && session.role !== "owner") return <Navigate to="/" replace />
   if (requireWritable && !session.subscription.writable)
-    return (
-      <Navigate to="/" replace />
-    )
+    return <Navigate to="/" replace />
   return children
 }
 
