@@ -160,7 +160,6 @@ const navItems: {
   { label: "Today's Task", icon: "task", to: "/todays-task" },
   { label: "Training", icon: "training", to: "/training" },
   { label: "Medical", icon: "heart", to: "/medical" },
-  { label: "Deployments", icon: "clipboard", to: "/deployments" },
   { label: "Handlers", icon: "users", to: "/handlers" },
   { label: "Reports", icon: "reports", to: "/reports" },
   { label: "Subscription", icon: "shield", to: "/subscription" },
