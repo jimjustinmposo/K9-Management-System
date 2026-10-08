@@ -76,9 +76,9 @@ export default function SubscribePage() {
       <button
         type="button"
         onClick={() => void logout()}
-        className="mt-4 w-full text-xs font-bold text-muted"
+        className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-muted transition hover:border-navy/20 hover:bg-canvas hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy"
       >
-        Sign out
+        <span>Sign out</span>
       </button>
     </AuthLayout>
   )

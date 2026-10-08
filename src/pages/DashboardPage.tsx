@@ -19,6 +19,7 @@ type IconName =
   | "task"
   | "download"
   | "heart"
+  | "logout"
   | "menu"
   | "more"
   | "plus"
@@ -122,6 +123,12 @@ function Icon({
       </>
     ),
     check: <path d="m5 12 4 4L19 6" />,
+    logout: (
+      <>
+        <path d="M10 17l5-5-5-5M15 12H3" />
+        <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+      </>
+    ),
     chevron: <path d="m9 18 6-6-6-6" />,
     arrow: <path d="M5 12h14M14 7l5 5-5 5" />,
     cross: <path d="m6 6 12 12M18 6 6 18" />,
@@ -349,7 +356,16 @@ export default function DashboardPage() {
                 <p className="truncate text-xs font-bold">{session?.user.name}</p>
                 <p className="truncate text-[10px] capitalize text-white/45">{session?.role}</p>
               </div>
-              <button type="button" onClick={() => void logout()} title="Sign out" className="text-white/40 hover:text-white"><Icon name="cross" className="size-4" /></button>
+              <button
+                type="button"
+                onClick={() => void logout()}
+                title="Log out"
+                aria-label="Log out"
+                className="flex shrink-0 items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white/75 transition hover:border-white/20 hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+              >
+                <Icon name="logout" className="size-4" />
+                <span>Log out</span>
+              </button>
             </div>
           </div>
         </div>

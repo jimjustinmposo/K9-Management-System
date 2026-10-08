@@ -220,7 +220,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 onClick={() => void logout()}
                 title="Log out"
                 aria-label="Log out"
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-white/10 px-3 py-3 text-base font-normal text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/8 px-3 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/20 hover:bg-white/12 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 <Icon name="logout" className="size-[18px]" />
                 <span>Log out</span>
