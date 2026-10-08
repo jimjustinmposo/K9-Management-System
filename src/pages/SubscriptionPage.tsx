@@ -21,10 +21,18 @@ const prices = {
 } satisfies Record<Interval, { amount: string; detail: string }>
 
 const benefits = [
-  "Complete K9 profiles and operational records",
-  "Training, medical, and certification tracking",
-  "Deployment history and readiness analytics",
-  "Secure reports and data exports",
+  "Full K9 Management System access",
+  "Cloud hosting",
+  "Database hosting and maintenance",
+  "Routine database optimization",
+  "Scheduled database backups",
+  "Security monitoring and updates",
+  "Bug fixes and system maintenance",
+  "Performance optimization",
+  "Technical support",
+  "Existing feature updates",
+  "SSL/HTTPS security",
+  "System availability monitoring",
 ]
 
 export default function SubscriptionPage() {
@@ -109,7 +117,7 @@ export default function SubscriptionPage() {
               <span className="grid size-6 place-items-center rounded-full bg-warning-soft text-warning">
                 <Icon name="shield" className="size-3" />
               </span>
-              Sentinel Command Plan
+              Payment Plans
             </p>
             <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.04em] text-ink md:text-[28px]">
               One plan. Total operational visibility.
@@ -147,7 +155,7 @@ export default function SubscriptionPage() {
                     <span className="absolute right-3 top-3 grid size-4 place-items-center rounded-full bg-gold text-[9px] font-black text-navy">✓</span>
                   )}
                   {value === "year" && !active && (
-                    <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">SAVE 10%</span>
+                      <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">SAVE 10%</span>
                   )}
                 </button>
               )
@@ -163,7 +171,7 @@ export default function SubscriptionPage() {
                   <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3 py-1.5 text-[8px] font-extrabold uppercase tracking-[0.12em] text-gold">
                     <Icon name="shield" className="size-3" /> Professional operations
                   </span>
-                  <h3 className="mt-4 text-base font-extrabold">Sentinel Command</h3>
+                  <h3 className="mt-4 text-base font-extrabold">Payment Plans</h3>
                 </div>
                 <div className="text-right">
                   <strong className="text-3xl font-extrabold tracking-tight">{selected.amount}</strong>
@@ -173,7 +181,7 @@ export default function SubscriptionPage() {
             </div>
             <div className="grid md:grid-cols-2">
               <div className="border-b border-line p-7 md:border-b-0 md:border-r">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.17em] text-muted">Plan includes</p>
+                <p className="text-[9px] font-extrabold uppercase tracking-[0.17em] text-muted">What's included in both plans</p>
                 <ul className="mt-5 space-y-4">
                   {benefits.map((benefit) => (
                     <li key={benefit} className="flex items-start gap-3 text-[10px] leading-5 text-slate">
@@ -190,8 +198,8 @@ export default function SubscriptionPage() {
                     <Icon name="shield" className="size-5" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-extrabold">Owner seat</p>
-                    <p className="mt-1 text-[8px] text-muted">Owner plus 3 member accounts included</p>
+                    <p className="text-[11px] font-extrabold">Individual Access Plan</p>
+                    <p className="mt-1 text-[8px] leading-4 text-muted">Provides complete access for one owner, perfect for solo operators who need full control of the system.</p>
                   </div>
                 </div>
               </div>
@@ -208,7 +216,7 @@ export default function SubscriptionPage() {
             <div className="p-5">
               <div className="flex items-end justify-between border-b border-line pb-5">
                 <div>
-                  <p className="text-xs font-extrabold">Sentinel Command</p>
+                  <p className="text-xs font-extrabold">Payment Plans</p>
                   <p className="mt-1 text-[9px] text-muted">{interval === "month" ? "Monthly" : "Yearly"} subscription</p>
                 </div>
                 <div className="text-right">
