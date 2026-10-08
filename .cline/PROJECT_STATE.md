@@ -48,12 +48,11 @@
 - Enabled `/training` route with full TrainingPage (sessions, goals, readiness)
 - Added trainingApi.ts, /api/training/types.ts, /api/training/goals.ts
 - Added 0003 seed migration for 8 training types + 40 assessment criteria
-- Added owner/member authentication and PayPal subscription billing on Cloudflare Pages Functions.
-- PayPal monthly/yearly plan details are loaded server-side; only verified active subscriptions can modify records.
+- Added owner/member authentication and subscription-based write permissions on Cloudflare Pages Functions.
+- Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
 
 ## Next Steps
-- Add the PayPal live Client ID, secret, and webhook ID to Cloudflare Pages secrets.
-- Complete monthly and yearly PayPal checkout tests.
+- Connect and test the replacement subscription provider.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

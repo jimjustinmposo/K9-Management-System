@@ -43,7 +43,7 @@ export default function AcceptInvitePage() {
           <input
             name="password"
             type="password"
-            minLength={10}
+            minLength={6}
             required
             className={authInput}
           />

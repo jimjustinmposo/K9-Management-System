@@ -5,11 +5,11 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const body = (await context.request.json()) as any
   const token = clean(body.token)
   const password = String(body.password ?? "")
-  if (!token || password.length < 10)
+  if (!token || password.length < 6)
     return json(
       {
         error:
-          "A valid token and password of at least 10 characters are required",
+          "A valid token and password of at least 6 characters are required",
       },
       400,
     )

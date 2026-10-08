@@ -11,9 +11,9 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const token = clean(body.token)
   const name = clean(body.name)
   const password = String(body.password ?? "")
-  if (!token || !name || password.length < 10)
+  if (!token || !name || password.length < 6)
     return json(
-      { error: "Name and a password of at least 10 characters are required" },
+      { error: "Name and a password of at least 6 characters are required" },
       400,
     )
   const invite = await context.env.DB.prepare(

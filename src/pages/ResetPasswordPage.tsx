@@ -9,7 +9,7 @@ export default function ResetPasswordPage() {
   return (
     <AuthLayout
       title="Choose a new password"
-      subtitle="Use at least 10 characters."
+      subtitle="Use at least 6 characters."
     >
       {done ? (
         <Link to="/login" className={`${primaryButton} mt-6 block text-center`}>
@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
               className={authInput}
               name="password"
               type="password"
-              minLength={10}
+              minLength={6}
               required
             />
           </label>

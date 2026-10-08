@@ -95,7 +95,7 @@ function devAuthApiPlugin(): Plugin {
         }
         if (pathname === '/api/auth/register' && req.method === 'POST') {
           const body = await readBody(); const email = String(body.email || '').trim().toLowerCase(); const password = String(body.password || '')
-          if (!body.name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 10) return send(400, { error: 'Name, valid email, and a password of at least 10 characters are required' })
+          if (!body.name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 6) return send(400, { error: 'Name, valid email, and a password of at least 6 characters are required' })
           if (users.has(email)) return send(409, { error: 'An account with this email already exists' })
           users.set(email, { id: randomUUID(), email, name: String(body.name).trim(), workspaceName: String(body.workspaceName || `${body.name}'s K9 Unit`).trim(), password: encodePassword(password) })
           const token = randomUUID(); sessions.set(token, email)

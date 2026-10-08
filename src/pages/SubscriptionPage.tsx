@@ -1,13 +1,13 @@
-import { useEffect, useMemo, useState } from "react"
+import { useState } from "react"
 import { useLocation } from "react-router-dom"
 import { AppShell, Icon } from "../components/AppShell"
-import { apiRequest } from "../lib/auth"
-import {
-  type BillingInterval as Interval,
-  type BillingPlans as Plans,
-  formatPlanMoney,
-  isBillingPlan,
-} from "../lib/billing"
+
+type Interval = "month" | "year"
+
+const prices = {
+  month: { amount: "AED 150", detail: "Billed every month" },
+  year: { amount: "AED 1,620", detail: "AED 135/month · billed yearly" },
+} satisfies Record<Interval, { amount: string; detail: string }>
 
 const benefits = [
   "Complete K9 profiles and operational records",
@@ -18,67 +18,15 @@ const benefits = [
 
 export default function SubscriptionPage() {
   const location = useLocation()
-  const [plans, setPlans] = useState<Plans | null>(null)
   const [interval, setInterval] = useState<Interval>("month")
-  const [error, setError] = useState("")
-  const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    apiRequest("/api/billing/plans")
-      .then((result) => setPlans(result.data))
-      .catch((cause) => setError(cause instanceof Error ? cause.message : "Unable to load plans"))
-  }, [])
-
-  const selectedPlan = plans?.[interval]
-  const chosenPrice = isBillingPlan(selectedPlan)
-    ? formatPlanMoney(selectedPlan.value, selectedPlan.currency)
-    : "—"
-  const { monthlyEquivalent, discountPercent } = useMemo(() => {
-    const month = plans?.month
-    const year = plans?.year
-    if (
-      !isBillingPlan(month) ||
-      !isBillingPlan(year) ||
-      month.currency !== year.currency
-    )
-      return { monthlyEquivalent: "", discountPercent: 0 }
-    const regularAnnual = Number(month.value) * 12
-    const yearly = Number(year.value)
-    return {
-      monthlyEquivalent: formatPlanMoney(yearly / 12, year.currency),
-      discountPercent:
-        regularAnnual > yearly
-          ? Math.round(((regularAnnual - yearly) / regularAnnual) * 100)
-          : 0,
-    }
-  }, [plans])
-
-  async function checkout() {
-    setSaving(true)
-    setError("")
-    if (!isBillingPlan(selectedPlan)) {
-      setError(selectedPlan?.error || "PayPal billing is being configured. Please try again shortly.")
-      setSaving(false)
-      return
-    }
-    try {
-      const result = await apiRequest("/api/billing/checkout", {
-        method: "POST",
-        body: JSON.stringify({ interval }),
-      })
-      window.location.assign(result.data.url)
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Unable to open PayPal")
-      setSaving(false)
-    }
-  }
+  const selected = prices[interval]
 
   return (
     <AppShell title="Subscription">
       <div className="mx-auto max-w-[1180px]">
         {Boolean(location.state?.subscriptionRequired) && (
           <div role="alert" className="mb-6 rounded-xl border border-warning/25 bg-warning-soft px-4 py-3 text-sm font-bold text-warning">
-            You are not actively subscribed. Your workspace is view only. Choose a monthly or yearly plan to add records.
+            You are not actively subscribed. Your workspace is view only.
           </div>
         )}
         <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
@@ -100,7 +48,6 @@ export default function SubscriptionPage() {
           <div className="grid w-full grid-cols-2 gap-2 xl:w-[355px]">
             {(["month", "year"] as const).map((value) => {
               const active = interval === value
-              const price = plans?.[value]
               return (
                 <button
                   key={value}
@@ -115,25 +62,15 @@ export default function SubscriptionPage() {
                   <span className="block text-[9px] font-extrabold uppercase tracking-[0.13em]">
                     {value === "month" ? "1 month" : "1 year"}
                   </span>
-                  <strong className="mt-2 block text-lg font-extrabold">
-                    {isBillingPlan(price)
-                      ? formatPlanMoney(price.value, price.currency)
-                      : "—"}
-                  </strong>
+                  <strong className="mt-2 block text-lg font-extrabold">{prices[value].amount}</strong>
                   <span className={`mt-0.5 block text-[8px] ${active ? "text-white/60" : "text-muted"}`}>
-                    {value === "month"
-                      ? "Billed every month"
-                      : monthlyEquivalent
-                        ? `${monthlyEquivalent}/month · billed yearly`
-                        : "Billed yearly"}
+                    {prices[value].detail}
                   </span>
                   {active && (
                     <span className="absolute right-3 top-3 grid size-4 place-items-center rounded-full bg-gold text-[9px] font-black text-navy">✓</span>
                   )}
-                  {value === "year" && !active && discountPercent > 0 && (
-                    <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">
-                      SAVE {discountPercent}%
-                    </span>
+                  {value === "year" && !active && (
+                    <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">SAVE 10%</span>
                   )}
                 </button>
               )
@@ -143,28 +80,20 @@ export default function SubscriptionPage() {
 
         <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,.93fr)]">
           <section className="overflow-hidden rounded-2xl border border-line bg-surface">
-            <div className="relative overflow-hidden bg-navy px-7 py-7 text-white">
-              <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+            <div className="bg-navy px-7 py-7 text-white">
+              <div className="flex items-start justify-between gap-5">
                 <div>
                   <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3 py-1.5 text-[8px] font-extrabold uppercase tracking-[0.12em] text-gold">
                     <Icon name="shield" className="size-3" /> Professional operations
                   </span>
                   <h3 className="mt-4 text-base font-extrabold">Sentinel Command</h3>
-                  <p className="mt-2 text-[10px] text-white/55">
-                    Full access for one K9 organization with secure owner and member accounts.
-                  </p>
                 </div>
-                <div className="shrink-0 text-left sm:text-right">
-                  <strong className="text-3xl font-extrabold tracking-tight">{chosenPrice}</strong>
+                <div className="text-right">
+                  <strong className="text-3xl font-extrabold tracking-tight">{selected.amount}</strong>
                   <span className="ml-1 text-[9px] text-white/55">/{interval}</span>
-                  <p className="mt-1 text-[8px] text-white/45">
-                    Billed {interval === "month" ? "monthly" : "yearly"} · cancel anytime
-                  </p>
                 </div>
               </div>
-              <div className="absolute -right-6 -top-20 size-48 rounded-full bg-white/[0.025]" />
             </div>
-
             <div className="grid md:grid-cols-2">
               <div className="border-b border-line p-7 md:border-b-0 md:border-r">
                 <p className="text-[9px] font-extrabold uppercase tracking-[0.17em] text-muted">Plan includes</p>
@@ -183,86 +112,40 @@ export default function SubscriptionPage() {
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-navy text-gold">
                     <Icon name="shield" className="size-5" />
                   </span>
-                  <div className="min-w-0 flex-1">
+                  <div>
                     <p className="text-[11px] font-extrabold">Owner seat</p>
-                    <p className="mt-1 text-[8px] text-muted">Billing, access, and full system control</p>
+                    <p className="mt-1 text-[8px] text-muted">Owner plus 3 member accounts included</p>
                   </div>
-                  <span className="text-[8px] font-extrabold uppercase text-positive">1 included</span>
                 </div>
-                <p className="mt-4 flex items-center gap-2 text-[9px] text-muted">
-                  <Icon name="users" className="size-3.5" /> Owner plus 3 member accounts included
-                </p>
-                <p className="mt-2 text-[9px] text-muted">Three member accounts are included.</p>
               </div>
             </div>
           </section>
 
-          <div className="space-y-4">
-            <section className="overflow-hidden rounded-2xl border border-line bg-surface">
-              <div className="border-b border-line px-5 py-4">
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-muted">Order summary</p>
-                <h3 className="mt-2 text-sm font-extrabold">
-                  Start your subscription
-                </h3>
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-4 border-b border-line pb-5">
-                  <div>
-                    <p className="text-xs font-extrabold">Sentinel Command</p>
-                    <p className="mt-1 text-[9px] text-muted">{interval === "month" ? "Monthly" : "Yearly"} subscription</p>
-                  </div>
-                  <strong className="text-xs">{chosenPrice}</strong>
-                </div>
-                <div className="flex items-end justify-between py-5">
-                  <div>
-                    <p className="text-[10px] font-extrabold">Due today</p>
-                    <p className="mt-1 text-[8px] text-muted">Taxes calculated at checkout</p>
-                  </div>
-                  <strong className="text-2xl font-extrabold">{chosenPrice}</strong>
-                </div>
-                {error && <p role="alert" className="mb-3 text-[10px] font-bold text-danger">{error}</p>}
-                <button
-                  type="button"
-                  disabled={saving || !isBillingPlan(selectedPlan)}
-                  onClick={() => void checkout()}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white shadow-action transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {saving ? "Opening checkout…" : "Continue to secure checkout"} <span className="text-gold">→</span>
-                </button>
-                <p className="mt-3 flex items-center justify-center gap-2 text-[8px] text-muted">
-                  <Icon name="shield" className="size-3 text-positive" /> Secure payment powered by PayPal
-                </p>
-              </div>
-            </section>
-
-            <section className="flex items-start gap-4 rounded-2xl border border-line bg-surface p-5">
-              <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-info-soft text-info">
-                <Icon name="reports" className="size-4" />
-              </span>
-              <div>
-                <p className="text-[10px] font-extrabold">Simple, secure billing</p>
-                <p className="mt-1 text-[8px] leading-4 text-muted">
-                  Your plan renews automatically. Manage the subscription from your PayPal account.
-                </p>
-              </div>
-            </section>
-          </div>
-        </div>
-
-        <div className="mt-7 grid gap-3 md:grid-cols-3">
-          {[
-            ["01", "Secure by design", "Encrypted payments and protected operational data"],
-            ["02", "Ready in minutes", "Your workspace is available immediately after payment"],
-            ["03", "Human support", "Direct assistance from our operations support team"],
-          ].map(([number, title, copy]) => (
-            <div key={number} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-4">
-              <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-canvas text-[8px] font-extrabold">{number}</span>
-              <div>
-                <p className="text-[9px] font-extrabold">{title}</p>
-                <p className="mt-1 text-[8px] text-muted">{copy}</p>
-              </div>
+          <section className="overflow-hidden rounded-2xl border border-line bg-surface">
+            <div className="border-b border-line px-5 py-4">
+              <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-muted">Order summary</p>
+              <h3 className="mt-2 text-sm font-extrabold">Subscription unavailable</h3>
             </div>
-          ))}
+            <div className="p-5">
+              <div className="flex items-end justify-between border-b border-line pb-5">
+                <div>
+                  <p className="text-xs font-extrabold">Sentinel Command</p>
+                  <p className="mt-1 text-[9px] text-muted">{interval === "month" ? "Monthly" : "Yearly"} subscription</p>
+                </div>
+                <strong className="text-xl font-extrabold">{selected.amount}</strong>
+              </div>
+              <p role="status" className="py-5 text-[10px] font-bold leading-5 text-warning">
+                Online payments are temporarily unavailable while billing is updated.
+              </p>
+              <button
+                type="button"
+                disabled
+                className="flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white opacity-50"
+              >
+                Payments temporarily unavailable
+              </button>
+            </div>
+          </section>
         </div>
       </div>
     </AppShell>

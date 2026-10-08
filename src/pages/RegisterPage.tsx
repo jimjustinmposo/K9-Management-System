@@ -68,12 +68,12 @@ export default function RegisterPage() {
             className={authInput}
             name="password"
             type="password"
-            minLength={10}
+            minLength={6}
             autoComplete="new-password"
             required
           />
           <span className="mt-1 block font-medium text-muted">
-            At least 10 characters
+            At least 6 characters
           </span>
         </label>
         {error && (

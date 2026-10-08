@@ -8,11 +8,11 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     const name = clean(body.name)
     const workspaceName = clean(body.workspaceName) || `${name}'s K9 Unit`
     const password = typeof body.password === "string" ? body.password : ""
-    if (!name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 10)
+    if (!name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 6)
       return json(
         {
           error:
-            "Name, valid email, and a password of at least 10 characters are required",
+            "Name, valid email, and a password of at least 6 characters are required",
         },
         400,
       )
