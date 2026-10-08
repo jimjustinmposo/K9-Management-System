@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS workspaces (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  stripe_customer_id TEXT UNIQUE,
+  stripe_subscription_id TEXT UNIQUE,
+  stripe_base_item_id TEXT,
+  stripe_seat_item_id TEXT,
+  billing_interval TEXT NOT NULL DEFAULT 'month',
+  subscription_status TEXT NOT NULL DEFAULT 'incomplete',
+  current_period_end TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  paddle_customer_id TEXT,
+  paddle_subscription_id TEXT,
+  paddle_price_id TEXT,
+  paddle_plan TEXT,
+  paddle_current_period_start TEXT,
+  paddle_scheduled_cancel_at TEXT,
+  paddle_last_synced_at TEXT,
+  paddle_last_event_at TEXT
+);
