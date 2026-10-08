@@ -1,7 +1,7 @@
 # PROJECT STATE
 
 ## Project
-- Name: Martina K9 Management System (Sentinel K9 Operations)
+- Name: Martina’s Management System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
 - Status: K9 Roster + Training modules live; other modules coming soon
 

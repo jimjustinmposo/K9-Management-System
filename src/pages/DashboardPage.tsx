@@ -295,10 +295,10 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                Sentinel
+                Martina’s
               </p>
               <p className="text-sm font-extrabold tracking-wide text-white">
-                K9 OPERATIONS
+                MANAGEMENT SYSTEM
               </p>
             </div>
           </div>

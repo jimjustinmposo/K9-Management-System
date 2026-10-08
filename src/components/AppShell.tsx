@@ -180,8 +180,8 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <Icon name="shield" className="size-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Sentinel</p>
-              <p className="text-sm font-extrabold tracking-wide text-white">K9 OPERATIONS</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">Martina’s</p>
+              <p className="text-sm font-extrabold tracking-wide text-white">MANAGEMENT SYSTEM</p>
             </div>
           </Link>
           <button type="button" aria-label="Close navigation" onClick={() => setMobileNav(false)} className="text-white/60 lg:hidden">
