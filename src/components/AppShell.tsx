@@ -139,7 +139,7 @@ export function SubscriptionStatusBar() {
         : "border-warning/20 bg-warning-soft text-warning"
     }`}>
       <span className={`size-2 rounded-full ${active ? "bg-positive" : "bg-warning"}`} />
-      <span>{active ? "Subscription active" : "Subscription inactive · View only"}</span>
+      <span>{active ? "Subscription Active · Full access" : "Subscription inactive · View only"}</span>
       {active && renewal && <span className="font-semibold">Renews {renewal}</span>}
     </div>
   );
