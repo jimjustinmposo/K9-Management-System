@@ -16,15 +16,15 @@ export default function AuthLayout({
         <Link to="/" className="mb-7 flex items-center justify-center gap-3">
           <img
             src="/logo.png"
-            alt="Mussafah K9 Operation logo"
+            alt="K9 Management System logo"
             className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-black/5 sm:size-[4.5rem]"
           />
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[0.2em] text-gold">
-              MUSSAFAH
+              K9 MANAGEMENT
             </span>
             <span className="block text-sm font-black tracking-wide text-navy">
-              K9 OPERATION
+              SYSTEM
             </span>
           </span>
         </Link>
