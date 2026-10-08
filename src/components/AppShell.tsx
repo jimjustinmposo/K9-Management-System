@@ -206,15 +206,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
           </div>
         </nav>
         <div className="border-t border-white/10 p-4">
-          <div className="rounded-xl bg-white/5 p-4">
-            <div className="flex flex-col items-stretch gap-4">
-              <div className="flex min-w-0 items-center gap-4">
-                <div className="grid size-11 shrink-0 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white/85">Account</p>
-                  <p className="text-xs capitalize text-white/60">{session?.role}</p>
-                </div>
-              </div>
+          <div className="rounded-xl bg-white/5 p-3">
               <button
                 type="button"
                 onClick={() => void logout()}
@@ -225,7 +217,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 <Icon name="logout" className="size-[18px]" />
                 <span>Log out</span>
               </button>
-            </div>
           </div>
         </div>
       </aside>
@@ -241,7 +232,16 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <h1 className="mt-0.5 text-xl font-extrabold tracking-tight md:text-2xl">{title}</h1>
             </div>
           </div>
-          <SubscriptionStatusBar />
+          <div className="flex items-center gap-3">
+            <div className="hidden text-right sm:block">
+              <p className="text-sm font-semibold text-ink">{session?.user.name}</p>
+              <p className="text-xs capitalize text-muted">{session?.role}</p>
+            </div>
+            <div className="grid size-9 place-items-center rounded-full bg-navy text-xs font-bold text-white" aria-hidden="true">
+              {session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
+            </div>
+            <SubscriptionStatusBar />
+          </div>
         </header>
         <main className="p-4 md:p-7 lg:p-8">{children}</main>
       </div>

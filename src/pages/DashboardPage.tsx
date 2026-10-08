@@ -342,13 +342,7 @@ export default function DashboardPage() {
         </nav>
 
         <div className="border-t border-white/10 p-4">
-          <div className="rounded-xl bg-white/5 p-4">
-            <div className="flex items-center gap-3">
-              <div className="grid size-10 place-items-center rounded-full bg-slate text-xs font-extrabold">{session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0,2).toUpperCase()}</div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold">Account</p>
-                <p className="truncate text-[10px] capitalize text-white/45">{session?.role}</p>
-              </div>
+          <div className="rounded-xl bg-white/5 p-3">
               <button
                 type="button"
                 onClick={() => void logout()}
@@ -362,7 +356,6 @@ export default function DashboardPage() {
                 </svg>
                 <span>Log out</span>
               </button>
-            </div>
           </div>
         </div>
       </aside>
@@ -395,6 +388,15 @@ export default function DashboardPage() {
 
           <div className="flex items-center gap-2">
             <SubscriptionStatusBar />
+            <div className="hidden items-center gap-2 border-l border-line pl-3 sm:flex">
+              <div className="text-right">
+                <p className="text-xs font-semibold text-ink">{session?.user.name}</p>
+                <p className="text-[10px] capitalize text-muted">{session?.role}</p>
+              </div>
+              <div className="grid size-9 place-items-center rounded-full bg-navy text-xs font-bold text-white" aria-hidden="true">
+                {session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0,2).toUpperCase()}
+              </div>
+            </div>
             <div
               className={`hidden items-center overflow-hidden rounded-lg border border-line bg-canvas transition-all sm:flex ${
                 searchOpen ? "w-64" : "w-10"
