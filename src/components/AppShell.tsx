@@ -188,6 +188,9 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             <Icon name="cross" />
           </button>
         </div>
+        <div className="px-4 pt-4">
+          <SubscriptionStatusBar />
+        </div>
         <nav className="flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
           <p className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">Operations</p>
           <div className="mt-3 space-y-1">
@@ -242,9 +245,6 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             </div>
           </div>
         </header>
-        <div className="sticky top-20 z-20">
-          <SubscriptionStatusBar />
-        </div>
         <main className="p-4 md:p-7 lg:p-8">{children}</main>
       </div>
     </div>
