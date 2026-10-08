@@ -34,6 +34,11 @@ export default function SubscriptionPage() {
   const [pending, setPending] = useState(false)
   const [message, setMessage] = useState("")
   const selected = prices[interval]
+  const subscriptionStatus = session?.subscription.status.toLowerCase()
+  const hasManageableSubscription =
+    ["active", "trialing", "past_due", "paused"].includes(subscriptionStatus ?? "") &&
+    (!session?.subscription.currentPeriodEnd ||
+      new Date(session.subscription.currentPeriodEnd).getTime() > Date.now())
 
   async function openCheckout() {
     setPending(true)
@@ -197,7 +202,7 @@ export default function SubscriptionPage() {
             <div className="border-b border-line px-5 py-4">
               <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-muted">Order summary</p>
               <h3 className="mt-2 text-sm font-extrabold">
-                {session && session.subscription.status !== "incomplete" ? "Manage subscription" : "Start your subscription"}
+                {hasManageableSubscription ? "Manage subscription" : "Start your subscription"}
               </h3>
             </div>
             <div className="p-5">
@@ -218,11 +223,11 @@ export default function SubscriptionPage() {
               {message && <p role="alert" className="py-4 text-[10px] font-bold leading-5 text-danger">{message}</p>}
               <button
                 type="button"
-                onClick={session && session.subscription.status !== "incomplete" ? openPortal : openCheckout}
+                onClick={hasManageableSubscription ? openPortal : openCheckout}
                 disabled={pending || !session?.permissions.manageBilling}
                 className="flex w-full items-center justify-center rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {pending ? "Please wait…" : session && session.subscription.status !== "incomplete" ? "Manage billing" : "Continue to secure checkout"}
+                {pending ? "Please wait…" : hasManageableSubscription ? "Manage billing" : subscriptionStatus === "canceled" ? "Subscribe again" : "Continue to secure checkout"}
               </button>
               {!session?.permissions.manageBilling && (
                 <p className="mt-3 text-center text-[9px] text-muted">Only the workspace owner can manage billing.</p>
