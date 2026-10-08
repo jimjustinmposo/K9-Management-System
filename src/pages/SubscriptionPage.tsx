@@ -5,8 +5,8 @@ import { AppShell, Icon } from "../components/AppShell"
 type Interval = "month" | "year"
 
 const prices = {
-  month: { amount: "AED 150", detail: "Billed every month" },
-  year: { amount: "AED 1,620", detail: "AED 135/month · billed yearly" },
+  month: { amount: "$41", detail: "Billed every month" },
+  year: { amount: "$443", detail: "Billed yearly" },
 } satisfies Record<Interval, { amount: string; detail: string }>
 
 const benefits = [
@@ -65,6 +65,9 @@ export default function SubscriptionPage() {
                   <strong className="mt-2 block text-lg font-extrabold">{prices[value].amount}</strong>
                   <span className={`mt-0.5 block text-[8px] ${active ? "text-white/60" : "text-muted"}`}>
                     {prices[value].detail}
+                    {value === "year" && (
+                      <strong className="ml-1 font-extrabold text-positive">10% discount</strong>
+                    )}
                   </span>
                   {active && (
                     <span className="absolute right-3 top-3 grid size-4 place-items-center rounded-full bg-gold text-[9px] font-black text-navy">✓</span>
@@ -132,7 +135,14 @@ export default function SubscriptionPage() {
                   <p className="text-xs font-extrabold">Sentinel Command</p>
                   <p className="mt-1 text-[9px] text-muted">{interval === "month" ? "Monthly" : "Yearly"} subscription</p>
                 </div>
-                <strong className="text-xl font-extrabold">{selected.amount}</strong>
+                <div className="text-right">
+                  <strong className="text-xl font-extrabold">{selected.amount}</strong>
+                  {interval === "year" && (
+                    <strong className="mt-1 block text-[9px] font-extrabold text-positive">
+                      10% discount
+                    </strong>
+                  )}
+                </div>
               </div>
               <p role="status" className="py-5 text-[10px] font-bold leading-5 text-warning">
                 Online payments are temporarily unavailable while billing is updated.
