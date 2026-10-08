@@ -343,19 +343,19 @@ export default function DashboardPage() {
 
         <div className="border-t border-white/10 p-4">
           <div className="rounded-xl bg-white/5 p-3">
-              <button
-                type="button"
-                onClick={() => void logout()}
-                title="Log out"
-                aria-label="Log out"
-                className="flex shrink-0 items-center gap-2 rounded-lg border border-gold/25 bg-gold/10 px-3 py-2 text-xs font-semibold text-gold transition hover:border-gold/45 hover:bg-gold/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
-              >
-                <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M10 17l5-5-5-5M15 12H3" />
-                  <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
-                </svg>
-                <span>Log out</span>
-              </button>
+            <button
+              type="button"
+              onClick={() => void logout()}
+              title="Log out"
+              aria-label="Log out"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-gold/25 bg-gold/10 px-3 py-2.5 text-sm font-semibold text-gold transition hover:border-gold/45 hover:bg-gold/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+            >
+              <svg aria-hidden="true" className="size-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 17l5-5-5-5M15 12H3" />
+                <path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+              </svg>
+              <span>Log out</span>
+            </button>
           </div>
         </div>
       </aside>
