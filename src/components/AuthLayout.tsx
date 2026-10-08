@@ -13,17 +13,17 @@ export default function AuthLayout({
   return (
     <main className="grid min-h-screen place-items-center bg-canvas p-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-7 flex items-center justify-center gap-3">
+        <Link to="/" className="mb-7 flex items-center justify-center gap-4">
           <img
             src="/logo.png"
             alt="K9 Management System logo"
             className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-black/5 sm:size-[4.5rem]"
           />
           <span>
-            <span className="block text-[10px] font-extrabold uppercase tracking-[0.2em] text-gold">
+            <span className="block text-xs font-extrabold uppercase tracking-[0.18em] text-gold sm:text-sm">
               K9 MANAGEMENT
             </span>
-            <span className="block text-sm font-black tracking-wide text-navy">
+            <span className="block text-lg font-black tracking-wide text-navy sm:text-xl">
               SYSTEM
             </span>
           </span>
