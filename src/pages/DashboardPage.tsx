@@ -313,6 +313,10 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        <div className="px-4 pt-4">
+          <SubscriptionStatusBar />
+        </div>
+
         <nav className="flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
           <p className="px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-white/35">
             Operations
@@ -413,7 +417,6 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <SubscriptionStatusBar />
         <main className="p-4 md:p-7 lg:p-8">
           <div className="mb-7 flex flex-col justify-between gap-4 xl:flex-row xl:items-end">
             <div>
