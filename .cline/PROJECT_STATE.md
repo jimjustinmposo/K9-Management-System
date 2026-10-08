@@ -51,10 +51,10 @@
 - Added 0003 seed migration for 8 training types + 40 assessment criteria
 - Added owner/member authentication and subscription-based write permissions on Cloudflare Pages Functions.
 - Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
-- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. Subscription routes display checkout; local D1 migration 0010 is applied. Sandbox API accepted configured monthly/yearly price IDs: active USD recurring prices at $41/month and $443/year. Local Pages preview confirmed config and invalid-signature protections; checkout/webhook round-trip remains untested.
+- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. D1 migration 0010 is applied locally and remotely. Wrangler confirms the production Pages project currently has no secrets configured, so Paddle checkout remains unavailable until credentials are added.
 
 ## Next Steps
-- [ ] Complete Paddle Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Deploy migration 0010 remotely only after explicit confirmation; do not enable live payments without approval.
+- [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 
