@@ -171,7 +171,15 @@ export default function SubscriptionPage() {
                   <span className="inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-3 py-1.5 text-[8px] font-extrabold uppercase tracking-[0.12em] text-gold">
                     <Icon name="shield" className="size-3" /> Professional operations
                   </span>
-                  <h3 className="mt-4 text-base font-extrabold">Payment Plans</h3>
+                  <h3 className="mt-4 text-base font-extrabold">
+                    Payment Plans
+                    {interval === "year" && (
+                      <>
+                        {" - "}
+                        <span className="font-extrabold text-positive">10% discount</span>
+                      </>
+                    )}
+                  </h3>
                 </div>
                 <div className="text-right">
                   <strong className="text-3xl font-extrabold tracking-tight">{selected.amount}</strong>

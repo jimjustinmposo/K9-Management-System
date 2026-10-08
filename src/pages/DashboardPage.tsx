@@ -294,11 +294,8 @@ export default function DashboardPage() {
               <Icon name="shield" className="size-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold">
-                Martina’s
-              </p>
               <p className="text-sm font-extrabold tracking-wide text-white">
-                MANAGEMENT SYSTEM
+                Martina's K9 System
               </p>
             </div>
           </div>

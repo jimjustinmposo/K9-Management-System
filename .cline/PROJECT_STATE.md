@@ -1,7 +1,7 @@
 # PROJECT STATE
 
 ## Project
-- Name: Martina’s Management System
+- Name: Martina's K9 System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
 - Status: K9 Roster + Training modules live; other modules coming soon
 
