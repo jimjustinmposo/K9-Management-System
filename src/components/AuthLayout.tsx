@@ -17,7 +17,7 @@ export default function AuthLayout({
           <img
             src="/logo.png"
             alt="Mussafah K9 Operation logo"
-            className="size-10 rounded-xl object-contain"
+            className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-black/5 sm:size-[4.5rem]"
           />
           <span>
             <span className="block text-[10px] font-extrabold uppercase tracking-[0.2em] text-gold">
