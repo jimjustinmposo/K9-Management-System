@@ -54,6 +54,7 @@
 - Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
 - Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. D1 migration 0010 is applied locally and remotely. Wrangler confirms the production Pages project currently has no secrets configured, so Paddle checkout remains unavailable until credentials are added.
 - Added and applied migration 0011 to restore a missing `workspaces` table in local and remote D1; remote `sqlite_master` verification confirms the table exists.
+- Fixed Paddle webhook's subscription-period column and made unmatched workspace updates fail/retry instead of being acknowledged. Production D1 still has no delivered Paddle webhook events; source fix requires deployment and Paddle destination verification.
 
 ## Next Steps
 - [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.

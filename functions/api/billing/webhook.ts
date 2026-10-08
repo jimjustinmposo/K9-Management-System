@@ -124,7 +124,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
             : null
       if (!plan) throw new Error("Subscription price is not configured")
 
-      await context.env.DB.prepare(
+      const update = await context.env.DB.prepare(
         `UPDATE workspaces SET
           paddle_customer_id=?, paddle_subscription_id=?, paddle_price_id=?, paddle_plan=?,
           subscription_status=?, billing_interval=?,
@@ -151,6 +151,8 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
           occurredAt,
         )
         .run()
+      if (update.meta?.changes !== 1)
+        throw new Error("No workspace matched the subscription workspace_id")
     }
 
     await context.env.DB.prepare(
