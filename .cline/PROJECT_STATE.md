@@ -17,6 +17,7 @@
 - Pages Functions return `{ data }` or `{ success, data }` / `{ success:false, error:{code,message} }`.
 
 ## Implemented Features
+- [x] Authentication UI and APIs (email/password plus Google and Facebook OAuth)
 - [x] Dashboard
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
@@ -29,12 +30,14 @@
 - `training_sessions` — FK `k9_id` → k9_roster (CASCADE), FK training_type_id → training_types
 - `training_assessments` — per-session criterion scores, UNIQUE(session_id, criterion_id)
 - `training_goals` — FK `k9_id` → k9_roster, optional training_type_id/criterion_id
+- `oauth_accounts` — provider identity links for Google/Facebook login
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
 - GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
 - GET/POST `/api/training/types`
 - GET/POST `/api/training/goals` (filter: k9_id, status)
+- GET `/api/auth/oauth/:provider`, GET `/api/auth/oauth/callback/:provider`
 
 ## Important Decisions
 - Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
@@ -44,19 +47,14 @@
 ## Environment
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
 - Production URL: `https://martina-k9-management-system.pages.dev`
+- OAuth requires `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `FACEBOOK_APP_ID`, and `FACEBOOK_APP_SECRET`.
 
 ## Recent Changes
-- Enabled `/training` route with full TrainingPage (sessions, goals, readiness)
-- Added trainingApi.ts, /api/training/types.ts, /api/training/goals.ts
-- Added 0003 seed migration for 8 training types + 40 assessment criteria
-- Added owner/member authentication and subscription-based write permissions on Cloudflare Pages Functions.
-- Paddle `active` status plus an unexpired billing period is the sole condition for write access; inactive workspaces remain view-only, with billing management available to owners.
-- Removed the PayPal integration; billing controls are unavailable until a replacement provider is connected.
-- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend Paddle.js checkout/portal flow. D1 migration 0010 is applied locally and remotely. Wrangler confirms the production Pages project currently has no secrets configured, so Paddle checkout remains unavailable until credentials are added.
-- Added and applied migration 0011 to restore a missing `workspaces` table in local and remote D1; remote `sqlite_master` verification confirms the table exists.
-- Fixed Paddle webhook's subscription-period column and made unmatched workspace updates fail/retry instead of being acknowledged. Production D1 still has no delivered Paddle webhook events; source fix requires deployment and Paddle destination verification.
-- Subscription page now routes canceled/expired subscriptions to a new checkout and offers “Subscribe again”; current subscriptions remain on billing management.
-- Removed the Deployments page/route and added Subscription to the application navigation.
+- Added Google and Facebook OAuth login with CSRF state validation, account linking/creation, and provider identity storage.
+- Replaced login/register screens with a responsive animated auth switch using the navy/gold palette and existing auth APIs.
+- Added Lucide React for authentication form icons.
+- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend checkout/portal flow.
+- Fixed Paddle webhook subscription-period synchronization and unmatched-workspace retry behavior.
 
 ## Next Steps
 - [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.
