@@ -5,10 +5,6 @@ export interface AppEnv {
   RESEND_API_KEY?: string
   RESEND_FROM_EMAIL?: string
   APP_URL?: string
-  GOOGLE_CLIENT_ID?: string
-  GOOGLE_CLIENT_SECRET?: string
-  FACEBOOK_APP_ID?: string
-  FACEBOOK_APP_SECRET?: string
   PADDLE_API_KEY?: string
   PADDLE_CLIENT_TOKEN?: string
   PADDLE_ENVIRONMENT?: "sandbox" | "production"

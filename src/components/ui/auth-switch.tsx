@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react"
 import { LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { apiRequest, useAuth } from "../../lib/auth"
 
 type AuthMode = "sign-in" | "sign-up"
@@ -13,11 +13,9 @@ export default function AuthSwitch({
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
-  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { refresh } = useAuth()
   const isSignUp = mode === "sign-up"
-  const oauthError = searchParams.get("oauth_error")
 
   const switchMode = (nextMode: AuthMode) => {
     setError("")
@@ -186,16 +184,6 @@ export default function AuthSwitch({
         .auth-switch__link:hover { text-decoration: underline; }
         .auth-switch__error { width: 100%; margin: 8px 0 0; color: #a93e38; font-size: .72rem; font-weight: 700; text-align: center; }
         .auth-switch__hint { margin: 8px 0 0; color: #7c898d; font-size: .68rem; }
-        .auth-switch__divider { display: flex; align-items: center; width: 100%; gap: 10px; margin: 13px 0 5px; color: #849095; font-size: .65rem; font-weight: 700; text-transform: uppercase; }
-        .auth-switch__divider::before, .auth-switch__divider::after { content: ""; flex: 1; height: 1px; background: #dbe2e1; }
-        .auth-switch__socials { display: grid; grid-template-columns: repeat(2, 1fr); width: 100%; gap: 9px; }
-        .auth-switch__social {
-          display: flex; align-items: center; justify-content: center; gap: 8px; height: 42px;
-          border: 1px solid #d8dfde; border-radius: 12px; background: #fff; color: #26383e;
-          font-size: .72rem; font-weight: 800; text-decoration: none; transition: border-color .2s, box-shadow .2s, transform .2s;
-        }
-        .auth-switch__social:hover { transform: translateY(-1px); border-color: #9caaaa; box-shadow: 0 5px 14px rgba(19, 38, 45, .1); }
-        .auth-switch__social svg { width: 17px; height: 17px; }
         .auth-switch__panels { z-index: 6; display: grid; grid-template-columns: repeat(2, 1fr); pointer-events: none; }
         .auth-switch__panel { display: flex; align-items: flex-end; justify-content: space-around; flex-direction: column; text-align: center; }
         .auth-switch__panel--left { padding: 3rem 17% 3rem 10%; pointer-events: auto; }
@@ -272,15 +260,13 @@ export default function AuthSwitch({
               <Brand />
               <h1 className="auth-switch__title">Welcome back</h1>
               <p className="auth-switch__subtitle">Sign in to Martina&apos;s K9 Management System.</p>
-              <SocialLoginButtons />
-              <div className="auth-switch__divider">or use email</div>
               <AuthField icon={<Mail size={19} />} label="Email address">
                 <input name="email" type="email" placeholder="Email address" autoComplete="email" required />
               </AuthField>
               <AuthField icon={<LockKeyhole size={19} />} label="Password">
                 <input name="password" type="password" placeholder="Password" autoComplete="current-password" required />
               </AuthField>
-              {!isSignUp && (error || oauthError) && <p className="auth-switch__error" role="alert">{error || oauthError}</p>}
+              {!isSignUp && error && <p className="auth-switch__error" role="alert">{error}</p>}
               <button className="auth-switch__button" disabled={saving}>
                 {saving ? "Signing in…" : "Sign in"}
               </button>
@@ -291,8 +277,6 @@ export default function AuthSwitch({
               <Brand />
               <h1 className="auth-switch__title">Create account</h1>
               <p className="auth-switch__subtitle">Create your owner account and K9 workspace.</p>
-              <SocialLoginButtons />
-              <div className="auth-switch__divider">or use email</div>
               <AuthField icon={<UserRound size={19} />} label="Your name">
                 <input name="name" placeholder="Your name" autoComplete="name" required />
               </AuthField>
@@ -342,27 +326,6 @@ function Brand() {
       <span className="auth-switch__brand-copy">Martina&apos;s K9 System</span>
     </div>
   )
-}
-
-function SocialLoginButtons() {
-  return (
-    <div className="auth-switch__socials" aria-label="Social login options">
-      <a className="auth-switch__social" href="/api/auth/oauth/google">
-        <GoogleIcon /> Google
-      </a>
-      <a className="auth-switch__social" href="/api/auth/oauth/facebook">
-        <FacebookIcon /> Facebook
-      </a>
-    </div>
-  )
-}
-
-function GoogleIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.35 12.25c0-.73-.07-1.43-.19-2.1H12v3.98h5.24a4.48 4.48 0 0 1-1.94 2.94v2.58h3.14c1.84-1.69 2.91-4.19 2.91-7.4Z"/><path fill="#34A853" d="M12 21.75c2.63 0 4.83-.87 6.44-2.36l-3.14-2.58c-.87.58-1.98.93-3.3.93-2.53 0-4.68-1.71-5.45-4.01H3.31v2.66A9.74 9.74 0 0 0 12 21.75Z"/><path fill="#FBBC05" d="M6.55 13.73A5.86 5.86 0 0 1 6.25 12c0-.6.1-1.18.3-1.73V7.61H3.31A9.75 9.75 0 0 0 2.25 12c0 1.57.38 3.05 1.06 4.39l3.24-2.66Z"/><path fill="#EA4335" d="M12 6.26c1.43 0 2.71.49 3.72 1.45l2.79-2.79A9.35 9.35 0 0 0 12 2.25a9.74 9.74 0 0 0-8.69 5.36l3.24 2.66c.77-2.3 2.92-4.01 5.45-4.01Z"/></svg>
-}
-
-function FacebookIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#1877F2" d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.62.77-1.62 1.56V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12Z"/></svg>
 }
 
 function AuthField({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
