@@ -126,7 +126,7 @@ function devAuthApiPlugin(): Plugin {
           const email = sessionEmail
           const user = sessionUser
           if (!user) return send(401, { error: 'Authentication required' })
-          return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.id}`, name: user.workspaceName }, role: 'owner', subscription: { status: 'incomplete', interval: 'month', currentPeriodEnd: null, writable: false, hasSubscription: false }, permissions: { view: true, create: false, edit: false, delete: false, manageMembers: false, manageBilling: true, viewAdmin: true } } })
+          return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.id}`, name: user.workspaceName }, role: 'owner', subscription: { status: 'active', interval: 'month', currentPeriodEnd: null, writable: true, hasSubscription: true }, permissions: { view: true, create: true, edit: true, delete: true, manageMembers: true, manageBilling: true, viewAdmin: true } } })
         }
         if (pathname === '/api/auth/register' && req.method === 'POST') {
           const body = await readBody(); const email = String(body.email || '').trim().toLowerCase(); const password = String(body.password || '')

@@ -19,6 +19,7 @@
 ## Implemented Features
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth account persistence across dev-server restarts (server-side hashed credentials)
+- [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
 - [x] Owner-only user administration with manual member password reset and session invalidation
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
@@ -55,6 +56,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Local Vite auth now grants active subscription permissions for feature testing without changing deployed Cloudflare behavior.
 - Improved signup panel button contrast and local-test account sign-in flow; local Vite accounts persist across restarts.
 - Fixed Pages production configuration and redeployed the developer-secret reset flow; invalid-secret production probe correctly returns 403.
 - Deployed owner-only Users page and manual member password reset; resets invalidate the member's sessions and outstanding reset tokens.
