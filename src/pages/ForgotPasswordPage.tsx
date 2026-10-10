@@ -5,6 +5,7 @@ import { apiRequest } from "../lib/auth"
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
+  const [resetUrl, setResetUrl] = useState("")
   return (
     <AuthLayout
       title="Reset your password"
@@ -15,6 +16,8 @@ export default function ForgotPasswordPage() {
         onSubmit={async (e) => {
           e.preventDefault()
           setError("")
+          setMessage("")
+          setResetUrl("")
           try {
             const f = new FormData(e.currentTarget)
             const data = await apiRequest("/api/auth/forgot-password", {
@@ -22,6 +25,7 @@ export default function ForgotPasswordPage() {
               body: JSON.stringify({ email: f.get("email") }),
             })
             setMessage(data.message)
+            setResetUrl(typeof data.resetUrl === "string" ? data.resetUrl : "")
           } catch (err) {
             setError(err instanceof Error ? err.message : "Request failed")
           }
@@ -32,6 +36,11 @@ export default function ForgotPasswordPage() {
           <input name="email" type="email" required className={authInput} />
         </label>
         {message && <p className="text-xs text-positive">{message}</p>}
+        {resetUrl && (
+          <Link to={resetUrl} className="block text-xs font-bold text-info underline">
+            Open password reset page
+          </Link>
+        )}
         {error && <p className="text-xs text-danger">{error}</p>}
         <button className={primaryButton}>Send reset link</button>
       </form>

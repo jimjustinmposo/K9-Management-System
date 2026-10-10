@@ -21,5 +21,9 @@ export async function sendEmail(
       html,
     }),
   })
-  if (!response.ok) throw new Error("Invitation email could not be sent")
+  if (!response.ok) {
+    const details = await response.text().catch(() => "")
+    console.error("Resend email delivery failed", response.status, details)
+    throw new Error("Email could not be sent")
+  }
 }

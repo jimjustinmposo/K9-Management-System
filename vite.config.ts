@@ -53,8 +53,10 @@ react(),
  * in deployed environments; Vite itself does not execute the functions folder. */
 function devAuthApiPlugin(): Plugin {
   type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string }
+  type DevPasswordReset = { email: string; expiresAt: number }
   const users = new Map<string, DevUser>()
   const sessions = new Map<string, string>()
+  const passwordResets = new Map<string, DevPasswordReset>()
   const encodePassword = (password: string) => {
     const salt = randomBytes(16)
     return `${salt.toString('hex')}:${scryptSync(password, salt, 32).toString('hex')}`
@@ -106,6 +108,34 @@ function devAuthApiPlugin(): Plugin {
           if (!user || !matchesPassword(String(body.password || ''), user.password)) return send(401, { error: 'Invalid email or password' })
           const token = randomUUID(); sessions.set(token, email)
           return send(200, { success: true, devMode: true }, `sentinel_dev_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`)
+        }
+        if (pathname === '/api/auth/forgot-password' && req.method === 'POST') {
+          const body = await readBody(); const email = String(body.email || '').trim().toLowerCase()
+          const user = users.get(email)
+          if (!user) return send(200, { success: true, message: 'If that account exists, a reset link has been sent.' })
+          const token = randomUUID()
+          passwordResets.set(token, { email, expiresAt: Date.now() + 60 * 60 * 1000 })
+          return send(200, {
+            success: true,
+            devMode: true,
+            message: 'Development mode does not send email. Use the reset link below.',
+            resetUrl: `/reset-password?token=${encodeURIComponent(token)}`,
+          })
+        }
+        if (pathname === '/api/auth/reset-password' && req.method === 'POST') {
+          const body = await readBody(); const token = String(body.token || ''); const password = String(body.password || '')
+          const reset = passwordResets.get(token)
+          if (!reset || reset.expiresAt <= Date.now()) {
+            passwordResets.delete(token)
+            return send(400, { error: 'This reset link is invalid or expired' })
+          }
+          if (password.length < 6) return send(400, { error: 'A password of at least 6 characters is required' })
+          const user = users.get(reset.email)
+          if (!user) return send(400, { error: 'This reset link is invalid or expired' })
+          user.password = encodePassword(password)
+          passwordResets.delete(token)
+          for (const [session, email] of sessions) if (email === reset.email) sessions.delete(session)
+          return send(200, { success: true, devMode: true })
         }
         if (pathname === '/api/auth/logout' && req.method === 'POST') {
           if (sessionToken) sessions.delete(sessionToken)

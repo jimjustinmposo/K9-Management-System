@@ -22,5 +22,8 @@ export function id(): string {
 }
 
 export function appUrl(request: Request, configured?: string): string {
-  return configured?.replace(/\/$/, "") || new URL(request.url).origin
+  const requestUrl = new URL(request.url)
+  if (requestUrl.hostname === "localhost" || requestUrl.hostname === "127.0.0.1")
+    return requestUrl.origin
+  return configured?.replace(/\/$/, "") || requestUrl.origin
 }

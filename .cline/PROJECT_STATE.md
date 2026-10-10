@@ -45,13 +45,14 @@
 ## Environment
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
 - Production URL: `https://martina-k9-management-system.pages.dev`
+- Password reset and invitation emails require `RESEND_API_KEY` and `RESEND_FROM_EMAIL`; local Vite auth exposes a development-only reset link instead of sending email.
 
 ## Recent Changes
+- Added working forgot/reset-password behavior to the Vite development auth bridge and made production email-delivery failures visible to users.
 - Removed Google and Facebook login UI, OAuth endpoints, provider configuration, and deployment setup.
 - Replaced login/register screens with a responsive animated auth switch using the navy/gold palette and existing auth APIs.
 - Added Lucide React for authentication form icons.
 - Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend checkout/portal flow.
-- Fixed Paddle webhook subscription-period synchronization and unmatched-workspace retry behavior.
 
 ## Next Steps
 - [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.

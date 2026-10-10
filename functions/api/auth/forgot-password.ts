@@ -3,6 +3,11 @@ import { sendEmail } from "../../_lib/email"
 import { appUrl, clean, id, json } from "../../_lib/http"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
+  if (!context.env.RESEND_API_KEY || !context.env.RESEND_FROM_EMAIL)
+    return json(
+      { error: "Password reset email is temporarily unavailable" },
+      503,
+    )
   const email = clean(
     ((await context.request.json()) as any).email,
   ).toLowerCase()
@@ -32,8 +37,15 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
         "Reset your Sentinel password",
         `<p>Reset your password:</p><p><a href="${appUrl(context.request, context.env.APP_URL)}/reset-password?token=${encodeURIComponent(token)}">Reset password</a></p><p>This link expires in one hour.</p>`,
       )
-    } catch {
-      /* Do not reveal delivery state. */
+    } catch (error) {
+      await context.env.DB.prepare("DELETE FROM password_resets WHERE token_hash=?")
+        .bind(await hashToken(token))
+        .run()
+      console.error("Password reset email delivery failed", error)
+      return json(
+        { error: "Password reset email could not be sent. Please try again later." },
+        503,
+      )
     }
   }
   return json({
