@@ -160,13 +160,16 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "Medical", to: "/medical", icon: "heart" },
   { label: "Handlers", to: "/handlers", icon: "users" },
   { label: "Reports", to: "/reports", icon: "reports" },
+  { label: "Users", to: "/users", icon: "users" },
   { label: "Subscription", to: "/subscription", icon: "shield" },
 ];
 
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const { session, logout } = useAuth();
-  const visibleNav = navItems;
+  const visibleNav = navItems.filter(
+    (item) => item.to !== "/users" || session?.permissions.viewAdmin,
+  );
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       {mobileNav && (

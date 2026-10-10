@@ -8,10 +8,10 @@ import K9FormPage from "./pages/K9FormPage"
 import K9RosterPage from "./pages/K9RosterPage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
-import ResetPasswordPage from "./pages/ResetPasswordPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import TodaysTaskPage from "./pages/TodaysTaskPage"
 import TrainingPage from "./pages/TrainingPage"
+import UsersPage from "./pages/UsersPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -21,9 +21,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
       <Route path="/subscribe" element={protectedPage(<SubscriptionPage />)} />
       <Route path="/subscription" element={protectedPage(<SubscriptionPage />)} />
@@ -47,6 +46,14 @@ export default function App() {
         }
       />
       <Route path="/training" element={protectedPage(<TrainingPage />)} />
+      <Route
+        path="/users"
+        element={
+          <ProtectedRoute owner>
+            <UsersPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/todays-task" element={protectedPage(<TodaysTaskPage />)} />
       <Route
         path="/medical"

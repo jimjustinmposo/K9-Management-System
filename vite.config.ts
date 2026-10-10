@@ -74,7 +74,7 @@ function devAuthApiPlugin(): Plugin {
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const pathname = (req.url || '').split('?')[0]
-        if (!pathname?.startsWith('/api/auth/')) return next()
+        if (!pathname?.startsWith('/api/auth/') && !pathname?.startsWith('/api/members')) return next()
         const send = (status: number, body: unknown, cookie?: string) => {
           res.statusCode = status
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
@@ -89,9 +89,32 @@ function devAuthApiPlugin(): Plugin {
           catch { return {} }
         }
         const sessionToken = (req.headers.cookie || '').split(';').map(value => value.trim()).find(value => value.startsWith('sentinel_dev_session='))?.slice('sentinel_dev_session='.length)
+        const sessionEmail = sessionToken ? sessions.get(sessionToken) : undefined
+        const sessionUser = sessionEmail ? users.get(sessionEmail) : undefined
+        if (pathname === '/api/members' && req.method === 'GET') {
+          if (!sessionUser) return send(401, { error: 'Authentication required' })
+          return send(200, {
+            data: {
+              members: [{ id: sessionUser.id, name: sessionUser.name, email: sessionUser.email, role: 'owner', created_at: new Date().toISOString() }],
+              invitations: [],
+              seats: { included: 3, used: 0, extra: 0 },
+            },
+          })
+        }
+        const memberMatch = pathname?.match(/^\/api\/members\/([^/]+)$/)
+        if (memberMatch && req.method === 'PATCH') {
+          if (!sessionUser) return send(401, { error: 'Authentication required' })
+          const target = [...users.values()].find(user => user.id === decodeURIComponent(memberMatch[1]))
+          if (!target || target.id === sessionUser.id) return send(404, { error: 'Member not found' })
+          const body = await readBody(); const password = String(body.password || '')
+          if (password.length < 6) return send(400, { error: 'Password must be at least 6 characters' })
+          target.password = encodePassword(password)
+          for (const [session, email] of sessions) if (email === target.email) sessions.delete(session)
+          return send(200, { success: true, devMode: true })
+        }
         if (pathname === '/api/auth/session' && req.method === 'GET') {
-          const email = sessionToken ? sessions.get(sessionToken) : undefined
-          const user = email ? users.get(email) : undefined
+          const email = sessionEmail
+          const user = sessionUser
           if (!user) return send(401, { error: 'Authentication required' })
           return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.id}`, name: user.workspaceName }, role: 'owner', subscription: { status: 'incomplete', interval: 'month', currentPeriodEnd: null, writable: false, hasSubscription: false }, permissions: { view: true, create: false, edit: false, delete: false, manageMembers: false, manageBilling: true, viewAdmin: true } } })
         }

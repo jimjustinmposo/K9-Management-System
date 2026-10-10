@@ -2,6 +2,7 @@ import { json } from "./http"
 
 export interface AppEnv {
   DB: D1Database
+  DEV_SECRET_PASS?: string
   RESEND_API_KEY?: string
   RESEND_FROM_EMAIL?: string
   APP_URL?: string

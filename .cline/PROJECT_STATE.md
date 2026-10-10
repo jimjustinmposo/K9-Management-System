@@ -18,6 +18,8 @@
 
 ## Implemented Features
 - [x] Authentication UI and APIs (email/password)
+- [x] Owner-only user administration with manual member password reset and session invalidation
+- [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
@@ -36,7 +38,9 @@
 - GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
 - GET/POST `/api/training/types`
 - GET/POST `/api/training/goals` (filter: k9_id, status)
-- POST `/api/auth/forgot-password`, POST `/api/auth/reset-password`
+- PATCH `/api/members/:id` — owner-only manual member password reset
+- POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
+- Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
 - Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
@@ -46,18 +50,21 @@
 ## Environment
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
 - Production URL: `https://martina-k9-management-system.pages.dev`
-- Production Pages has encrypted `RESEND_API_KEY` and `RESEND_FROM_EMAIL` bindings; `APP_URL` is configured in `wrangler.toml`.
-- Local Vite auth exposes a development-only reset link instead of sending email.
+- Production Pages still has legacy encrypted `RESEND_API_KEY` and `RESEND_FROM_EMAIL` bindings; the active member reset workflow does not use email.
+- Wrangler lists encrypted `DEV_SECRET_PASS` in production, but the deployed reset Function currently returns 503 as if the binding were unavailable; reset is blocked pending binding verification.
 
 ## Recent Changes
-- Hardened and deployed forgot/reset-password: validated email, single active one-hour token, one-use cleanup, confirmation field, invalid-link state, and loading states.
-- Added production Pages `RESEND_API_KEY` and `RESEND_FROM_EMAIL` encrypted bindings; production forgot-password configuration check returns 200.
+- Deployed clickable developer-secret password reset flow with password confirmation and visibility controls; production endpoint binding currently needs verification.
+- Deployed owner-only Users page and manual member password reset; resets invalidate the member's sessions and outstanding reset tokens.
+- Removed self-service forgot/reset routes from the frontend and directs users to their administrator.
+- Hardened legacy forgot/reset-password APIs with validated email, one-hour one-use tokens, and session invalidation.
 - Removed Google and Facebook login UI, OAuth endpoints, provider configuration, and deployment setup.
 - Replaced login/register screens with a responsive animated auth switch using the navy/gold palette and existing auth APIs.
 - Added Lucide React for authentication form icons.
 
 ## Next Steps
-- [ ] Test password-reset delivery to a known registered account and confirm the Resend sender/domain is verified.
+- [ ] Resolve production Pages `DEV_SECRET_PASS` binding (Wrangler lists it, but Function reports it missing) and verify reset safely.
+- [ ] Verify owner-driven password reset against an existing member account.
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
