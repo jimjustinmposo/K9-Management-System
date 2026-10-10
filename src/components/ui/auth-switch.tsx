@@ -196,8 +196,8 @@ export default function AuthSwitch({
         .auth-switch__panel-content { color: #fff; transition: transform .9s ease-in-out .6s; }
         .auth-switch__panel h2 { margin: 0 0 12px; color: #f1f3ed; font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 1.8rem; font-weight: 700; }
         .auth-switch__panel p { max-width: 310px; margin: 0 auto 22px; color: rgba(255, 255, 255, .76); font-size: .9rem; line-height: 1.65; }
-        .auth-switch__button--outline { margin: 0; border: 2px solid rgba(255, 255, 255, .82); background: transparent; }
-        .auth-switch__button--outline:hover:not(:disabled) { background: rgba(255, 255, 255, .1); box-shadow: none; }
+        .auth-switch__button--outline { margin: 0; border: 2px solid #fff; color: #fff; background: #26352b; cursor: pointer; }
+        .auth-switch__button--outline:hover:not(:disabled) { color: #101613; background: #fff; box-shadow: 0 4px 14px rgba(0, 0, 0, .22); }
         .auth-switch__panel--right .auth-switch__panel-content { transform: translateX(800px); }
         .auth-switch__container::before {
           content: "";
@@ -295,7 +295,13 @@ export default function AuthSwitch({
                 <input name="password" type="password" placeholder="Password" minLength={6} autoComplete="new-password" required />
               </AuthField>
               <p className="auth-switch__hint">Use at least 6 characters.</p>
-              {isSignUp && error && <p className="auth-switch__error" role="alert">{error}</p>}
+              {isSignUp && error && (
+                <p className="auth-switch__error" role="alert">
+                  {error}{error.toLowerCase().includes("already exists") && (
+                    <> <button type="button" className="auth-switch__link" onClick={() => switchMode("sign-in")}>Sign in to this account</button></>
+                  )}
+                </p>
+              )}
               <button className="auth-switch__button" disabled={saving}>
                 {saving ? "Creating…" : "Create account"}
               </button>
@@ -308,7 +314,7 @@ export default function AuthSwitch({
             <div className="auth-switch__panel-content">
               <h2>New to the unit?</h2>
               <p>Create your secure workspace and start managing your K9 operation in one place.</p>
-              <button type="button" className="auth-switch__button auth-switch__button--outline" onClick={() => switchMode("sign-up")}>Sign up</button>
+              <button type="button" className="auth-switch__button auth-switch__button--outline" onClick={() => switchMode("sign-up")}>Sign up — create account</button>
             </div>
           </section>
           <section className="auth-switch__panel auth-switch__panel--right">

@@ -2,6 +2,7 @@ import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'node:path'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from 'node:crypto'
 
 import siteConfiguration from './.figma/make/site.json'
@@ -54,7 +55,15 @@ react(),
 function devAuthApiPlugin(): Plugin {
   type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string }
   type DevPasswordReset = { email: string; expiresAt: number }
-  const users = new Map<string, DevUser>()
+  const usersFile = path.resolve(__dirname, '.tmp-dev-auth-users.json')
+  let savedUsers: DevUser[] = []
+  try {
+    if (existsSync(usersFile)) savedUsers = JSON.parse(readFileSync(usersFile, 'utf8')) as DevUser[]
+  } catch {
+    console.warn('[dev-auth] Could not read local test accounts; starting with an empty account list.')
+  }
+  const users = new Map<string, DevUser>(savedUsers.map(user => [user.email, user]))
+  const persistUsers = () => writeFileSync(usersFile, JSON.stringify([...users.values()], null, 2), { mode: 0o600 })
   const sessions = new Map<string, string>()
   const passwordResets = new Map<string, DevPasswordReset>()
   const encodePassword = (password: string) => {
@@ -109,6 +118,7 @@ function devAuthApiPlugin(): Plugin {
           const body = await readBody(); const password = String(body.password || '')
           if (password.length < 6) return send(400, { error: 'Password must be at least 6 characters' })
           target.password = encodePassword(password)
+          persistUsers()
           for (const [session, email] of sessions) if (email === target.email) sessions.delete(session)
           return send(200, { success: true, devMode: true })
         }
@@ -123,6 +133,7 @@ function devAuthApiPlugin(): Plugin {
           if (!body.name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 6) return send(400, { error: 'Name, valid email, and a password of at least 6 characters are required' })
           if (users.has(email)) return send(409, { error: 'An account with this email already exists' })
           users.set(email, { id: randomUUID(), email, name: String(body.name).trim(), workspaceName: String(body.workspaceName || `${body.name}'s K9 Unit`).trim(), password: encodePassword(password) })
+          persistUsers()
           const token = randomUUID(); sessions.set(token, email)
           return send(201, { success: true, devMode: true }, `sentinel_dev_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`)
         }
@@ -156,6 +167,7 @@ function devAuthApiPlugin(): Plugin {
           const user = users.get(reset.email)
           if (!user) return send(400, { error: 'This reset link is invalid or expired' })
           user.password = encodePassword(password)
+          persistUsers()
           passwordResets.delete(token)
           for (const [session, email] of sessions) if (email === reset.email) sessions.delete(session)
           return send(200, { success: true, devMode: true })
