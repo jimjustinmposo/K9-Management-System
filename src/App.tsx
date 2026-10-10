@@ -2,14 +2,12 @@ import { Navigate, Route, Routes } from "react-router-dom"
 import { ProtectedRoute } from "./lib/auth"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
 import ComingSoonPage from "./pages/ComingSoonPage"
-import DashboardPage from "./pages/DashboardPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import K9FormPage from "./pages/K9FormPage"
 import K9RosterPage from "./pages/K9RosterPage"
 import LoginPage from "./pages/LoginPage"
 import RegisterPage from "./pages/RegisterPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
-import TodaysTaskPage from "./pages/TodaysTaskPage"
 import TrainingPage from "./pages/TrainingPage"
 import UsersPage from "./pages/UsersPage"
 
@@ -27,7 +25,7 @@ export default function App() {
       <Route path="/subscribe" element={protectedPage(<SubscriptionPage />)} />
       <Route path="/subscription" element={protectedPage(<SubscriptionPage />)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
-      <Route path="/" element={protectedPage(<DashboardPage />)} />
+      <Route path="/" element={<Navigate to="/k9-roster" replace />} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />
       <Route
         path="/k9-roster/new"
@@ -54,7 +52,7 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/todays-task" element={protectedPage(<TodaysTaskPage />)} />
+      <Route path="/todays-task" element={<Navigate to="/k9-roster" replace />} />
       <Route
         path="/medical"
         element={protectedPage(<ComingSoonPage title="Medical" />)}
@@ -67,7 +65,7 @@ export default function App() {
         path="/reports"
         element={protectedPage(<ComingSoonPage title="Reports" />)}
       />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/k9-roster" replace />} />
     </Routes>
   )
 }

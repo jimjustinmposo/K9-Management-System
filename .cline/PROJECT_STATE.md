@@ -20,7 +20,7 @@
 - [x] Authentication UI and APIs (email/password)
 - [x] Owner-only user administration with manual member password reset and session invalidation
 - [x] Developer-secret password reset page and server-side password update
-- [x] Dashboard
+- [x] Dashboard removed; root and unknown routes redirect to K9 Roster
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
 - [ ] Medical, Handlers, Reports (ComingSoonPage)

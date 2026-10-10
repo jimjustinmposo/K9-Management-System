@@ -3,7 +3,6 @@ import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 
 export type IconName =
-  | "dashboard"
   | "dog"
   | "task"
   | "training"
@@ -23,14 +22,6 @@ export type IconName =
 
 export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, React.ReactNode> = {
-    dashboard: (
-      <>
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-      </>
-    ),
     dog: (
       <>
         <path d="M7 9.5 4 7V4l5 2h6l5-2v3l-3 2.5V15a5 5 0 0 1-10 0Z" />
@@ -153,9 +144,7 @@ export function SubscriptionStatusBar() {
 }
 
 const navItems: { label: string; to: string; icon: IconName }[] = [
-  { label: "Dashboard", to: "/", icon: "dashboard" },
   { label: "K9 Roster", to: "/k9-roster", icon: "dog" },
-  { label: "Today's Task", to: "/todays-task", icon: "task" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Medical", to: "/medical", icon: "heart" },
   { label: "Handlers", to: "/handlers", icon: "users" },
@@ -178,7 +167,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
       )}
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-y-auto bg-navy text-white transition-transform duration-300 lg:translate-x-0 ${mobileNav ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/k9-roster" className="flex items-center gap-3">
             <div className="grid size-9 place-items-center rounded-lg border border-gold/40 bg-gold/10 text-gold">
               <Icon name="shield" className="size-5" />
             </div>
