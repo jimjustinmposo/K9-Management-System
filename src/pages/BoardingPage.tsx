@@ -5,10 +5,6 @@ import { boardingApi } from "../lib/boardingApi";
 import { useAuth } from "../lib/auth";
 import { boardingDays, type BoardingRecord } from "../types/boarding";
 
-function statusClass(status: BoardingRecord["status"]): string {
-  return status === "Boarding" ? "bg-positive-soft text-positive" : "bg-canvas text-muted";
-}
-
 export default function BoardingPage() {
   const { session } = useAuth();
   const [records, setRecords] = useState<BoardingRecord[]>([]);
@@ -80,12 +76,12 @@ export default function BoardingPage() {
                 <td className="px-4 py-3"><span className="block text-xs font-bold">{record.ownerName}</span><span className="text-[11px] text-muted">{record.ownerPhone || "No phone"}</span></td>
                 <td className="px-4 py-3 text-xs font-semibold">{record.checkInDate}</td><td className="px-4 py-3 text-xs font-semibold">{record.checkOutDate || "—"}</td>
                 <td className="px-4 py-3 text-xs font-semibold">{boardingDays(record)} {boardingDays(record) === 1 ? "day" : "days"}</td>
-                <td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${statusClass(record.status)}`}>{record.status}</span></td>
+                <td className="px-4 py-3"><div className="flex flex-col gap-1.5"><label className="inline-flex items-center gap-1.5 text-[10px] font-semibold"><input type="checkbox" checked={record.status === "Boarding"} readOnly aria-label={`${record.k9.dogName} boarding`} className="size-3.5 accent-emerald-600" />Boarding</label><label className="inline-flex items-center gap-1.5 text-[10px] font-semibold"><input type="checkbox" checked={record.status === "Checked Out"} readOnly aria-label={`${record.k9.dogName} checked out`} className="size-3.5 accent-emerald-600" />Checked out</label></div></td>
                 <td className="px-4 py-3"><div className="flex justify-end gap-2">{session?.permissions.edit && <Link to={`/boarding/${record.id}/edit`} className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-bold text-info hover:bg-info-soft">Edit</Link>}{session?.permissions.delete && <button type="button" disabled={deletingId === record.id} onClick={() => void remove(record)} className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-bold text-danger hover:bg-danger-soft disabled:opacity-50">Delete</button>}</div></td>
               </tr>)}</tbody>
             </table></div>
             <div className="grid gap-3 p-4 md:hidden">{filtered.map((record) => <article key={record.id} className="rounded-xl border border-line p-4">
-              <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-extrabold">{record.k9.dogName}</p><p className="text-[11px] text-muted">{record.k9.breed || "K9"} · Owner: {record.ownerName}</p></div><span className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-extrabold ${statusClass(record.status)}`}>{record.status}</span></div>
+              <div className="flex items-start justify-between gap-3"><div><p className="text-sm font-extrabold">{record.k9.dogName}</p><p className="text-[11px] text-muted">{record.k9.breed || "K9"} · Owner: {record.ownerName}</p></div><div className="grid shrink-0 gap-1"><label className="inline-flex items-center gap-1.5 text-[10px] font-semibold"><input type="checkbox" checked={record.status === "Boarding"} readOnly aria-label={`${record.k9.dogName} boarding`} className="size-3.5 accent-emerald-600" />Boarding</label><label className="inline-flex items-center gap-1.5 text-[10px] font-semibold"><input type="checkbox" checked={record.status === "Checked Out"} readOnly aria-label={`${record.k9.dogName} checked out`} className="size-3.5 accent-emerald-600" />Checked out</label></div></div>
               <p className="mt-3 text-xs text-muted">{record.checkInDate} → {record.checkOutDate || "Still boarding"} · {boardingDays(record)} {boardingDays(record) === 1 ? "day" : "days"}</p>
               {record.ownerPhone && <p className="mt-1 text-xs text-muted">{record.ownerPhone}</p>}
               {(session?.permissions.edit || session?.permissions.delete) && <div className="mt-3 flex gap-2">{session?.permissions.edit && <Link to={`/boarding/${record.id}/edit`} className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-info">Edit</Link>}{session?.permissions.delete && <button type="button" onClick={() => void remove(record)} className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-danger">Delete</button>}</div>}
