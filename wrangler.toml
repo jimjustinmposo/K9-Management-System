@@ -1,16 +1,12 @@
 name = "martina-k9-management-system"
-compatibility_date = "2025-05-01"
 pages_build_output_dir = "dist"
+compatibility_date = "2025-05-01"
 
 [vars]
 APP_URL = "https://martina-k9-management-system.pages.dev"
 
-# Cloudflare Pages project. The D1 binding below is used by
-# `wrangler pages dev` for local development. For production,
-# also add the same binding in the Cloudflare dashboard:
-# Pages project > Settings > Functions > D1 database bindings > DB
 [[d1_databases]]
+database_id = "a67e5d3b-d14f-44b0-92c8-ee708c85a642"
 binding = "DB"
 database_name = "k9_ops_db"
-database_id = "a67e5d3b-d14f-44b0-92c8-ee708c85a642"
 migrations_dir = "migrations"

@@ -51,10 +51,10 @@
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
 - Production URL: `https://martina-k9-management-system.pages.dev`
 - Production Pages still has legacy encrypted `RESEND_API_KEY` and `RESEND_FROM_EMAIL` bindings; the active member reset workflow does not use email.
-- Wrangler lists encrypted `DEV_SECRET_PASS` in production, but the deployed reset Function currently returns 503 as if the binding were unavailable; reset is blocked pending binding verification.
+- Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
-- Deployed clickable developer-secret password reset flow with password confirmation and visibility controls; production endpoint binding currently needs verification.
+- Fixed Pages production configuration and redeployed the developer-secret reset flow; invalid-secret production probe correctly returns 403.
 - Deployed owner-only Users page and manual member password reset; resets invalidate the member's sessions and outstanding reset tokens.
 - Removed self-service forgot/reset routes from the frontend and directs users to their administrator.
 - Hardened legacy forgot/reset-password APIs with validated email, one-hour one-use tokens, and session invalidation.
@@ -63,7 +63,7 @@
 - Added Lucide React for authentication form icons.
 
 ## Next Steps
-- [ ] Resolve production Pages `DEV_SECRET_PASS` binding (Wrangler lists it, but Function reports it missing) and verify reset safely.
+- [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
