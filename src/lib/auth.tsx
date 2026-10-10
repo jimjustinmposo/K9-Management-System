@@ -117,6 +117,14 @@ export async function apiRequest(path: string, init?: RequestInit) {
     },
   })
   const data = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(data.error || "Request failed")
+  if (!response.ok) {
+    const message =
+      typeof data.error === "string"
+        ? data.error
+        : typeof data.error?.message === "string"
+          ? data.error.message
+          : "Request failed"
+    throw new Error(message)
+  }
   return data
 }

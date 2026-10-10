@@ -2,9 +2,12 @@ import { hashPassword, hashToken, type AppEnv } from "../../_lib/auth"
 import { clean, json } from "../../_lib/http"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
-  const body = (await context.request.json()) as any
+  const body = (await context.request.json()) as {
+    token?: unknown
+    password?: unknown
+  }
   const token = clean(body.token)
-  const password = String(body.password ?? "")
+  const password = typeof body.password === "string" ? body.password : ""
   if (!token || password.length < 6)
     return json(
       {
@@ -34,6 +37,11 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     .run()
   await context.env.DB.prepare("DELETE FROM sessions WHERE user_id=?")
     .bind(reset.user_id)
+    .run()
+  await context.env.DB.prepare(
+    "DELETE FROM password_resets WHERE user_id=? AND id<>?",
+  )
+    .bind(reset.user_id, reset.id)
     .run()
   return json({ success: true })
 }

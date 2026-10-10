@@ -36,6 +36,7 @@
 - GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
 - GET/POST `/api/training/types`
 - GET/POST `/api/training/goals` (filter: k9_id, status)
+- POST `/api/auth/forgot-password`, POST `/api/auth/reset-password`
 
 ## Important Decisions
 - Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
@@ -45,17 +46,19 @@
 ## Environment
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
 - Production URL: `https://martina-k9-management-system.pages.dev`
-- Password reset and invitation emails require `RESEND_API_KEY` and `RESEND_FROM_EMAIL`; local Vite auth exposes a development-only reset link instead of sending email.
+- Production Pages has encrypted `RESEND_API_KEY` and `RESEND_FROM_EMAIL` bindings; `APP_URL` is configured in `wrangler.toml`.
+- Local Vite auth exposes a development-only reset link instead of sending email.
 
 ## Recent Changes
-- Added working forgot/reset-password behavior to the Vite development auth bridge and made production email-delivery failures visible to users.
+- Hardened and deployed forgot/reset-password: validated email, single active one-hour token, one-use cleanup, confirmation field, invalid-link state, and loading states.
+- Added production Pages `RESEND_API_KEY` and `RESEND_FROM_EMAIL` encrypted bindings; production forgot-password configuration check returns 200.
 - Removed Google and Facebook login UI, OAuth endpoints, provider configuration, and deployment setup.
 - Replaced login/register screens with a responsive animated auth switch using the navy/gold palette and existing auth APIs.
 - Added Lucide React for authentication form icons.
-- Added Paddle billing migration, authenticated transaction/portal endpoints, signed webhook synchronization, and frontend checkout/portal flow.
 
 ## Next Steps
-- [ ] Configure required Paddle production Pages secrets/variables, then complete Sandbox checkout and webhook round-trip; verify Resend credential rotation separately. Do not enable live payments without approval.
+- [ ] Test password-reset delivery to a known registered account and confirm the Resend sender/domain is verified.
+- [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
 - Add edit/delete for sessions and goals; assessment scoring UI per session
 - Medical module
 

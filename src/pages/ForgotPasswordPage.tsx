@@ -6,6 +6,7 @@ export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("")
   const [error, setError] = useState("")
   const [resetUrl, setResetUrl] = useState("")
+  const [sending, setSending] = useState(false)
   return (
     <AuthLayout
       title="Reset your password"
@@ -18,6 +19,7 @@ export default function ForgotPasswordPage() {
           setError("")
           setMessage("")
           setResetUrl("")
+          setSending(true)
           try {
             const f = new FormData(e.currentTarget)
             const data = await apiRequest("/api/auth/forgot-password", {
@@ -28,6 +30,8 @@ export default function ForgotPasswordPage() {
             setResetUrl(typeof data.resetUrl === "string" ? data.resetUrl : "")
           } catch (err) {
             setError(err instanceof Error ? err.message : "Request failed")
+          } finally {
+            setSending(false)
           }
         }}
       >
@@ -42,7 +46,9 @@ export default function ForgotPasswordPage() {
           </Link>
         )}
         {error && <p className="text-xs text-danger">{error}</p>}
-        <button className={primaryButton}>Send reset link</button>
+        <button className={primaryButton} disabled={sending}>
+          {sending ? "Sending…" : "Send reset link"}
+        </button>
       </form>
       <Link
         to="/login"
