@@ -17,18 +17,18 @@ export default function AuthLayout({
           <img
             src="/logo.png"
             alt="K9 Management System logo"
-            className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-black/5 sm:size-[4.5rem]"
+            className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-white/10 sm:size-[4.5rem]"
           />
           <span>
             <span className="block text-xs font-extrabold uppercase tracking-[0.18em] text-gold sm:text-sm">
               K9 MANAGEMENT
             </span>
-            <span className="block text-lg font-black tracking-wide text-navy sm:text-xl">
+            <span className="block text-lg font-black tracking-wide text-ink sm:text-xl">
               SYSTEM
             </span>
           </span>
         </Link>
-        <section className="rounded-2xl border border-line bg-surface p-7 shadow-[0_20px_60px_rgba(19,38,45,.08)]">
+        <section className="rounded-2xl border border-line bg-surface p-7 shadow-action">
           <h1 className="text-2xl font-black tracking-tight">{title}</h1>
           <p className="mt-2 text-sm leading-6 text-muted">{subtitle}</p>
           {children}
@@ -39,6 +39,6 @@ export default function AuthLayout({
 }
 
 export const authInput =
-  "mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none focus:border-navy"
+  "mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-medium text-ink outline-none placeholder:text-muted/70 focus:border-gold"
 export const primaryButton =
   "w-full rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-action transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-60"

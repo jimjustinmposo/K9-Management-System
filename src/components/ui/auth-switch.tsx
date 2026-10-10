@@ -69,10 +69,10 @@ export default function AuthSwitch({
         .auth-switch,
         .auth-switch * { box-sizing: border-box; }
         .auth-switch {
-          --auth-dark: #13262d;
-          --auth-mid: #1d3a43;
-          --auth-accent: #d7ad58;
-          --auth-canvas: #eef2f1;
+          --auth-dark: #151d18;
+          --auth-mid: #26352b;
+          --auth-accent: #d0b47b;
+          --auth-canvas: #101613;
           min-height: 100vh;
           width: 100%;
           display: flex;
@@ -81,8 +81,8 @@ export default function AuthSwitch({
           padding: 20px;
           overflow: hidden;
           background:
-            radial-gradient(circle at 12% 15%, rgba(215, 173, 88, .16), transparent 28%),
-            linear-gradient(135deg, #0d1d22 0%, var(--auth-dark) 48%, var(--auth-mid) 100%);
+            radial-gradient(circle at 12% 15%, rgba(208, 180, 123, .12), transparent 28%),
+            linear-gradient(135deg, #101613 0%, var(--auth-dark) 48%, var(--auth-mid) 100%);
         }
         .auth-switch__container {
           position: relative;
@@ -92,8 +92,8 @@ export default function AuthSwitch({
           overflow: hidden;
           border: 1px solid rgba(255, 255, 255, .18);
           border-radius: 24px;
-          background: #fff;
-          box-shadow: 0 30px 80px rgba(3, 15, 19, .38);
+          background: #1d2722;
+          box-shadow: 0 30px 80px rgba(0, 0, 0, .42);
         }
         .auth-switch__forms,
         .auth-switch__panels { position: absolute; inset: 0; }
@@ -130,9 +130,9 @@ export default function AuthSwitch({
           background: #fff;
           box-shadow: 0 5px 18px rgba(19, 38, 45, .12);
         }
-        .auth-switch__brand-copy { color: var(--auth-dark); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-        .auth-switch__title { margin: 0 0 6px; color: var(--auth-dark); font-size: 2rem; font-weight: 800; letter-spacing: -.035em; }
-        .auth-switch__subtitle { margin: 0 0 16px; color: #68777c; font-size: .82rem; text-align: center; }
+        .auth-switch__brand-copy { color: #f1f3ed; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .auth-switch__title { margin: 0 0 6px; color: #f1f3ed; font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: .01em; }
+        .auth-switch__subtitle { margin: 0 0 16px; color: #a7b3aa; font-size: .82rem; text-align: center; }
         .auth-switch__field {
           display: grid;
           grid-template-columns: 48px 1fr;
@@ -140,17 +140,17 @@ export default function AuthSwitch({
           width: 100%;
           height: 52px;
           margin: 7px 0;
-          border: 1px solid transparent;
+          border: 1px solid #344139;
           border-radius: 14px;
           background: var(--auth-canvas);
           transition: border-color .2s, box-shadow .2s, background .2s;
         }
         .auth-switch__field:focus-within {
-          border-color: var(--auth-mid);
-          background: #fff;
-          box-shadow: 0 0 0 3px rgba(19, 38, 45, .1);
+          border-color: var(--auth-accent);
+          background: #101613;
+          box-shadow: 0 0 0 3px rgba(208, 180, 123, .18);
         }
-        .auth-switch__field-icon { display: grid; place-items: center; color: #6c7b80; }
+        .auth-switch__field-icon { display: grid; place-items: center; color: #a7b3aa; }
         .auth-switch__field input {
           width: 100%;
           height: 100%;
@@ -158,11 +158,11 @@ export default function AuthSwitch({
           border: 0;
           outline: 0;
           background: transparent;
-          color: #172127;
+          color: #f1f3ed;
           font-size: .9rem;
           font-weight: 600;
         }
-        .auth-switch__field input::placeholder { color: #8b989c; font-weight: 500; }
+        .auth-switch__field input::placeholder { color: #a7b3aa; font-weight: 500; }
         .auth-switch__button {
           min-width: 154px;
           height: 48px;
@@ -170,26 +170,31 @@ export default function AuthSwitch({
           padding: 0 24px;
           border: 0;
           border-radius: 999px;
-          background: var(--auth-dark);
-          color: #fff;
+          color: #101613;
+          background: var(--auth-accent);
           font-size: .78rem;
           font-weight: 800;
           letter-spacing: .08em;
           text-transform: uppercase;
           transition: transform .2s, background .2s, box-shadow .2s;
         }
-        .auth-switch__button:hover:not(:disabled) { transform: translateY(-2px); background: var(--auth-mid); box-shadow: 0 8px 20px rgba(19, 38, 45, .24); }
+        .auth-switch__button:hover:not(:disabled) { transform: translateY(-1px); background: #dfc997; box-shadow: 0 8px 20px rgba(0, 0, 0, .24); }
         .auth-switch__button:disabled { cursor: not-allowed; opacity: .6; }
-        .auth-switch__link { margin-top: 14px; color: #416773; font-size: .75rem; font-weight: 700; text-decoration: none; }
+        .auth-switch__button:focus-visible,
+        .auth-switch__link:focus-visible {
+          outline: 3px solid #d0b47b;
+          outline-offset: 3px;
+        }
+        .auth-switch__link { margin-top: 14px; color: #d0b47b; font-size: .75rem; font-weight: 700; text-decoration: none; }
         .auth-switch__link:hover { text-decoration: underline; }
-        .auth-switch__error { width: 100%; margin: 8px 0 0; color: #a93e38; font-size: .72rem; font-weight: 700; text-align: center; }
-        .auth-switch__hint { margin: 8px 0 0; color: #7c898d; font-size: .68rem; }
+        .auth-switch__error { width: 100%; margin: 8px 0 0; color: #d27a68; font-size: .72rem; font-weight: 700; text-align: center; }
+        .auth-switch__hint { margin: 8px 0 0; color: #a7b3aa; font-size: .68rem; }
         .auth-switch__panels { z-index: 6; display: grid; grid-template-columns: repeat(2, 1fr); pointer-events: none; }
         .auth-switch__panel { display: flex; align-items: flex-end; justify-content: space-around; flex-direction: column; text-align: center; }
         .auth-switch__panel--left { padding: 3rem 17% 3rem 10%; pointer-events: auto; }
         .auth-switch__panel--right { padding: 3rem 10% 3rem 17%; }
         .auth-switch__panel-content { color: #fff; transition: transform .9s ease-in-out .6s; }
-        .auth-switch__panel h2 { margin: 0 0 12px; font-size: 1.65rem; font-weight: 800; }
+        .auth-switch__panel h2 { margin: 0 0 12px; color: #f1f3ed; font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 1.8rem; font-weight: 700; }
         .auth-switch__panel p { max-width: 310px; margin: 0 auto 22px; color: rgba(255, 255, 255, .76); font-size: .9rem; line-height: 1.65; }
         .auth-switch__button--outline { margin: 0; border: 2px solid rgba(255, 255, 255, .82); background: transparent; }
         .auth-switch__button--outline:hover:not(:disabled) { background: rgba(255, 255, 255, .1); box-shadow: none; }
@@ -204,9 +209,9 @@ export default function AuthSwitch({
           height: 2000px;
           border-radius: 50%;
           transform: translateY(-50%);
-          background:
-            radial-gradient(circle at 64% 68%, rgba(215, 173, 88, .2), transparent 18%),
-            linear-gradient(-45deg, #0e2026 0%, var(--auth-dark) 55%, #214550 100%);
+            background:
+            radial-gradient(circle at 64% 68%, rgba(208, 180, 123, .16), transparent 18%),
+            linear-gradient(-45deg, #101613 0%, var(--auth-dark) 55%, #354638 100%);
           transition: 1.8s ease-in-out;
         }
         .auth-switch__container--signup::before { right: 52%; transform: translate(100%, -50%); }

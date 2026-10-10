@@ -113,7 +113,7 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
 }
 
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <section className={`rounded-2xl border border-line bg-surface ${className}`}>{children}</section>;
+  return <section className={`rounded-xl border border-line bg-surface shadow-filter ${className}`}>{children}</section>;
 }
 
 export function PanelHeader({ eyebrow, title, action }: { eyebrow?: string; title: string; action?: ReactNode }) {
@@ -121,7 +121,7 @@ export function PanelHeader({ eyebrow, title, action }: { eyebrow?: string; titl
     <div className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
       <div>
         {eyebrow && <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-muted">{eyebrow}</p>}
-        <h2 className="text-base font-extrabold tracking-tight text-ink">{title}</h2>
+        <h2 className="font-sans text-base font-semibold tracking-tight text-ink">{title}</h2>
       </div>
       {action}
     </div>
@@ -176,14 +176,14 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
         <button type="button" aria-label="Close menu"
           className="fixed inset-0 z-30 bg-navy/60 lg:hidden" onClick={() => setMobileNav(false)} />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-navy text-white transition-transform duration-300 lg:translate-x-0 ${mobileNav ? "translate-x-0" : "-translate-x-full"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-y-auto bg-navy text-white transition-transform duration-300 lg:translate-x-0 ${mobileNav ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
           <Link to="/" className="flex items-center gap-3">
             <div className="grid size-9 place-items-center rounded-lg border border-gold/40 bg-gold/10 text-gold">
               <Icon name="shield" className="size-5" />
             </div>
             <div>
-              <p className="text-sm font-extrabold tracking-wide text-white">Martina's K9 System</p>
+              <p className="font-rajdhani text-lg font-bold tracking-wide text-white">Martina's K9 System</p>
             </div>
           </Link>
           <button type="button" aria-label="Close navigation" onClick={() => setMobileNav(false)} className="text-white/60 lg:hidden">
@@ -198,7 +198,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
                 onClick={() => setMobileNav(false)}
                 className={({ isActive }) =>
                   `flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                    isActive ? "bg-gold text-navy shadow-nav" : "text-white/60 hover:bg-white/6 hover:text-white"
+                    isActive ? "bg-gold/15 text-gold shadow-nav ring-1 ring-inset ring-gold/25" : "text-white/65 hover:bg-white/6 hover:text-white"
                   }`
                 }>
                 <Icon name={item.icon} className="size-[18px]" />
@@ -223,7 +223,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
         </div>
       </aside>
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-line bg-surface/95 px-4 backdrop-blur md:px-7 lg:px-8">
+        <header className="sticky top-0 z-20 flex h-20 items-center justify-between border-b border-line bg-canvas/95 px-4 backdrop-blur md:px-7 lg:px-8">
           <div className="flex items-center gap-3">
             <button type="button" aria-label="Open navigation" onClick={() => setMobileNav(true)}
               className="grid size-10 place-items-center rounded-lg border border-line text-muted lg:hidden">
@@ -231,7 +231,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             </button>
             <div>
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">MUSSAFAH K9 OPERATION</p>
-              <h1 className="mt-0.5 text-xl font-extrabold tracking-tight md:text-2xl">{title}</h1>
+              <h1 className="mt-0.5 font-rajdhani text-2xl font-bold tracking-wide text-ink md:text-3xl">{title}</h1>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <p className="text-sm font-semibold text-ink">{session?.user.name}</p>
               <p className="text-xs capitalize text-muted">{session?.role}</p>
             </div>
-            <div className="grid size-9 place-items-center rounded-full bg-navy text-xs font-bold text-white" aria-hidden="true">
+            <div className="grid size-9 place-items-center rounded-full border border-olive/40 bg-olive/15 font-mono text-xs font-semibold text-olive" aria-hidden="true">
               {session?.user.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}
             </div>
             <SubscriptionStatusBar />
