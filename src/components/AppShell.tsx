@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth";
 
 export type IconName =
   | "dog"
+  | "boarding"
   | "task"
   | "training"
   | "heart"
@@ -26,6 +27,12 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
       <>
         <path d="M7 9.5 4 7V4l5 2h6l5-2v3l-3 2.5V15a5 5 0 0 1-10 0Z" />
         <path d="M9.5 13h.01M14.5 13h.01M10 17h4M12 15v2" />
+      </>
+    ),
+    boarding: (
+      <>
+        <path d="M3 11 12 4l9 7" />
+        <path d="M5 10v10h14V10M9 20v-6h6v6" />
       </>
     ),
     task: (
@@ -145,6 +152,7 @@ export function SubscriptionStatusBar() {
 
 const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "K9 Roster", to: "/k9-roster", icon: "dog" },
+  { label: "Boarding", to: "/boarding", icon: "boarding" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Medical", to: "/medical", icon: "heart" },
   { label: "Handlers", to: "/handlers", icon: "users" },

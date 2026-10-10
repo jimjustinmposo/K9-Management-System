@@ -3,7 +3,7 @@
 ## Project
 - Name: Martina's K9 System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
-- Status: K9 Roster + Training modules live; other modules coming soon
+- Status: K9 Roster, Training, and Boarding modules implemented; Medical, Handlers, and Reports coming soon
 
 ## Current Stack
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
@@ -24,6 +24,7 @@
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
+- [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
 - [ ] Medical, Handlers, Reports (ComingSoonPage)
 
@@ -34,9 +35,11 @@
 - `training_sessions` — FK `k9_id` → k9_roster (CASCADE), FK training_type_id → training_types
 - `training_assessments` — per-session criterion scores, UNIQUE(session_id, criterion_id)
 - `training_goals` — FK `k9_id` → k9_roster, optional training_type_id/criterion_id
+- `boarding_records` — workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
+- GET/POST `/api/boarding`, GET/PUT/DELETE `/api/boarding/:id`; writes validate that the selected K9 belongs to the same workspace
 - GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
 - GET/POST `/api/training/types`
 - GET/POST `/api/training/goals` (filter: k9_id, status)
@@ -67,6 +70,7 @@
 - Added Lucide React for authentication form icons.
 
 ## Next Steps
+- Apply migration `0013_boarding.sql` to the Cloudflare D1 databases before using the deployed boarding API.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.

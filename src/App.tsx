@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { ProtectedRoute } from "./lib/auth"
+import BoardingFormPage from "./pages/BoardingFormPage"
+import BoardingPage from "./pages/BoardingPage"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
 import ComingSoonPage from "./pages/ComingSoonPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
@@ -44,6 +46,23 @@ export default function App() {
         }
       />
       <Route path="/training" element={protectedPage(<TrainingPage />)} />
+      <Route path="/boarding" element={protectedPage(<BoardingPage />)} />
+      <Route
+        path="/boarding/new"
+        element={
+          <ProtectedRoute requireWritable>
+            <BoardingFormPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/boarding/:id/edit"
+        element={
+          <ProtectedRoute owner requireWritable>
+            <BoardingFormPage />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/users"
         element={
