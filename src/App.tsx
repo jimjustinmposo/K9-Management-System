@@ -12,6 +12,10 @@ import RegisterPage from "./pages/RegisterPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import TrainingPage from "./pages/TrainingPage"
 import UsersPage from "./pages/UsersPage"
+import MedicalFormPage from "./pages/MedicalFormPage"
+import { MedicalHomePage, MedicalListPage } from "./pages/MedicalPages"
+import HandlerFormPage from "./pages/HandlerFormPage"
+import HandlersPage from "./pages/HandlersPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -72,14 +76,19 @@ export default function App() {
         }
       />
       <Route path="/todays-task" element={<Navigate to="/k9-roster" replace />} />
-      <Route
-        path="/medical"
-        element={protectedPage(<ComingSoonPage title="Medical" />)}
-      />
-      <Route
-        path="/handlers"
-        element={protectedPage(<ComingSoonPage title="Handlers" />)}
-      />
+      <Route path="/medical" element={protectedPage(<MedicalHomePage />)} />
+      <Route path="/medical/medications" element={protectedPage(<MedicalListPage kind="medications" />)} />
+      <Route path="/medical/medications/new" element={<ProtectedRoute requireWritable><MedicalFormPage kind="medications" /></ProtectedRoute>} />
+      <Route path="/medical/medications/:id/edit" element={<ProtectedRoute owner requireWritable><MedicalFormPage kind="medications" /></ProtectedRoute>} />
+      <Route path="/medical/records" element={protectedPage(<MedicalListPage kind="records" />)} />
+      <Route path="/medical/records/new" element={<ProtectedRoute requireWritable><MedicalFormPage kind="records" /></ProtectedRoute>} />
+      <Route path="/medical/records/:id/edit" element={<ProtectedRoute owner requireWritable><MedicalFormPage kind="records" /></ProtectedRoute>} />
+      <Route path="/medical/conditions" element={protectedPage(<MedicalListPage kind="conditions" />)} />
+      <Route path="/medical/conditions/new" element={<ProtectedRoute requireWritable><MedicalFormPage kind="conditions" /></ProtectedRoute>} />
+      <Route path="/medical/conditions/:id/edit" element={<ProtectedRoute owner requireWritable><MedicalFormPage kind="conditions" /></ProtectedRoute>} />
+      <Route path="/handlers" element={protectedPage(<HandlersPage />)} />
+      <Route path="/handlers/new" element={<ProtectedRoute requireWritable><HandlerFormPage /></ProtectedRoute>} />
+      <Route path="/handlers/:id/edit" element={<ProtectedRoute owner requireWritable><HandlerFormPage /></ProtectedRoute>} />
       <Route
         path="/reports"
         element={protectedPage(<ComingSoonPage title="Reports" />)}

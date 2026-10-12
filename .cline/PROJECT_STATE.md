@@ -3,7 +3,7 @@
 ## Project
 - Name: Martina's K9 System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
-- Status: K9 Roster, Training, and Boarding modules implemented; Medical, Handlers, and Reports coming soon
+- Status: K9 Roster, Training, Boarding, Medical, and Handlers modules implemented; Reports coming soon
 
 ## Current Stack
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
@@ -27,7 +27,9 @@
 - [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes, daily rate/currency and checked-out total)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
-- [ ] Medical, Handlers, Reports (ComingSoonPage)
+- [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
+- [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
+- [ ] Reports (ComingSoonPage)
 
 ## Database
 - `k9_roster` — K9 records (id, dog_name, breed, status, microchip, lineage...)
@@ -38,10 +40,14 @@
 - `training_goals` — FK `k9_id` → k9_roster, optional training_type_id/criterion_id
 - `boarding_records` — workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
 - Boarding pricing columns (`currency`, `price_per_day`, `total_amount`) are added by migration `0014_boarding_pricing.sql`; checked-out totals are calculated server-side.
+- `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` — workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
+- `k9_handlers` — workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
 - GET/POST `/api/boarding`, GET/PUT/DELETE `/api/boarding/:id`; writes validate that the selected K9 belongs to the same workspace
+- GET/POST `/api/medical/{medications,records,conditions}`, GET/PUT/DELETE `/api/medical/{medications,records,conditions}/:id`; writes are workspace-scoped and validate related K9/medication ownership.
+- GET/POST `/api/handlers`, GET/PUT/DELETE `/api/handlers/:id`; handler records and searches are workspace-scoped.
 - GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
 - GET/POST `/api/training/types`
 - GET/POST `/api/training/goals` (filter: k9_id, status)
@@ -50,6 +56,9 @@
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
+- Local database testing uses `wrangler pages dev` + local D1 persisted under `.wrangler/state`; Vite-only `pnpm dev` uses the localStorage/API fallback.
+- Local Pages development uses port `8790` because `8788` is occupied in the current environment.
+- Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
 - Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
 - Readiness scoring (GREEN/YELLOW/RED) computed client-side in `src/types/training.ts` `calculateReadiness()`
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
@@ -63,6 +72,9 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added handler directory and workspace-scoped CRUD; migration `0016_handlers.sql` applied to local D1 only.
+- Added local Pages/D1 workflow scripts and a local-only full subscription access flag; deployed payment enforcement remains active.
+- Added medical overview, medication formulary, K9 treatment records and condition history with workspace-scoped CRUD; migration `0015_medical.sql` is pending application.
 - Added boarding daily price/currency and persisted checkout totals (migration `0014_boarding_pricing.sql`).
 - Added persisted light/dark themes and updated login/sidebar branding assets
 - Local Vite auth now grants active subscription permissions for feature testing without changing deployed Cloudflare behavior.
@@ -86,3 +98,4 @@
 ## Known Limitations
 - Training types list falls back to localStorage if API unreachable (seeded types won't appear offline until fetched once)
 - No PUT/DELETE endpoints for training sessions/goals yet
+

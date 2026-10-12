@@ -1,0 +1,13 @@
+[1mdiff --git a/src/components/AppShell.tsx b/src/components/AppShell.tsx[m
+[1mindex ea5ec80..b02c346 100644[m
+[1m--- a/src/components/AppShell.tsx[m
+[1m+++ b/src/components/AppShell.tsx[m
+[36m@@ -228,7 +228,7 @@[m [mexport function AppShell({ title, children }: { title: string; children: ReactNo[m
+               <Icon name="menu" />[m
+             </button>[m
+             <div>[m
+[31m-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">MUSSAFAH K9 OPERATION</p>[m
+[32m+[m[32m              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">K9 Managent System</p>[m
+               <h1 className="mt-0.5 font-rajdhani text-2xl font-bold tracking-wide text-ink md:text-3xl">{title}</h1>[m
+             </div>[m
+           </div>[m

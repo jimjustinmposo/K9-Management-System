@@ -2,6 +2,7 @@ import { json } from "./http"
 
 export interface AppEnv {
   DB: D1Database
+  LOCAL_DEV_FULL_ACCESS?: string
   DEV_SECRET_PASS?: string
   RESEND_API_KEY?: string
   RESEND_FROM_EMAIL?: string
@@ -140,6 +141,7 @@ export const clearSessionCookie =
 export async function getSession(
   request: Request,
   db: D1Database,
+  localDevFullAccess = false,
 ): Promise<SessionInfo | null> {
   const token = cookie(request, "sentinel_session")
   if (!token) return null
@@ -152,21 +154,25 @@ export async function getSession(
     .first<any>()
   if (!row) return null
   const subscriptionStatus = String(row.subscription_status ?? "").toLowerCase()
-  const hasSubscription = subscriptionStatus === "active"
+  const hasSubscription = localDevFullAccess || subscriptionStatus === "active"
   const periodEnd = row.current_period_end
     ? new Date(row.current_period_end).getTime()
     : null
   const periodIsCurrent = periodEnd !== null && periodEnd > Date.now()
-  const writable = hasSubscription && (periodEnd === null || periodIsCurrent)
+  const writable =
+    localDevFullAccess ||
+    (hasSubscription && (periodEnd === null || periodIsCurrent))
   const owner = row.role === "owner"
   return {
     user: { id: row.user_id, email: row.email, name: row.user_name },
     workspace: { id: row.workspace_id, name: row.workspace_name },
     role: row.role,
     subscription: {
-      status: row.subscription_status,
+      status: localDevFullAccess ? "active" : row.subscription_status,
       interval: row.billing_interval,
-      currentPeriodEnd: row.current_period_end,
+      currentPeriodEnd: localDevFullAccess
+        ? null
+        : row.current_period_end,
       writable,
       hasSubscription,
     },
@@ -186,7 +192,11 @@ export async function requireSession(
   context: PagesFunctionContext<AppEnv>,
   permission?: keyof SessionInfo["permissions"],
 ): Promise<SessionInfo | Response> {
-  const session = await getSession(context.request, context.env.DB)
+  const session = await getSession(
+    context.request,
+    context.env.DB,
+    context.env.LOCAL_DEV_FULL_ACCESS === "true",
+  )
   if (!session) return json({ error: "Authentication required" }, 401)
   if (permission && !session.permissions[permission])
     return json(

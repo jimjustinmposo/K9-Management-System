@@ -6,9 +6,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:pages": "node scripts/dev-pages.mjs",
     "build": "vite build",
+    "build:watch": "vite build --watch",
     "typecheck": "tsc --noEmit && tsc -p functions/tsconfig.json",
     "preview": "vite preview",
+    "pages:dev": "wrangler pages dev --port 8790",
+    "db:migrate:local": "wrangler d1 migrations apply k9_ops_db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply k9_ops_db --remote",
+    "db:seed:local": "wrangler d1 execute k9_ops_db --local --file scripts/seed-local-subscription.sql",
+    "db:reset:local": "node -e \"require('node:fs').rmSync('.wrangler/state', { recursive: true, force: true })\"",
     "format": "oxfmt"
   },
   "dependencies": {

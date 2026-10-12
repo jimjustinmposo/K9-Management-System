@@ -228,7 +228,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
               <Icon name="menu" />
             </button>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">MUSSAFAH K9 OPERATION</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted">K9 Managent System</p>
               <h1 className="mt-0.5 font-rajdhani text-2xl font-bold tracking-wide text-ink md:text-3xl">{title}</h1>
             </div>
           </div>
