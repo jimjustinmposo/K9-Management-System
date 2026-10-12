@@ -24,8 +24,9 @@
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters)
-- [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes)
+- [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes, daily rate/currency and checked-out total)
 - [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
+- [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [ ] Medical, Handlers, Reports (ComingSoonPage)
 
 ## Database
@@ -36,6 +37,7 @@
 - `training_assessments` — per-session criterion scores, UNIQUE(session_id, criterion_id)
 - `training_goals` — FK `k9_id` → k9_roster, optional training_type_id/criterion_id
 - `boarding_records` — workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
+- Boarding pricing columns (`currency`, `price_per_day`, `total_amount`) are added by migration `0014_boarding_pricing.sql`; checked-out totals are calculated server-side.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -51,6 +53,8 @@
 - Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
 - Readiness scoring (GREEN/YELLOW/RED) computed client-side in `src/types/training.ts` `calculateReadiness()`
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
+- Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
+- Branding assets: `/logo.jpg` for the logo mark and `/Caninelogy.png` for the wordmark
 
 ## Environment
 - Cloudflare D1 database `k9_ops_db` is bound to Pages Functions as `DB`.
@@ -59,6 +63,8 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added boarding daily price/currency and persisted checkout totals (migration `0014_boarding_pricing.sql`).
+- Added persisted light/dark themes and updated login/sidebar branding assets
 - Local Vite auth now grants active subscription permissions for feature testing without changing deployed Cloudflare behavior.
 - Improved signup panel button contrast and local-test account sign-in flow; local Vite accounts persist across restarts.
 - Fixed Pages production configuration and redeployed the developer-secret reset flow; invalid-secret production probe correctly returns 403.

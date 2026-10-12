@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import type { ReactNode } from "react"
+import ThemeToggle from "./ThemeToggle"
 
 export default function AuthLayout({
   title,
@@ -11,7 +12,8 @@ export default function AuthLayout({
   children: ReactNode
 }) {
   return (
-    <main className="grid min-h-screen place-items-center bg-canvas p-4">
+    <main className="relative grid min-h-screen place-items-center bg-canvas p-4">
+      <ThemeToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
         <Link to="/" className="mb-7 flex items-center justify-center gap-4">
           <img

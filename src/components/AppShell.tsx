@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/auth";
+import ThemeToggle from "./ThemeToggle";
 
 export type IconName =
   | "dog"
@@ -176,11 +177,11 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col overflow-y-auto bg-navy text-white transition-transform duration-300 lg:translate-x-0 ${mobileNav ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-20 items-center justify-between border-b border-white/10 px-6">
           <Link to="/k9-roster" className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-lg border border-gold/40 bg-gold/10 text-gold">
-              <Icon name="shield" className="size-5" />
+            <div className="grid size-9 place-items-center overflow-hidden rounded-lg border border-gold/40 bg-white/5">
+              <img src="/logo.jpg" alt="" className="size-full object-cover" />
             </div>
             <div>
-              <p className="font-rajdhani text-lg font-bold tracking-wide text-white">Martina's K9 System</p>
+              <img src="/Caninelogy.png" alt="Caninelogy" className="h-10 max-w-36 object-contain object-left" />
             </div>
           </Link>
           <button type="button" aria-label="Close navigation" onClick={() => setMobileNav(false)} className="text-white/60 lg:hidden">
@@ -232,6 +233,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <div className="hidden text-right sm:block">
               <p className="text-sm font-semibold text-ink">{session?.user.name}</p>
               <p className="text-xs capitalize text-muted">{session?.role}</p>

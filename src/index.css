@@ -41,6 +41,43 @@
   --shadow-status: 0 0 0 4px rgb(130 156 112 / 0.16);
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-canvas: #f4f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #1d2922;
+  --color-muted: #68776d;
+  --color-slate: #526157;
+  --color-line: #dce4dd;
+  --color-line-strong: #bcc9bf;
+
+  --color-navy: #23372d;
+  --color-navy-light: #304b3c;
+  --color-gold: #95743b;
+  --color-olive: #526f4a;
+
+  --color-positive: #3f7044;
+  --color-positive-soft: #e6f1e5;
+  --color-warning: #8a6420;
+  --color-warning-soft: #f7efd9;
+  --color-danger: #a34638;
+  --color-danger-soft: #f8e8e4;
+  --color-info: #3c6b70;
+  --color-info-soft: #e4f0f0;
+  --color-violet: #69518a;
+  --color-violet-soft: #eee9f5;
+
+  --color-k9-one: #dce9e0;
+  --color-k9-two: #f0e7d5;
+  --color-k9-three: #f1dfda;
+  --color-k9-four: #e0e9df;
+
+  --shadow-nav: 0 8px 22px rgb(30 50 37 / 0.08);
+  --shadow-action: 0 7px 16px rgb(30 50 37 / 0.1);
+  --shadow-filter: 0 1px 4px rgb(30 50 37 / 0.07);
+  --shadow-status: 0 0 0 4px rgb(82 111 74 / 0.12);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -88,6 +125,29 @@ a:focus-visible {
     var(--color-positive) 0deg 295deg,
     var(--color-line) 295deg 360deg
   );
+}
+
+/* Apply to selected tabs, filters, and summary controls when selection matters. */
+.selection-active {
+  border-color: var(--color-positive) !important;
+  background-color: var(--color-positive-soft) !important;
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--color-positive) 38%, transparent),
+    0 0 22px color-mix(in srgb, var(--color-positive) 20%, transparent);
+}
+
+.selection-active-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background-color: var(--color-positive);
+  padding: 0.25rem 0.5rem;
+  color: var(--color-canvas);
+  font-size: 0.5625rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 ::-webkit-scrollbar {

@@ -27,6 +27,9 @@ function mapRow(row: any, dogs: K9Record[]): BoardingRecord {
     ownerPhone: row.owner_phone ?? row.ownerPhone ?? "",
     checkInDate: row.check_in_date ?? row.checkInDate ?? "",
     checkOutDate: row.check_out_date ?? row.checkOutDate ?? "",
+    currency: row.currency ?? "USD",
+    pricePerDay: Number(row.price_per_day ?? row.pricePerDay ?? 0),
+    totalAmount: row.total_amount == null && row.totalAmount == null ? null : Number(row.total_amount ?? row.totalAmount),
     status: row.status === "Checked Out" ? "Checked Out" : "Boarding",
     notes: row.notes ?? "", createdAt: row.created_at ?? row.createdAt ?? "",
     updatedAt: row.updated_at ?? row.updatedAt ?? "",
@@ -44,6 +47,7 @@ function payload(values: BoardingFormValues) {
   return {
     k9_id: values.k9Id, owner_name: values.ownerName.trim(), owner_phone: values.ownerPhone.trim(),
     check_in_date: values.checkInDate, check_out_date: values.checkOutDate,
+    currency: values.currency, price_per_day: values.pricePerDay,
     status: values.status, notes: values.notes.trim(),
   };
 }
@@ -94,7 +98,10 @@ export const boardingApi = {
       const dog = dogs.find((item) => item.id === values.k9Id);
       if (!dog) throw new Error("Register this dog in the K9 Roster first.");
       const now = new Date().toISOString();
-      const record: StoredRecord = { ...values, id: uid(), createdAt: now, updatedAt: now };
+      const totalAmount = values.status === "Checked Out" && values.checkOutDate
+        ? Math.round((Math.ceil((Date.parse(`${values.checkOutDate}T00:00:00Z`) - Date.parse(`${values.checkInDate}T00:00:00Z`)) / 86400000) + 1) * values.pricePerDay * 100) / 100
+        : null;
+      const record: StoredRecord = { ...values, totalAmount, id: uid(), createdAt: now, updatedAt: now };
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...readLocal(), record]));
       return mapRow(record, dogs);
     }
@@ -111,7 +118,7 @@ export const boardingApi = {
       const dogs = await k9Api.list();
       if (!dogs.some((item) => item.id === values.k9Id)) throw new Error("Register this dog in the K9 Roster first.");
       let updated: StoredRecord | undefined;
-      const records = readLocal().map((item) => item.id === id ? (updated = { ...item, ...values, updatedAt: new Date().toISOString() }) : item);
+      const records = readLocal().map((item) => item.id === id ? (updated = { ...item, ...values, totalAmount: values.status === "Checked Out" && values.checkOutDate ? Math.round((Math.ceil((Date.parse(`${values.checkOutDate}T00:00:00Z`) - Date.parse(`${values.checkInDate}T00:00:00Z`)) / 86400000) + 1) * values.pricePerDay * 100) / 100 : null, updatedAt: new Date().toISOString() }) : item);
       if (!updated) throw new Error("Boarding record not found.");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
       return mapRow(updated, dogs);

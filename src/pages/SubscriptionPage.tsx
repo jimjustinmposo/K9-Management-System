@@ -137,7 +137,7 @@ export default function SubscriptionPage() {
                   onClick={() => setInterval(value)}
                   className={`relative min-h-[92px] rounded-xl border p-4 text-left transition ${
                     active
-                      ? "border-gold bg-navy text-white shadow-[0_0_0_2px_rgba(215,173,88,.35),0_8px_18px_rgba(19,38,45,.12)]"
+                      ? "selection-active text-ink"
                       : "border-line bg-surface text-ink hover:border-line-strong"
                   }`}
                 >
@@ -152,7 +152,7 @@ export default function SubscriptionPage() {
                     )}
                   </span>
                   {active && (
-                    <span className="absolute right-3 top-3 grid size-4 place-items-center rounded-full bg-gold text-[9px] font-black text-navy">✓</span>
+                    <span className="selection-active-badge absolute right-3 top-3">Selected</span>
                   )}
                   {value === "year" && !active && (
                       <span className="absolute right-2 top-3 rounded-full bg-positive-soft px-2 py-1 text-[7px] font-extrabold text-positive">SAVE 10%</span>

@@ -100,9 +100,9 @@ export default function K9RosterPage() {
           </label>
           <div className="flex flex-wrap gap-2">
             {["All", "Active", "In Training", "Medical Hold", "Retired", "Deceased"].map((status) => (
-              <button key={status} type="button" onClick={() => setStatusFilter(status)}
-                className={`rounded-lg px-3 py-2 text-[11px] font-extrabold transition ${
-                  statusFilter === status ? "bg-navy text-white" : "bg-canvas text-muted hover:text-ink"
+              <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}
+                className={`rounded-lg border px-3 py-2 text-[11px] font-extrabold transition ${
+                  statusFilter === status ? "selection-active text-ink" : "border-transparent bg-canvas text-muted hover:text-ink"
                 }`}>
                 {status}
               </button>

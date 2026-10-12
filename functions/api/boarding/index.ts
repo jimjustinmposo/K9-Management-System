@@ -2,6 +2,13 @@ import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { clean, json } from "../../_lib/http"
 
 const statuses = ["Boarding", "Checked Out"] as const
+const currencies = ["AED", "USD", "CAD", "EUR", "GBP", "AUD", "NZD"] as const
+
+function calculateTotal(checkInDate: string, checkOutDate: string, pricePerDay: number): number | null {
+  if (!checkOutDate) return null
+  const days = Math.ceil((Date.parse(`${checkOutDate}T00:00:00Z`) - Date.parse(`${checkInDate}T00:00:00Z`)) / 86400000) + 1
+  return Math.round(days * pricePerDay * 100) / 100
+}
 
 function newId(): string {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -66,6 +73,11 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     if (checkOutDate && (!/^\d{4}-\d{2}-\d{2}$/.test(checkOutDate) || checkOutDate < checkInDate)) {
       return json({ error: "Check-out date must be on or after check-in" }, 400)
     }
+    const currency = clean(body.currency) || "USD"
+    const pricePerDay = Number(body.price_per_day)
+    if (!currencies.includes(currency as (typeof currencies)[number])) return json({ error: "Select a supported currency" }, 400)
+    if (!Number.isFinite(pricePerDay) || pricePerDay < 0) return json({ error: "Enter a valid daily price" }, 400)
+    const totalAmount = status === "Checked Out" ? calculateTotal(checkInDate, checkOutDate, pricePerDay) : null
 
     const k9 = await context.env.DB.prepare("SELECT id FROM k9_roster WHERE id = ? AND workspace_id = ?")
       .bind(k9Id, session.workspace.id)
@@ -75,10 +87,10 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     const now = new Date().toISOString()
     const id = newId()
     await context.env.DB.prepare(`INSERT INTO boarding_records
-      (id, k9_id, owner_name, owner_phone, check_in_date, check_out_date, status, notes, created_at, updated_at, workspace_id, created_by_user_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+      (id, k9_id, owner_name, owner_phone, check_in_date, check_out_date, status, notes, created_at, updated_at, workspace_id, created_by_user_id, currency, price_per_day, total_amount)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
       .bind(id, k9Id, ownerName, clean(body.owner_phone), checkInDate, checkOutDate, status,
-        typeof body.notes === "string" ? body.notes.trim() : "", now, now, session.workspace.id, session.user.id)
+        typeof body.notes === "string" ? body.notes.trim() : "", now, now, session.workspace.id, session.user.id, currency, pricePerDay, totalAmount)
       .run()
 
     const row = await context.env.DB.prepare(`SELECT b.*, k.dog_name, k.nick_name, k.breed, k.profile_photo

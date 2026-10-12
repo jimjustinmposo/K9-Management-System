@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from "react"
 import { LockKeyhole, Mail, ShieldCheck, UserRound } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { apiRequest, useAuth } from "../../lib/auth"
+import ThemeToggle from "../ThemeToggle"
 
 type AuthMode = "sign-in" | "sign-up"
 
@@ -73,6 +74,17 @@ export default function AuthSwitch({
           --auth-mid: #26352b;
           --auth-accent: #d0b47b;
           --auth-canvas: #101613;
+          --auth-surface: #1d2722;
+          --auth-text: #f1f3ed;
+          --auth-button-text: #101613;
+          --auth-muted: #a7b3aa;
+          --auth-line: #344139;
+          --auth-panel-text: #f1f3ed;
+          --auth-panel-muted: rgba(255, 255, 255, .76);
+          --auth-outline: #fff;
+          --auth-outline-bg: #26352b;
+          --auth-outline-hover: #fff;
+          --auth-outer-start: #101613;
           min-height: 100vh;
           width: 100%;
           display: flex;
@@ -82,18 +94,39 @@ export default function AuthSwitch({
           overflow: hidden;
           background:
             radial-gradient(circle at 12% 15%, rgba(208, 180, 123, .12), transparent 28%),
-            linear-gradient(135deg, #101613 0%, var(--auth-dark) 48%, var(--auth-mid) 100%);
+            linear-gradient(135deg, var(--auth-outer-start) 0%, var(--auth-dark) 48%, var(--auth-mid) 100%);
         }
+        :root[data-theme="light"] .auth-switch {
+          --auth-dark: #e6eee7;
+          --auth-mid: #d5e2d7;
+          --auth-accent: #95743b;
+          --auth-canvas: #f4f6f2;
+          --auth-surface: #ffffff;
+          --auth-text: #1d2922;
+          --auth-button-text: #ffffff;
+          --auth-muted: #68776d;
+          --auth-line: #dce4dd;
+          --auth-panel-text: #21382b;
+          --auth-panel-muted: rgba(33, 56, 43, .78);
+          --auth-outline: #536b58;
+          --auth-outline-bg: #f7faf6;
+          --auth-outline-hover: #e8efe8;
+          --auth-outer-start: #f4f6f2;
+          background:
+            radial-gradient(circle at 12% 15%, rgba(149, 116, 59, .12), transparent 28%),
+            linear-gradient(135deg, #f4f6f2 0%, #e6eee7 48%, #d5e2d7 100%);
+        }
+        .auth-switch__theme-toggle { position: fixed; top: 20px; right: 20px; z-index: 20; }
         .auth-switch__container {
           position: relative;
           width: 100%;
           max-width: 960px;
           height: 610px;
           overflow: hidden;
-          border: 1px solid rgba(255, 255, 255, .18);
+          border: 1px solid color-mix(in srgb, var(--auth-text) 14%, transparent);
           border-radius: 24px;
-          background: #1d2722;
-          box-shadow: 0 30px 80px rgba(0, 0, 0, .42);
+          background: var(--auth-surface);
+          box-shadow: 0 30px 80px rgba(0, 0, 0, .22);
         }
         .auth-switch__forms,
         .auth-switch__panels { position: absolute; inset: 0; }
@@ -130,9 +163,8 @@ export default function AuthSwitch({
           background: #fff;
           box-shadow: 0 5px 18px rgba(19, 38, 45, .12);
         }
-        .auth-switch__brand-copy { color: #f1f3ed; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-        .auth-switch__title { margin: 0 0 6px; color: #f1f3ed; font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: .01em; }
-        .auth-switch__subtitle { margin: 0 0 16px; color: #a7b3aa; font-size: .82rem; text-align: center; }
+        .auth-switch__title { margin: 0 0 6px; color: var(--auth-text); font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 2rem; font-weight: 700; letter-spacing: .01em; }
+        .auth-switch__subtitle { margin: 0 0 16px; color: var(--auth-muted); font-size: .82rem; text-align: center; }
         .auth-switch__field {
           display: grid;
           grid-template-columns: 48px 1fr;
@@ -140,17 +172,17 @@ export default function AuthSwitch({
           width: 100%;
           height: 52px;
           margin: 7px 0;
-          border: 1px solid #344139;
+          border: 1px solid var(--auth-line);
           border-radius: 14px;
           background: var(--auth-canvas);
           transition: border-color .2s, box-shadow .2s, background .2s;
         }
         .auth-switch__field:focus-within {
           border-color: var(--auth-accent);
-          background: #101613;
-          box-shadow: 0 0 0 3px rgba(208, 180, 123, .18);
+          background: var(--auth-canvas);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--auth-accent) 24%, transparent);
         }
-        .auth-switch__field-icon { display: grid; place-items: center; color: #a7b3aa; }
+        .auth-switch__field-icon { display: grid; place-items: center; color: var(--auth-muted); }
         .auth-switch__field input {
           width: 100%;
           height: 100%;
@@ -158,11 +190,11 @@ export default function AuthSwitch({
           border: 0;
           outline: 0;
           background: transparent;
-          color: #f1f3ed;
+          color: var(--auth-text);
           font-size: .9rem;
           font-weight: 600;
         }
-        .auth-switch__field input::placeholder { color: #a7b3aa; font-weight: 500; }
+        .auth-switch__field input::placeholder { color: var(--auth-muted); font-weight: 500; }
         .auth-switch__button {
           min-width: 154px;
           height: 48px;
@@ -170,7 +202,7 @@ export default function AuthSwitch({
           padding: 0 24px;
           border: 0;
           border-radius: 999px;
-          color: #101613;
+          color: var(--auth-button-text);
           background: var(--auth-accent);
           font-size: .78rem;
           font-weight: 800;
@@ -178,26 +210,26 @@ export default function AuthSwitch({
           text-transform: uppercase;
           transition: transform .2s, background .2s, box-shadow .2s;
         }
-        .auth-switch__button:hover:not(:disabled) { transform: translateY(-1px); background: #dfc997; box-shadow: 0 8px 20px rgba(0, 0, 0, .24); }
+        .auth-switch__button:hover:not(:disabled) { transform: translateY(-1px); background: color-mix(in srgb, var(--auth-accent) 82%, white); box-shadow: 0 8px 20px rgba(0, 0, 0, .18); }
         .auth-switch__button:disabled { cursor: not-allowed; opacity: .6; }
         .auth-switch__button:focus-visible,
         .auth-switch__link:focus-visible {
-          outline: 3px solid #d0b47b;
+          outline: 3px solid var(--auth-accent);
           outline-offset: 3px;
         }
-        .auth-switch__link { margin-top: 14px; color: #d0b47b; font-size: .75rem; font-weight: 700; text-decoration: none; }
+        .auth-switch__link { margin-top: 14px; color: var(--auth-accent); font-size: .75rem; font-weight: 700; text-decoration: none; }
         .auth-switch__link:hover { text-decoration: underline; }
         .auth-switch__error { width: 100%; margin: 8px 0 0; color: #d27a68; font-size: .72rem; font-weight: 700; text-align: center; }
-        .auth-switch__hint { margin: 8px 0 0; color: #a7b3aa; font-size: .68rem; }
+        .auth-switch__hint { margin: 8px 0 0; color: var(--auth-muted); font-size: .68rem; }
         .auth-switch__panels { z-index: 6; display: grid; grid-template-columns: repeat(2, 1fr); pointer-events: none; }
         .auth-switch__panel { display: flex; align-items: flex-end; justify-content: space-around; flex-direction: column; text-align: center; }
         .auth-switch__panel--left { padding: 3rem 17% 3rem 10%; pointer-events: auto; }
         .auth-switch__panel--right { padding: 3rem 10% 3rem 17%; }
-        .auth-switch__panel-content { color: #fff; transition: transform .9s ease-in-out .6s; }
-        .auth-switch__panel h2 { margin: 0 0 12px; color: #f1f3ed; font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 1.8rem; font-weight: 700; }
-        .auth-switch__panel p { max-width: 310px; margin: 0 auto 22px; color: rgba(255, 255, 255, .76); font-size: .9rem; line-height: 1.65; }
-        .auth-switch__button--outline { margin: 0; border: 2px solid #fff; color: #fff; background: #26352b; cursor: pointer; }
-        .auth-switch__button--outline:hover:not(:disabled) { color: #101613; background: #fff; box-shadow: 0 4px 14px rgba(0, 0, 0, .22); }
+        .auth-switch__panel-content { color: var(--auth-panel-text); transition: transform .9s ease-in-out .6s; }
+        .auth-switch__panel h2 { margin: 0 0 12px; color: var(--auth-panel-text); font-family: Rajdhani, "Arial Narrow", sans-serif; font-size: 1.8rem; font-weight: 700; }
+        .auth-switch__panel p { max-width: 310px; margin: 0 auto 22px; color: var(--auth-panel-muted); font-size: .9rem; line-height: 1.65; }
+        .auth-switch__button--outline { margin: 0; border: 2px solid var(--auth-outline); color: var(--auth-panel-text); background: var(--auth-outline-bg); cursor: pointer; }
+        .auth-switch__button--outline:hover:not(:disabled) { color: var(--auth-panel-text); background: var(--auth-outline-hover); box-shadow: 0 4px 14px rgba(0, 0, 0, .16); }
         .auth-switch__panel--right .auth-switch__panel-content { transform: translateX(800px); }
         .auth-switch__container::before {
           content: "";
@@ -211,7 +243,7 @@ export default function AuthSwitch({
           transform: translateY(-50%);
             background:
             radial-gradient(circle at 64% 68%, rgba(208, 180, 123, .16), transparent 18%),
-            linear-gradient(-45deg, #101613 0%, var(--auth-dark) 55%, #354638 100%);
+            linear-gradient(-45deg, var(--auth-outer-start) 0%, var(--auth-dark) 55%, var(--auth-mid) 100%);
           transition: 1.8s ease-in-out;
         }
         .auth-switch__container--signup::before { right: 52%; transform: translate(100%, -50%); }
@@ -258,6 +290,7 @@ export default function AuthSwitch({
         }
       `}</style>
 
+      <ThemeToggle className="auth-switch__theme-toggle" />
       <div className={`auth-switch__container${isSignUp ? " auth-switch__container--signup" : ""}`}>
         <div className="auth-switch__forms">
           <div className="auth-switch__form-stack">
@@ -333,8 +366,8 @@ export default function AuthSwitch({
 function Brand() {
   return (
     <div className="auth-switch__brand">
-      <img className="auth-switch__logo" src="/logo.png" alt="" />
-      <span className="auth-switch__brand-copy">Martina&apos;s K9 System</span>
+      <img className="auth-switch__logo" src="/logo.jpg" alt="" />
+      <img className="auth-switch__brand-image" src="/Caninelogy.png" alt="Caninelogy" />
     </div>
   )
 }

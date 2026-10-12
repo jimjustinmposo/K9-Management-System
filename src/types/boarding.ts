@@ -9,6 +9,9 @@ export interface BoardingRecord {
   ownerPhone: string;
   checkInDate: string;
   checkOutDate: string;
+  currency: string;
+  pricePerDay: number;
+  totalAmount: number | null;
   status: BoardingStatus;
   notes: string;
   createdAt: string;
@@ -16,7 +19,7 @@ export interface BoardingRecord {
   k9: Pick<K9Record, "id" | "dogName" | "nickName" | "breed" | "profilePhoto">;
 }
 
-export type BoardingFormValues = Omit<BoardingRecord, "id" | "createdAt" | "updatedAt" | "k9">;
+export type BoardingFormValues = Omit<BoardingRecord, "id" | "createdAt" | "updatedAt" | "k9" | "totalAmount">;
 
 export const EMPTY_BOARDING_FORM: BoardingFormValues = {
   k9Id: "",
@@ -24,14 +27,22 @@ export const EMPTY_BOARDING_FORM: BoardingFormValues = {
   ownerPhone: "",
   checkInDate: new Date().toISOString().slice(0, 10),
   checkOutDate: "",
+  currency: "AED",
+  pricePerDay: 0,
   status: "Boarding",
   notes: "",
 };
 
 export const BOARDING_STATUS_OPTIONS: BoardingStatus[] = ["Boarding", "Checked Out"];
 
+export function boardingStayDays(checkInDate: string, checkOutDate: string): number {
+  const start = new Date(`${checkInDate}T00:00:00`).getTime();
+  const end = new Date(`${checkOutDate}T00:00:00`).getTime();
+  return Number.isFinite(start) && Number.isFinite(end) && end >= start
+    ? Math.ceil((end - start) / 86400000) + 1
+    : 0;
+}
+
 export function boardingDays(record: BoardingRecord): number {
-  const start = new Date(`${record.checkInDate}T00:00:00`).getTime();
-  const end = new Date(`${record.checkOutDate || new Date().toISOString().slice(0, 10)}T00:00:00`).getTime();
-  return Number.isFinite(start) && Number.isFinite(end) ? Math.max(1, Math.ceil((end - start) / 86400000) + 1) : 0;
+  return boardingStayDays(record.checkInDate, record.checkOutDate || new Date().toISOString().slice(0, 10));
 }

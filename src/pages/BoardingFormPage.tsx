@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell, Panel } from "../components/AppShell";
 import { boardingApi } from "../lib/boardingApi";
 import { k9Api } from "../lib/k9Api";
-import { EMPTY_BOARDING_FORM, type BoardingFormValues } from "../types/boarding";
+import { boardingStayDays, EMPTY_BOARDING_FORM, type BoardingFormValues } from "../types/boarding";
 import type { K9Record } from "../types/k9";
 
 const inputClass = "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm font-semibold text-ink outline-none transition placeholder:font-medium placeholder:text-muted/70 focus:border-navy";
@@ -26,7 +26,7 @@ export default function BoardingFormPage() {
         if (!active) return;
         setDogs(roster);
         if (id && !record) { setError("Boarding record not found."); return; }
-        if (record) setForm({ k9Id: record.k9Id, ownerName: record.ownerName, ownerPhone: record.ownerPhone, checkInDate: record.checkInDate, checkOutDate: record.checkOutDate, status: record.status, notes: record.notes });
+        if (record) setForm({ k9Id: record.k9Id, ownerName: record.ownerName, ownerPhone: record.ownerPhone, checkInDate: record.checkInDate, checkOutDate: record.checkOutDate, currency: record.currency, pricePerDay: record.pricePerDay, status: record.status, notes: record.notes });
       })
       .catch((err) => { if (active) setError(err instanceof Error ? err.message : "Could not load the form data."); })
       .finally(() => { if (active) setLoading(false); });
@@ -37,11 +37,15 @@ export default function BoardingFormPage() {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
+  const billableDays = form.status === "Checked Out" ? boardingStayDays(form.checkInDate, form.checkOutDate) : 0;
+  const totalAmount = billableDays * form.pricePerDay;
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
     if (!form.k9Id) { setError("Select a dog from the K9 Roster."); return; }
     if (!form.ownerName.trim()) { setError("Owner name is required."); return; }
+    if (form.status === "Checked Out" && !form.checkOutDate) { setError("Enter the check-out date to calculate the total."); return; }
     if (form.checkOutDate && form.checkOutDate < form.checkInDate) { setError("Check-out date must be on or after check-in."); return; }
     setSaving(true);
     try {
@@ -63,6 +67,7 @@ export default function BoardingFormPage() {
           <Panel className="p-5"><label htmlFor="boarding-k9" className={labelClass}>K9 Roster record <span className="text-danger">*</span></label><select id="boarding-k9" required className={inputClass} value={form.k9Id} onChange={(event) => set("k9Id", event.target.value)}><option value="">Select a registered dog</option>{dogs.map((dog) => <option key={dog.id} value={dog.id}>{dog.dogName}{dog.nickName ? ` “${dog.nickName}”` : ""}{dog.breed ? ` · ${dog.breed}` : ""}</option>)}</select><p className="mt-2 text-xs text-muted">Dog details are linked from the roster and are not duplicated here.</p></Panel>
           <Panel className="p-5"><p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">Owner contact</p><div className="mt-4 grid gap-4 md:grid-cols-2"><div><label htmlFor="owner-name" className={labelClass}>Owner name <span className="text-danger">*</span></label><input id="owner-name" required className={inputClass} value={form.ownerName} onChange={(event) => set("ownerName", event.target.value)} placeholder="Owner or client name" /></div><div><label htmlFor="owner-phone" className={labelClass}>Phone</label><input id="owner-phone" type="tel" className={inputClass} value={form.ownerPhone} onChange={(event) => set("ownerPhone", event.target.value)} placeholder="Contact number" /></div></div></Panel>
           <Panel className="p-5"><p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">Stay dates & status</p><div className="mt-4 grid gap-4 md:grid-cols-3"><div><label htmlFor="check-in" className={labelClass}>Check-in <span className="text-danger">*</span></label><input id="check-in" required type="date" className={inputClass} value={form.checkInDate} onChange={(event) => set("checkInDate", event.target.value)} /></div><div><label htmlFor="check-out" className={labelClass}>Check-out</label><input id="check-out" type="date" min={form.checkInDate} className={inputClass} value={form.checkOutDate} onChange={(event) => { set("checkOutDate", event.target.value); if (event.target.value) set("status", "Checked Out"); }} /></div><fieldset className="md:col-span-1"><legend className={labelClass}>Status</legend><div className="flex flex-wrap gap-4 pt-1"><label className="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={form.status === "Boarding"} onChange={() => { set("status", "Boarding"); set("checkOutDate", ""); }} className="size-4 accent-emerald-600" />Boarding</label><label className="inline-flex items-center gap-2 text-sm font-semibold"><input type="checkbox" checked={form.status === "Checked Out"} onChange={() => set("status", "Checked Out")} className="size-4 accent-emerald-600" />Checked out</label></div></fieldset></div></Panel>
+          <Panel className="p-5"><p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">Boarding rate</p><div className="mt-4 grid gap-4 md:grid-cols-2"><div><label htmlFor="price-currency" className={labelClass}>Currency</label><select id="price-currency" className={inputClass} value={form.currency} onChange={(event) => set("currency", event.target.value)}>{["AED", "USD", "CAD", "EUR", "GBP", "AUD", "NZD"].map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></div><div><label htmlFor="price-per-day" className={labelClass}>Price per day</label><input id="price-per-day" type="number" min="0" step="0.01" className={inputClass} value={form.pricePerDay} onChange={(event) => set("pricePerDay", Math.max(0, Number(event.target.value)))} /></div></div>{form.status === "Checked Out" && <div className="mt-4 rounded-xl border border-line bg-canvas px-4 py-3"><p className="text-xs font-semibold text-muted">{billableDays} {billableDays === 1 ? "day" : "days"} × {form.currency} {form.pricePerDay.toFixed(2)} per day</p><p className="mt-1 text-lg font-black text-ink">Total due: {form.currency} {totalAmount.toFixed(2)}</p></div>}</Panel>
           <Panel className="p-5"><label htmlFor="boarding-notes" className={labelClass}>Notes</label><textarea id="boarding-notes" rows={4} className={`${inputClass} resize-y`} value={form.notes} onChange={(event) => set("notes", event.target.value)} placeholder="Care notes or details for this stay…" /></Panel>
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Link to="/boarding" className="rounded-xl border border-line bg-surface px-6 py-3 text-center text-sm font-bold text-slate hover:bg-canvas">Cancel</Link><button type="submit" disabled={saving || dogs.length === 0} className="rounded-xl bg-navy px-8 py-3 text-sm font-bold text-white shadow-action hover:bg-navy-light disabled:opacity-60">{saving ? "Saving…" : editing ? "Save changes" : "Create boarding record"}</button></div>
         </>}
