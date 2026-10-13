@@ -9,6 +9,10 @@ import { boardingApi } from "../lib/boardingApi"
 import { useAuth } from "../lib/auth"
 
 import { boardingDays, boardingStayDays, type BoardingRecord } from "../types/boarding"
+import Pagination from "../components/Pagination"
+import SearchableSelect from "../components/SearchableSelect"
+
+const PAGE_SIZE = 10
 
 export default function BoardingPage() {
   const { session } = useAuth()
@@ -24,6 +28,7 @@ export default function BoardingPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const [dropdownFilter, setDropdownFilter] = useState("All")
+  const [page, setPage] = useState(1)
 
   const [deletingId, setDeletingId] = useState("")
 
@@ -81,6 +86,9 @@ export default function BoardingPage() {
     const panelRows = filterByPanel(staysData)
     return filterBySearch(activePanel === "total" ? filterByDropdown(panelRows) : panelRows)
   }, [staysData, activePanel, dropdownFilter, searchQuery])
+  const visibleRecords = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  useEffect(() => { setPage(1) }, [activePanel, dropdownFilter, searchQuery])
+  useEffect(() => { setPage((current) => Math.min(current, Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)))) }, [filtered.length])
 
   function updateCounters(status: BoardingRecord["status"]) {
     return staysData.filter((record) => record.status === status).length
@@ -293,18 +301,16 @@ export default function BoardingPage() {
           </label>
           <label>
             <span className="sr-only">Filter boarding status</span>
-            <select
+            <SearchableSelect
+              id="boarding-status-filter"
               value={dropdownFilter}
-              onChange={(event) => {
-                setDropdownFilter(event.target.value)
+              options={["All", "Boarding", "Checked Out"].map((status) => ({ value: status, label: status }))}
+              onChange={(value) => {
+                setDropdownFilter(value)
                 setActivePanel("total")
               }}
               className="w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm sm:w-auto"
-            >
-              <option>All</option>
-              <option>Boarding</option>
-              <option>Checked Out</option>
-            </select>
+            />
           </label>
         </div>
         {loading ? (
@@ -347,7 +353,7 @@ export default function BoardingPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-line">
-                  {filtered.map((record) => (
+                  {visibleRecords.map((record) => (
                     <tr key={record.id}>
                       <td className="px-5 py-3">
                         <span className="block text-sm font-extrabold">
@@ -452,7 +458,7 @@ export default function BoardingPage() {
               </table>
             </div>
             <div className="grid gap-3 p-4 md:hidden">
-              {filtered.map((record) => (
+              {visibleRecords.map((record) => (
                 <article
                   key={record.id}
                   className="rounded-xl border border-line p-4"
@@ -548,9 +554,7 @@ export default function BoardingPage() {
                 </article>
               ))}
             </div>
-            <p className="border-t border-line px-5 py-3 text-[11px] font-semibold text-muted">
-              Showing {filtered.length} of {staysData.length} stays
-            </p>
+            <Pagination page={page} totalItems={filtered.length} pageSize={PAGE_SIZE} onPageChange={setPage} label="stays" />
           </>
         )}
       </Panel>

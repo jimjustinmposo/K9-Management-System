@@ -13,7 +13,7 @@
 - Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
 
 ## Architecture
-- K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding.
+- K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.
 - Pages Functions return `{ data }` or `{ success, data }` / `{ success:false, error:{code,message} }`.
 
 ## Implemented Features
@@ -29,6 +29,7 @@
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
+- [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
 
 ## Database
@@ -66,6 +67,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.
 - Added owner-created member accounts using existing hashed user credentials/memberships; members can add records but cannot edit, delete, access reports, subscription, or user administration. Migration `0018_member_account_index.sql`.
 - Extended the Vite development auth bridge to create and sign in as local-test members with member permissions.

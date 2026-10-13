@@ -4,6 +4,7 @@ import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { medicalApi } from "../lib/medicalApi"
 import { useAuth } from "../lib/auth"
 import type { MedicalCondition, MedicalRecord, Medication } from "../types/medical"
+import Pagination from "../components/Pagination"
 
 type Kind = "medications" | "records" | "conditions"
 const config: Record<Kind, { title: string; eyebrow: string; create: string; label: string }> = {
@@ -29,18 +30,27 @@ function MedicalCard({ kind }: { kind: Kind }) {
 }
 
 export function MedicalListPage({ kind }: { kind: Kind }) {
+  const PAGE_SIZE = 10
   const { session } = useAuth()
   const [items, setItems] = useState<(Medication | MedicalRecord | MedicalCondition)[]>([])
+  const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   async function load() {
     setLoading(true); setError("")
-    try { const result = kind === "medications" ? await medicalApi.medications.list(search) : kind === "records" ? await medicalApi.records.list() : await medicalApi.conditions.list(); setItems(result) }
+    try {
+      const endpoint = `/api/medical/${kind}`
+      const result = await medicalApi.page<Medication | MedicalRecord | MedicalCondition>(endpoint, kind === "medications" ? search : "", pageSize, (page - 1) * pageSize)
+      setItems(result.data); setTotal(result.total)
+    }
     catch (err) { setError(err instanceof Error ? err.message : "Could not load medical data.") }
     finally { setLoading(false) }
   }
-  useEffect(() => { void load() }, [kind, search])
+  useEffect(() => { void load() }, [kind, search, page, pageSize])
+  useEffect(() => { setPage(1) }, [kind, search])
   async function deleteItem(id: string) {
     if (!window.confirm(`Delete this ${config[kind].label.toLowerCase()}?`)) return
     try { if (kind === "medications") await medicalApi.medications.remove(id); else if (kind === "records") await medicalApi.records.remove(id); else await medicalApi.conditions.remove(id); await load() }
@@ -50,7 +60,7 @@ export function MedicalListPage({ kind }: { kind: Kind }) {
     <div className="flex flex-wrap items-end justify-between gap-4"><div><Link to="/medical" className="text-xs font-bold text-positive">← Medical overview</Link><p className="mt-4 text-[10px] font-extrabold uppercase tracking-[.18em] text-positive">{config[kind].eyebrow}</p><h2 className="mt-1 font-rajdhani text-3xl font-bold text-ink">{config[kind].title}</h2></div>{session?.permissions.create && <Link to={config[kind].create} className="rounded-xl bg-navy px-4 py-3 text-sm font-bold text-white hover:bg-navy-light">+ Add {config[kind].label.toLowerCase()}</Link>}</div>
     {kind === "medications" && <input aria-label="Search medications" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search medication name or category…" className="w-full rounded-xl border border-line bg-surface px-4 py-3 text-sm text-ink outline-none focus:border-positive md:max-w-sm"/>}
     {error && <p role="alert" className="rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}</p>}
-    <Panel><PanelHeader eyebrow="Clinical register" title={`${items.length} ${config[kind].label.toLowerCase()}${items.length === 1 ? "" : "s"}`} />{loading ? <p className="p-8 text-center text-sm text-muted">Loading records…</p> : items.length === 0 ? <p className="p-10 text-center text-sm text-muted">No entries yet. Add the first one when ready.</p> : <div className="divide-y divide-line">{items.map((item) => {
+    <Panel><PanelHeader eyebrow="Clinical register" title={`${total} ${config[kind].label.toLowerCase()}${total === 1 ? "" : "s"}`} />{loading ? <p className="p-8 text-center text-sm text-muted">Loading records…</p> : total === 0 ? <p className="p-10 text-center text-sm text-muted">No entries yet. Add the first one when ready.</p> : <div className="divide-y divide-line">{items.map((item) => {
       const isMed = kind === "medications", isRecord = kind === "records"
       const record = item as MedicalRecord, condition = item as MedicalCondition, medication = item as Medication
       const title = isMed ? medication.name : isRecord ? `${record.dog_name}${record.medication_name ? ` · ${record.medication_name}` : ""}` : `${condition.dog_name} · ${condition.condition_name}`
@@ -59,7 +69,7 @@ export function MedicalListPage({ kind }: { kind: Kind }) {
       const id = item.id
       const editPath = `/medical/${kind}/${encodeURIComponent(id)}/edit`
       return <article key={id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div className="min-w-0"><h3 className="truncate text-sm font-bold text-ink">{title}</h3><p className="mt-1 text-xs text-muted">{subtitle}</p><p className="mt-1 text-[11px] text-muted/80">{meta}</p></div><div className="flex shrink-0 items-center gap-3">{isRecord && <span className="rounded-full bg-positive-soft px-2.5 py-1 text-[10px] font-bold text-positive">Treatment</span>}{session?.permissions.edit && <Link className="text-xs font-bold text-positive" to={editPath}>Edit</Link>}{session?.permissions.delete && <button className="text-xs font-bold text-danger" onClick={() => void deleteItem(id)}>Delete</button>}</div></article>
-    })}</div>}</Panel>
+    })}</div>}{!loading && total > 0 && <Pagination page={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1) }} label={config[kind].label.toLowerCase() + "s"} />}</Panel>
     <p className="text-xs text-muted">For veterinary use: team-entered notes are not a substitute for advice from a licensed veterinarian.</p>
   </div></AppShell>
 }

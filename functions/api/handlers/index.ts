@@ -22,14 +22,21 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   if (isResponse(session)) return session
   const params = new URL(context.request.url).searchParams
   const search = params.get("search")?.trim() ?? ""
+  const hasPagination = params.has("limit")
+  const requestedLimit = Number(params.get("limit"))
+  const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(20, Math.floor(requestedLimit))) : 10
+  const requestedOffset = Number(params.get("offset") ?? 0)
+  const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0
   try {
-    const statement = context.env.DB.prepare(`SELECT id, full_name, nick_name, position, email, phone, created_at, updated_at
+    const base = `SELECT id, full_name, nick_name, position, email, phone, created_at, updated_at
       FROM k9_handlers WHERE workspace_id = ?${search ? " AND (full_name LIKE ? OR nick_name LIKE ? OR position LIKE ? OR email LIKE ? OR phone LIKE ?)" : ""}
-      ORDER BY full_name COLLATE NOCASE ASC`)
-    const result = await (search
-      ? statement.bind(session.workspace.id, ...Array(5).fill(`%${search}%`))
-      : statement.bind(session.workspace.id)).all()
-    return json({ data: result.results ?? [] })
+      ORDER BY full_name COLLATE NOCASE ASC`
+    const bindings = search ? [session.workspace.id, ...Array(5).fill(`%${search}%`)] : [session.workspace.id]
+    const [result, count] = await Promise.all([
+      context.env.DB.prepare(`${base}${hasPagination ? " LIMIT ? OFFSET ?" : ""}`).bind(...bindings, ...(hasPagination ? [limit, offset] : [])).all(),
+      hasPagination ? context.env.DB.prepare(`SELECT COUNT(*) AS total FROM k9_handlers WHERE workspace_id = ?${search ? " AND (full_name LIKE ? OR nick_name LIKE ? OR position LIKE ? OR email LIKE ? OR phone LIKE ?)" : ""}`).bind(...bindings).first<{ total: number }>() : Promise.resolve(null),
+    ])
+    return json({ data: result.results ?? [], ...(hasPagination ? { total: Number(count?.total ?? 0) } : {}) })
   } catch {
     return json({ error: "Failed to load handlers" }, 500)
   }

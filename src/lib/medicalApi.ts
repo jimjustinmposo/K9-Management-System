@@ -17,6 +17,12 @@ async function save<T>(path: string, method: "POST" | "PUT", data: unknown): Pro
 async function remove(path: string): Promise<void> { await apiRequest(path, { method: "DELETE" }) }
 
 export const medicalApi = {
+  page: async <T,>(path: string, search: string, limit: number, offset: number): Promise<{ data: T[]; total: number }> => {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+    if (search.trim()) params.set("search", search.trim())
+    const response = await apiRequest(`${path}?${params.toString()}`)
+    return { data: response.data ?? [], total: Number(response.total ?? 0) }
+  },
   medications: {
     list: (search = "") => list<Medication>(`/api/medical/medications${search ? `?search=${encodeURIComponent(search)}` : ""}`),
     get: async (id: string) => (await apiRequest(`/api/medical/medications/${encodeURIComponent(id)}`)).data as Medication,

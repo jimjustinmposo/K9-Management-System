@@ -4,23 +4,30 @@ import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { useAuth } from "../lib/auth"
 import { handlersApi } from "../lib/handlersApi"
 import type { Handler } from "../types/handlers"
+import Pagination from "../components/Pagination"
+
+const PAGE_SIZE = 10
 
 export default function HandlersPage() {
   const { session } = useAuth()
   const [items, setItems] = useState<Handler[]>([])
+  const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   async function load() {
     setLoading(true)
     setError("")
-    try { setItems(await handlersApi.list(search)) }
+    try { const result = await handlersApi.page(search, pageSize, (page - 1) * pageSize); setItems(result.data); setTotal(result.total) }
     catch (err) { setError(err instanceof Error ? err.message : "Could not load handlers.") }
     finally { setLoading(false) }
   }
 
-  useEffect(() => { void load() }, [search])
+  useEffect(() => { void load() }, [search, page, pageSize])
+  useEffect(() => { setPage(1) }, [search])
 
   async function remove(handler: Handler) {
     if (!window.confirm(`Delete handler ${handler.full_name}?`)) return
@@ -46,9 +53,9 @@ export default function HandlersPage() {
 
       {error && <p role="alert" className="rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}</p>}
       <Panel>
-        <PanelHeader eyebrow="Team register" title={`${items.length} handler${items.length === 1 ? "" : "s"}`} />
+        <PanelHeader eyebrow="Team register" title={`${total} handler${total === 1 ? "" : "s"}`} />
         {loading ? <p className="p-8 text-center text-sm text-muted">Loading handlers…</p>
-          : items.length === 0 ? <div className="p-10 text-center"><p className="text-sm font-bold text-ink">{search ? "No matching handlers" : "No handlers added yet"}</p><p className="mt-1 text-xs text-muted">{search ? "Try another search term." : "Add your first handler to start the directory."}</p></div>
+          : total === 0 ? <div className="p-10 text-center"><p className="text-sm font-bold text-ink">{search ? "No matching handlers" : "No handlers added yet"}</p><p className="mt-1 text-xs text-muted">{search ? "Try another search term." : "Add your first handler to start the directory."}</p></div>
           : <div className="divide-y divide-line">{items.map((handler) => <article key={handler.id} className="flex flex-wrap items-center justify-between gap-4 px-5 py-4">
             <div className="flex min-w-0 items-center gap-3">
               <div className="grid size-11 shrink-0 place-items-center rounded-full border border-positive/20 bg-positive-soft text-sm font-black text-positive" aria-hidden="true">{handler.full_name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</div>
@@ -56,6 +63,7 @@ export default function HandlersPage() {
             </div>
             <div className="flex shrink-0 items-center gap-3">{session?.permissions.edit && <Link className="text-xs font-bold text-positive" to={`/handlers/${encodeURIComponent(handler.id)}/edit`}>Edit</Link>}{session?.permissions.delete && <button type="button" className="text-xs font-bold text-danger" onClick={() => void remove(handler)}>Delete</button>}</div>
           </article>)}</div>}
+        {!loading && total > 0 && <Pagination page={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1) }} label="handlers" />}
       </Panel>
     </div>
   </AppShell>

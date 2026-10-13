@@ -11,6 +11,7 @@ import {
   k9Initials,
   type K9FormValues,
 } from "../types/k9";
+import SearchableSelect from "../components/SearchableSelect";
 
 const inputClass =
   "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm font-semibold text-ink outline-none transition placeholder:font-medium placeholder:text-muted/70 focus:border-navy";
@@ -190,11 +191,7 @@ export default function K9FormPage() {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="breed">Breed</label>
-                  <input id="breed" className={inputClass} list="k9-breeds" value={form.breed}
-                    onChange={(e) => set("breed", e.target.value)} placeholder="Select or type a breed" />
-                  <datalist id="k9-breeds">
-                    {K9_BREED_OPTIONS.map((breed) => <option key={breed} value={breed} />)}
-                  </datalist>
+                  <SearchableSelect id="breed" className={inputClass} value={form.breed} onChange={(value) => set("breed", value)} placeholder="Select or search a breed" options={K9_BREED_OPTIONS.map((breed) => ({ value: breed, label: breed }))} />
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="dob">Date of birth</label>
@@ -216,11 +213,7 @@ export default function K9FormPage() {
                 </div>
                 <div>
                   <label className={labelClass} htmlFor="status">Status</label>
-                  <select id="status" className={inputClass} value={form.status}
-                    onChange={(e) => set("status", e.target.value as K9FormValues["status"])}>
-                    <option value="">Select status</option>
-                    {K9_STATUS_OPTIONS.map((status) => <option key={status} value={status}>{status}</option>)}
-                  </select>
+                  <SearchableSelect id="status" className={inputClass} value={form.status} onChange={(value) => set("status", value as K9FormValues["status"])} placeholder="Select status" options={K9_STATUS_OPTIONS.map((status) => ({ value: status, label: status }))} />
                 </div>
                 <div className="md:col-span-2">
                   <label className={labelClass} htmlFor="microchip">Microchip #</label>

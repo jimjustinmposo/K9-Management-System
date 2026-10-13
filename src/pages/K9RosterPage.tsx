@@ -4,8 +4,9 @@ import { AppShell, Panel } from "../components/AppShell";
 import { k9Api } from "../lib/k9Api";
 import { useAuth } from "../lib/auth";
 import { k9Age, k9Initials, type K9Record } from "../types/k9";
+import Pagination from "../components/Pagination";
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 function statusStyle(status: string): string {
   if (status === "Active") return "bg-positive-soft text-positive";
@@ -24,6 +25,7 @@ export default function K9RosterPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
@@ -62,8 +64,8 @@ export default function K9RosterPage() {
     });
   }, [records, search, statusFilter]);
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const visibleRecords = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const totalPages = Math.ceil(filtered.length / pageSize);
+  const visibleRecords = filtered.slice((page - 1) * pageSize, page * pageSize);
 
   useEffect(() => {
     setPage(1);
@@ -225,14 +227,7 @@ export default function K9RosterPage() {
                 </Link>
               ))}
             </div>
-            {totalPages > 1 && <nav aria-label="K9 roster pages" className="flex flex-wrap items-center justify-center gap-1 border-t border-line px-4 py-3">
-              <button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => <button key={pageNumber} type="button" aria-current={pageNumber === page ? "page" : undefined} onClick={() => setPage(pageNumber)} className={`min-w-9 rounded-lg border px-3 py-2 text-xs font-extrabold ${pageNumber === page ? "border-navy bg-navy text-white" : "border-line text-slate hover:bg-canvas"}`}>{pageNumber}</button>)}
-              <button type="button" aria-label="Next page" disabled={page === totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
-            </nav>}
-            <p className="border-t border-line px-5 py-3 text-[11px] font-semibold text-muted">
-              Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} matching records · {records.length} total · Cloudflare D1 endpoint /api/k9
-            </p>
+            <Pagination page={page} totalItems={filtered.length} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1) }} label={`matching K9 records · ${records.length} total`} />
           </>
         )}
 

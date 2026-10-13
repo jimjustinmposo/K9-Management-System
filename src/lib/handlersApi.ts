@@ -2,6 +2,12 @@ import { apiRequest } from "./auth"
 import type { Handler, HandlerFormValues } from "../types/handlers"
 
 export const handlersApi = {
+  async page(search: string, limit: number, offset: number): Promise<{ data: Handler[]; total: number }> {
+    const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
+    if (search.trim()) params.set("search", search.trim())
+    const response = await apiRequest(`/api/handlers?${params.toString()}`)
+    return { data: response.data ?? [], total: Number(response.total ?? 0) }
+  },
   async list(search = ""): Promise<Handler[]> {
     const query = search.trim() ? `?search=${encodeURIComponent(search.trim())}` : ""
     const response = await apiRequest(`/api/handlers${query}`)

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { AppShell } from "../components/AppShell"
+import SearchableSelect from "../components/SearchableSelect"
 import WeatherCard from "../components/WeatherCard"
 import { useAuth } from "../lib/auth"
 
@@ -145,6 +146,7 @@ export default function TodaysTaskPage() {
   const [selectedDate, setSelectedDate] = useState(today)
   const [month, setMonth] = useState(() => new Date(`${today}T12:00:00`))
   const [adding, setAdding] = useState(false)
+  const [taskKind, setTaskKind] = useState<TaskKind>("walk")
   const date = new Date(`${selectedDate}T12:00:00`)
   const dayTasks = tasks
     .filter((task) => task.date === selectedDate)
@@ -476,11 +478,12 @@ export default function TodaysTaskPage() {
                     title,
                     detail: String(values.get("detail") ?? "").trim(),
                     time: String(values.get("time")),
-                    kind: values.get("kind") as TaskKind,
+                    kind: taskKind,
                     done: false,
                     date: selectedDate,
                   },
                 ])
+                setTaskKind("walk")
                 setAdding(false)
               }}
             >
@@ -517,14 +520,13 @@ export default function TodaysTaskPage() {
                 </label>
                 <label className="block text-xs font-semibold">
                   Category
-                  <select
-                    name="kind"
+                  <SearchableSelect
+                    id="task-kind"
+                    value={taskKind}
+                    onChange={(value) => setTaskKind(value as TaskKind)}
+                    options={[{ value: "walk", label: "Walk" }, { value: "meal", label: "Meal" }, { value: "training", label: "Training" }]}
                     className="mt-1.5 block w-full rounded-xl border border-[#dfe3d8] bg-white p-3 text-sm"
-                  >
-                    <option value="walk">Walk</option>
-                    <option value="meal">Meal</option>
-                    <option value="training">Training</option>
-                  </select>
+                  />
                 </label>
               </div>
               <div className="flex justify-end gap-2 pt-2">
