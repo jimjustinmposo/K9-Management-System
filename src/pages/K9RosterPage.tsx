@@ -5,6 +5,8 @@ import { k9Api } from "../lib/k9Api";
 import { useAuth } from "../lib/auth";
 import { k9Age, k9Initials, type K9Record } from "../types/k9";
 
+const PAGE_SIZE = 10;
+
 function statusStyle(status: string): string {
   if (status === "Active") return "bg-positive-soft text-positive";
   if (status === "In Training") return "bg-info-soft text-info";
@@ -21,6 +23,7 @@ export default function K9RosterPage() {
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
@@ -58,6 +61,17 @@ export default function K9RosterPage() {
       return matchesStatus && matchesTerm;
     });
   }, [records, search, statusFilter]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const visibleRecords = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
+
+  useEffect(() => {
+    if (page > Math.max(1, totalPages)) setPage(Math.max(1, totalPages));
+  }, [page, totalPages]);
 
   async function handleDelete(id: string, name: string) {
     if (!window.confirm(`Delete ${name || "this K9 record"}?`)) return;
@@ -140,7 +154,7 @@ export default function K9RosterPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((k9) => (
+                {visibleRecords.map((k9) => (
                   <tr key={k9.id} className="border-t border-line transition hover:bg-canvas/60">
                     <td className="px-5 py-3">
                       <Link to={session?.permissions.edit ? `/k9-roster/${k9.id}/edit` : "/k9-roster"} className="flex items-center gap-3">
@@ -189,7 +203,7 @@ export default function K9RosterPage() {
             </table>
           </div>
           <div className="grid gap-3 border-t border-line p-4 md:hidden">
-              {filtered.map((k9) => (
+              {visibleRecords.map((k9) => (
                 <Link key={k9.id} to={session?.permissions.edit ? `/k9-roster/${k9.id}/edit` : "/k9-roster"}
                   className="flex items-center gap-3 rounded-xl border border-line p-3">
                   {k9.profilePhoto ? (
@@ -211,8 +225,13 @@ export default function K9RosterPage() {
                 </Link>
               ))}
             </div>
+            {totalPages > 1 && <nav aria-label="K9 roster pages" className="flex flex-wrap items-center justify-center gap-1 border-t border-line px-4 py-3">
+              <button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => setPage((current) => current - 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">&lt;</button>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => <button key={pageNumber} type="button" aria-current={pageNumber === page ? "page" : undefined} onClick={() => setPage(pageNumber)} className={`min-w-9 rounded-lg border px-3 py-2 text-xs font-extrabold ${pageNumber === page ? "border-navy bg-navy text-white" : "border-line text-slate hover:bg-canvas"}`}>{pageNumber}</button>)}
+              <button type="button" aria-label="Next page" disabled={page === totalPages} onClick={() => setPage((current) => current + 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">&gt;</button>
+            </nav>}
             <p className="border-t border-line px-5 py-3 text-[11px] font-semibold text-muted">
-              {filtered.length} of {records.length} records · Cloudflare D1 endpoint /api/k9
+              Showing {filtered.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, filtered.length)} of {filtered.length} matching records · {records.length} total · Cloudflare D1 endpoint /api/k9
             </p>
           </>
         )}
