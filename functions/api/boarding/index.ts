@@ -24,6 +24,11 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   const search = params.get("search")?.trim() ?? ""
   const status = params.get("status")?.trim() ?? ""
   const k9Id = params.get("k9_id")?.trim() ?? ""
+    const hasPagination = params.has("limit")
+    const requestedLimit = Number(params.get("limit"))
+    const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(200, Math.floor(requestedLimit))) : 50
+    const requestedOffset = Number(params.get("offset") ?? 0)
+    const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0
 
   try {
     let query = `SELECT b.*, k.dog_name, k.nick_name, k.breed, k.profile_photo
@@ -46,10 +51,13 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
       values.push(like, like, like, like)
     }
 
-    const result = await context.env.DB.prepare(`${query} ORDER BY b.check_in_date DESC, b.created_at DESC`)
-      .bind(...values)
-      .all()
-    return json({ data: result.results ?? [] })
+    const countQuery = query.replace("SELECT b.*, k.dog_name, k.nick_name, k.breed, k.profile_photo", "SELECT COUNT(*) AS total")
+    const [result, count] = await Promise.all([
+      context.env.DB.prepare(`${query} ORDER BY b.check_in_date DESC, b.created_at DESC${hasPagination ? " LIMIT ? OFFSET ?" : ""}`)
+        .bind(...values, ...(hasPagination ? [limit, offset] : [])).all(),
+      hasPagination ? context.env.DB.prepare(countQuery).bind(...values).first<{ total: number }>() : Promise.resolve(null),
+    ])
+    return json({ data: result.results ?? [], ...(hasPagination ? { total: Number(count?.total ?? 0) } : {}) })
   } catch {
     return json({ error: "Failed to load boarding records" }, 500)
   }

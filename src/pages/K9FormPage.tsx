@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AppShell, Panel } from "../components/AppShell";
+import K9LinkedRecords from "../components/K9LinkedRecords";
 import { k9Api } from "../lib/k9Api";
 import {
   EMPTY_K9_FORM,
@@ -141,6 +142,7 @@ export default function K9FormPage() {
 
       <form onSubmit={handleSubmit}>
         <div className="grid gap-5 xl:grid-cols-[320px_minmax(0,1fr)]">
+          <div className="grid content-start gap-5">
           <Panel className="p-5">
             <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-muted">Profile photo</p>
             <div className="mt-3 flex flex-col items-center text-center">
@@ -170,6 +172,7 @@ export default function K9FormPage() {
               <p className="mt-3 text-[11px] leading-5 text-muted">JPG/PNG under 1.5MB. Stored with the record.</p>
             </div>
           </Panel>
+          </div>
 
           <div className="grid gap-5">
             <Panel className="p-5">
@@ -248,6 +251,8 @@ export default function K9FormPage() {
                 </div>
               </div>
             </Panel>
+
+            {isEdit && id && <K9LinkedRecords k9Id={id} />}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Link to="/k9-roster"

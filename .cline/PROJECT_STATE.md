@@ -3,7 +3,7 @@
 ## Project
 - Name: Martina's K9 System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
-- Status: K9 Roster, Training, Boarding, Medical, and Handlers modules implemented; Reports coming soon
+- Status: K9 Roster, Training logs, Boarding, Medical, and Handlers modules implemented; Reports coming soon
 
 ## Current Stack
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
@@ -13,7 +13,7 @@
 - Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
 
 ## Architecture
-- `src/lib/k9Api.ts`, `src/lib/trainingApi.ts` call `/api/*` endpoints; on network failure or non-JSON response they fall back to localStorage records.
+- K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding.
 - Pages Functions return `{ data }` or `{ success, data }` / `{ success:false, error:{code,message} }`.
 
 ## Implemented Features
@@ -23,9 +23,9 @@
 - [x] Owner-only user administration with manual member password reset and session invalidation
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
-- [x] K9 Roster (list/create/edit/delete, photo, search, filters)
+- [x] K9 Roster (list/create/edit/delete, photo, search, filters, and per-dog linked boarding/training/medical/handler records with incremental paging)
 - [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes, daily rate/currency and checked-out total)
-- [x] Training page: sessions list + filters + stats, New Session modal, Goals panel + New Goal modal, K9 readiness panel
+- [x] Five training registers (Obedience, Detection, Tracking, Protection, Socialization) with linked K9/handler records and CRUD
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
@@ -33,11 +33,7 @@
 
 ## Database
 - `k9_roster` — K9 records (id, dog_name, breed, status, microchip, lineage...)
-- `training_types` — categories (seeded: Obedience, Detection, Tracking, Agility, Protection, Search & Rescue, Therapy, Socialization)
-- `assessment_criteria` — weighted 0–10 criteria per training type (seeded, is_critical flags)
-- `training_sessions` — FK `k9_id` → k9_roster (CASCADE), FK training_type_id → training_types
-- `training_assessments` — per-session criterion scores, UNIQUE(session_id, criterion_id)
-- `training_goals` — FK `k9_id` → k9_roster, optional training_type_id/criterion_id
+- Five `k9_training_*` tables — per-discipline date/note records with workspace-scoped K9 and handler foreign keys; migration `0017_training_logs.sql`.
 - `boarding_records` — workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
 - Boarding pricing columns (`currency`, `price_per_day`, `total_amount`) are added by migration `0014_boarding_pricing.sql`; checked-out totals are calculated server-side.
 - `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` — workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
@@ -48,9 +44,7 @@
 - GET/POST `/api/boarding`, GET/PUT/DELETE `/api/boarding/:id`; writes validate that the selected K9 belongs to the same workspace
 - GET/POST `/api/medical/{medications,records,conditions}`, GET/PUT/DELETE `/api/medical/{medications,records,conditions}/:id`; writes are workspace-scoped and validate related K9/medication ownership.
 - GET/POST `/api/handlers`, GET/PUT/DELETE `/api/handlers/:id`; handler records and searches are workspace-scoped.
-- GET/POST `/api/training` (sessions, filters: k9_id, training_type_id, status, search)
-- GET/POST `/api/training/types`
-- GET/POST `/api/training/goals` (filter: k9_id, status)
+- GET/POST `/api/training/:discipline`, GET/PUT/DELETE `/api/training/:discipline/:id`; discipline is obedience, detection, tracking, protection, or socialization.
 - PATCH `/api/members/:id` — owner-only manual member password reset
 - POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
@@ -59,8 +53,7 @@
 - Local database testing uses `wrangler pages dev` + local D1 persisted under `.wrangler/state`; Vite-only `pnpm dev` uses the localStorage/API fallback.
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
-- Training types/criteria seeded via `migrations/0003_seed_training_types.sql` (INSERT OR IGNORE)
-- Readiness scoring (GREEN/YELLOW/RED) computed client-side in `src/types/training.ts` `calculateReadiness()`
+- Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
 - Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
 - Branding assets: `/logo.jpg` for the logo mark and `/Caninelogy.png` for the wordmark
@@ -72,6 +65,9 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.
+- Added a per-K9 linked-record panel to the edit view with dog-specific boarding, training, medical, and training-handler details.
+- Added five workspace-scoped training logs linked to K9 and handler rosters; migration `0017_training_logs.sql`.
 - Added handler directory and workspace-scoped CRUD; migration `0016_handlers.sql` applied to local D1 only.
 - Added local Pages/D1 workflow scripts and a local-only full subscription access flag; deployed payment enforcement remains active.
 - Added medical overview, medication formulary, K9 treatment records and condition history with workspace-scoped CRUD; migration `0015_medical.sql` is pending application.
@@ -88,14 +84,11 @@
 - Added Lucide React for authentication form icons.
 
 ## Next Steps
-- Apply migration `0013_boarding.sql` to the Cloudflare D1 databases before using the deployed boarding API.
+- Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
-- Add edit/delete for sessions and goals; assessment scoring UI per session
-- Medical module
 
 ## Known Limitations
-- Training types list falls back to localStorage if API unreachable (seeded types won't appear offline until fetched once)
-- No PUT/DELETE endpoints for training sessions/goals yet
+- Training logs require the Pages Functions/D1 backend; they do not provide a localStorage fallback.
 

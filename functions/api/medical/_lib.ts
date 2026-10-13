@@ -65,8 +65,20 @@ export async function list(context: Context, resource: Resource) {
       const columns = resource === "medications" ? ["name", "category", "description"] : resource === "records" ? ["k.dog_name", "k.nick_name", "m.name", "r.administered_by"] : ["k.dog_name", "k.nick_name", "c.condition_name"]
       conditions.push(`(${columns.map((column) => `${column} LIKE ?`).join(" OR ")})`); bindings.push(...columns.map(() => `%${search}%`))
     }
-    const result = await context.env.DB.prepare(`${selectSql(resource)} WHERE ${conditions.join(" AND ")} ORDER BY ${alias(resource)}.${config.order}`).bind(...bindings).all()
-    return json({ data: result.results ?? [] })
+    const hasPagination = params.has("limit")
+    const requestedLimit = Number(params.get("limit"))
+    const limit = Number.isFinite(requestedLimit) ? Math.max(1, Math.min(200, Math.floor(requestedLimit))) : 50
+    const requestedOffset = Number(params.get("offset") ?? 0)
+    const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0
+    const base = `${selectSql(resource)} WHERE ${conditions.join(" AND ")}`
+    const [result, count] = await Promise.all([
+      context.env.DB.prepare(`${base} ORDER BY ${alias(resource)}.${config.order}${hasPagination ? " LIMIT ? OFFSET ?" : ""}`)
+        .bind(...bindings, ...(hasPagination ? [limit, offset] : [])).all(),
+      hasPagination
+        ? context.env.DB.prepare(`SELECT COUNT(*) AS total${base.slice(base.indexOf(" FROM "))}`).bind(...bindings).first<{ total: number }>()
+        : Promise.resolve(null),
+    ])
+    return json({ data: result.results ?? [], ...(hasPagination ? { total: Number(count?.total ?? 0) } : {}) })
   } catch { return json({ error: "Failed to load medical data" }, 500) }
 }
 

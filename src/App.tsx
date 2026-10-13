@@ -16,6 +16,8 @@ import MedicalFormPage from "./pages/MedicalFormPage"
 import { MedicalHomePage, MedicalListPage } from "./pages/MedicalPages"
 import HandlerFormPage from "./pages/HandlerFormPage"
 import HandlersPage from "./pages/HandlersPage"
+import TrainingLogPage from "./pages/TrainingLogPage"
+import TrainingFormPage from "./pages/TrainingFormPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -50,6 +52,9 @@ export default function App() {
         }
       />
       <Route path="/training" element={protectedPage(<TrainingPage />)} />
+      <Route path="/training/:discipline" element={protectedPage(<TrainingLogPage />)} />
+      <Route path="/training/:discipline/new" element={<ProtectedRoute requireWritable><TrainingFormPage /></ProtectedRoute>} />
+      <Route path="/training/:discipline/:id/edit" element={<ProtectedRoute requireWritable><TrainingFormPage /></ProtectedRoute>} />
       <Route path="/boarding" element={protectedPage(<BoardingPage />)} />
       <Route
         path="/boarding/new"

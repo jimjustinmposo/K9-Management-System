@@ -60,9 +60,16 @@ function errorMessage(data: any, status: number): string {
   return typeof data?.error === "string" ? data.error : `Request failed with status ${status}.`;
 }
 
-async function localRecords(): Promise<BoardingRecord[]> {
+async function localRecords(k9Id?: string): Promise<BoardingRecord[]> {
   const dogs = await k9Api.list();
-  return readLocal().map((record) => mapRow(record, dogs)).sort((a, b) => b.checkInDate.localeCompare(a.checkInDate));
+  return readLocal().map((record) => mapRow(record, dogs)).filter((record) => !k9Id || record.k9Id === k9Id).sort((a, b) => b.checkInDate.localeCompare(a.checkInDate));
+}
+
+export interface BoardingPage { data: BoardingRecord[]; total: number }
+
+function pageQuery(k9Id: string, limit: number, offset: number) {
+  const params = new URLSearchParams({ k9_id: k9Id, limit: String(limit), offset: String(offset) });
+  return params.toString();
 }
 
 export const boardingApi = {
@@ -74,6 +81,21 @@ export const boardingApi = {
     if (!response.ok) throw new Error(errorMessage(data, response.status));
     const dogs = await k9Api.list();
     return (data?.data ?? []).map((row: any) => mapRow(row, dogs));
+  },
+  async listForK9(k9Id: string, limit: number, offset: number): Promise<BoardingPage> {
+    let response: Response;
+    try { response = await fetch(`/api/boarding?${pageQuery(k9Id, limit, offset)}`); } catch {
+      const records = await localRecords(k9Id);
+      return { data: records.slice(offset, offset + limit), total: records.length };
+    }
+    if (!(response.headers.get("content-type") ?? "").includes("application/json")) {
+      const records = await localRecords(k9Id);
+      return { data: records.slice(offset, offset + limit), total: records.length };
+    }
+    const result = await jsonResponse(response);
+    if (!response.ok) throw new Error(errorMessage(result, response.status));
+    const dogs = await k9Api.list();
+    return { data: (result?.data ?? []).map((row: any) => mapRow(row, dogs)), total: Number(result?.total ?? 0) };
   },
   async get(id: string): Promise<BoardingRecord | null> {
     let response: Response;
