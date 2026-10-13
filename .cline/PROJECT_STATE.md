@@ -29,6 +29,7 @@
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
+- [~] K9 Feeding page, CRUD API, and remote-D1 migration prepared; migration awaits explicit approval/application
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
 
@@ -39,6 +40,7 @@
 - Boarding pricing columns (`currency`, `price_per_day`, `total_amount`) are added by migration `0014_boarding_pricing.sql`; checked-out totals are calculated server-side.
 - `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` — workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
 - `k9_handlers` — workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
+- `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -47,6 +49,7 @@
 - GET/POST `/api/handlers`, GET/PUT/DELETE `/api/handlers/:id`; handler records and searches are workspace-scoped.
 - Creating handlers requires owner `manageMembers` permission; members may view handlers only.
 - GET/POST `/api/training/:discipline`, GET/PUT/DELETE `/api/training/:discipline/:id`; discipline is obedience, detection, tracking, protection, or socialization.
+- GET/POST `/api/feeding`, GET/PUT/DELETE `/api/feeding/:id`; workspace-scoped feeding records linked to K9 and handler rosters.
 - GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` — owner-only member administration and direct member account creation
 - POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
@@ -56,6 +59,7 @@
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
 - Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
+- Wrangler's D1 binding uses `remote = true`, so Pages local development targets the shared remote D1; apply schema migrations only with explicit approval.
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
 - Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
 - Branding assets: `/logo.jpg` for the logo mark and `/Caninelogy.png` for the wordmark
@@ -67,6 +71,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
 - Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.
 - Added owner-created member accounts using existing hashed user credentials/memberships; members can add records but cannot edit, delete, access reports, subscription, or user administration. Migration `0018_member_account_index.sql`.

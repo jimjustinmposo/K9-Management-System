@@ -6,6 +6,7 @@ import ThemeToggle from "./ThemeToggle";
 export type IconName =
   | "dog"
   | "boarding"
+  | "feeding"
   | "task"
   | "training"
   | "heart"
@@ -34,6 +35,12 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
       <>
         <path d="M3 11 12 4l9 7" />
         <path d="M5 10v10h14V10M9 20v-6h6v6" />
+      </>
+    ),
+    feeding: (
+      <>
+        <path d="M4 7h16M6 7c0 8 2 12 6 12s6-4 6-12" />
+        <path d="M8 4h8M9 11h6" />
       </>
     ),
     task: (
@@ -154,6 +161,7 @@ export function SubscriptionStatusBar() {
 const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "K9 Roster", to: "/k9-roster", icon: "dog" },
   { label: "Boarding", to: "/boarding", icon: "boarding" },
+  { label: "K9 Feeding", to: "/feeding", icon: "feeding" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Medical", to: "/medical", icon: "heart" },
   { label: "Handlers", to: "/handlers", icon: "users" },
