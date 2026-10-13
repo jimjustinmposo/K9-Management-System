@@ -1,4 +1,4 @@
-git simport { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom"
 import { AppShell, Panel } from "../components/AppShell"
 import { handlersApi } from "../lib/handlersApi"

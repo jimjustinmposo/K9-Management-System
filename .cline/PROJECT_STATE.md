@@ -18,7 +18,7 @@
 
 ## Implemented Features
 - [x] Authentication UI and APIs (email/password)
-- [x] Vite local-test auth account persistence across dev-server restarts (server-side hashed credentials)
+- [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
 - [x] Owner-only user administration with manual member password reset and session invalidation
 - [x] Developer-secret password reset page and server-side password update
@@ -44,8 +44,9 @@
 - GET/POST `/api/boarding`, GET/PUT/DELETE `/api/boarding/:id`; writes validate that the selected K9 belongs to the same workspace
 - GET/POST `/api/medical/{medications,records,conditions}`, GET/PUT/DELETE `/api/medical/{medications,records,conditions}/:id`; writes are workspace-scoped and validate related K9/medication ownership.
 - GET/POST `/api/handlers`, GET/PUT/DELETE `/api/handlers/:id`; handler records and searches are workspace-scoped.
+- Creating handlers requires owner `manageMembers` permission; members may view handlers only.
 - GET/POST `/api/training/:discipline`, GET/PUT/DELETE `/api/training/:discipline/:id`; discipline is obedience, detection, tracking, protection, or socialization.
-- PATCH `/api/members/:id` — owner-only manual member password reset
+- GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` — owner-only member administration and direct member account creation
 - POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
@@ -66,6 +67,9 @@
 
 ## Recent Changes
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.
+- Added owner-created member accounts using existing hashed user credentials/memberships; members can add records but cannot edit, delete, access reports, subscription, or user administration. Migration `0018_member_account_index.sql`.
+- Extended the Vite development auth bridge to create and sign in as local-test members with member permissions.
+- Restricted handler creation to owners in the API, route, and UI.
 - Added a per-K9 linked-record panel to the edit view with dog-specific boarding, training, medical, and training-handler details.
 - Added five workspace-scoped training logs linked to K9 and handler rosters; migration `0017_training_logs.sql`.
 - Added handler directory and workspace-scoped CRUD; migration `0016_handlers.sql` applied to local D1 only.

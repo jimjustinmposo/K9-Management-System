@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom"
-import { ProtectedRoute } from "./lib/auth"
+import { ProtectedRoute, useAuth } from "./lib/auth"
 import BoardingFormPage from "./pages/BoardingFormPage"
 import BoardingPage from "./pages/BoardingPage"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
@@ -23,6 +23,11 @@ const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
 )
 
+function OwnerPage({ children }: { children: React.ReactNode }) {
+  const { session } = useAuth()
+  return session?.role === "owner" ? <>{children}</> : <Navigate to="/k9-roster" replace />
+}
+
 export default function App() {
   return (
     <Routes>
@@ -30,8 +35,8 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
-      <Route path="/subscribe" element={protectedPage(<SubscriptionPage />)} />
-      <Route path="/subscription" element={protectedPage(<SubscriptionPage />)} />
+      <Route path="/subscribe" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
+      <Route path="/subscription" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
       <Route path="/" element={<Navigate to="/k9-roster" replace />} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />
@@ -92,11 +97,11 @@ export default function App() {
       <Route path="/medical/conditions/new" element={<ProtectedRoute requireWritable><MedicalFormPage kind="conditions" /></ProtectedRoute>} />
       <Route path="/medical/conditions/:id/edit" element={<ProtectedRoute owner requireWritable><MedicalFormPage kind="conditions" /></ProtectedRoute>} />
       <Route path="/handlers" element={protectedPage(<HandlersPage />)} />
-      <Route path="/handlers/new" element={<ProtectedRoute requireWritable><HandlerFormPage /></ProtectedRoute>} />
+      <Route path="/handlers/new" element={<ProtectedRoute owner requireWritable><HandlerFormPage /></ProtectedRoute>} />
       <Route path="/handlers/:id/edit" element={<ProtectedRoute owner requireWritable><HandlerFormPage /></ProtectedRoute>} />
       <Route
         path="/reports"
-        element={protectedPage(<ComingSoonPage title="Reports" />)}
+        element={protectedPage(<OwnerPage><ComingSoonPage title="Reports" /></OwnerPage>)}
       />
       <Route path="*" element={<Navigate to="/k9-roster" replace />} />
     </Routes>

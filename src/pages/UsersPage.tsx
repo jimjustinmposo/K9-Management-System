@@ -16,6 +16,7 @@ export default function UsersPage() {
   const [error, setError] = useState("")
   const [selected, setSelected] = useState<Member | null>(null)
   const [saving, setSaving] = useState(false)
+  const [creating, setCreating] = useState(false)
   const [success, setSuccess] = useState("")
 
   useEffect(() => {
@@ -65,6 +66,39 @@ export default function UsersPage() {
     }
   }
 
+  async function createMember(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
+    const password = String(form.get("newPassword") ?? "")
+    const confirmPassword = String(form.get("newConfirmPassword") ?? "")
+    setError("")
+    setSuccess("")
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      return
+    }
+    setCreating(true)
+    try {
+      await apiRequest("/api/members/create", {
+        method: "POST",
+        body: JSON.stringify({
+          name: form.get("name"),
+          email: form.get("email"),
+          password,
+          confirmPassword,
+        }),
+      })
+      formElement.reset()
+      setSuccess("Member account created successfully.")
+      await loadMembers()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to create member")
+    } finally {
+      setCreating(false)
+    }
+  }
+
   return (
     <AppShell title="Users">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -94,6 +128,34 @@ export default function UsersPage() {
               </p>
             )}
           </div>
+        </Panel>
+
+        <Panel>
+          <PanelHeader title="Add a member" action={<span className="rounded-full bg-info-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-info">Member access</span>} />
+          <form className="grid gap-4 p-5 sm:grid-cols-2" onSubmit={createMember}>
+            <label className="block text-xs font-bold text-ink">
+              Member name
+              <input className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none transition focus:border-navy focus:ring-2 focus:ring-gold/50" name="name" autoComplete="name" required />
+            </label>
+            <label className="block text-xs font-bold text-ink">
+              Email address
+              <input className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none transition focus:border-navy focus:ring-2 focus:ring-gold/50" name="email" type="email" autoComplete="email" required />
+            </label>
+            <label className="block text-xs font-bold text-ink">
+              Password
+              <input className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none transition focus:border-navy focus:ring-2 focus:ring-gold/50" name="newPassword" type="password" minLength={6} autoComplete="new-password" required />
+            </label>
+            <label className="block text-xs font-bold text-ink">
+              Confirm password
+              <input className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none transition focus:border-navy focus:ring-2 focus:ring-gold/50" name="newConfirmPassword" type="password" minLength={6} autoComplete="new-password" required />
+            </label>
+            <p className="text-xs leading-5 text-muted sm:col-span-2">Members can view and add records only. Editing, deleting, reports, subscription, and user administration are unavailable.</p>
+            <div className="sm:col-span-2">
+              <button type="submit" disabled={creating} className="rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white ring-2 ring-transparent transition hover:bg-navy-light focus-visible:outline-none focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50">
+                {creating ? "Creating member…" : "Add member"}
+              </button>
+            </div>
+          </form>
         </Panel>
 
         <Panel>

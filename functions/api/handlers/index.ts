@@ -36,7 +36,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
 }
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
-  const session = await requireSession(context, "create")
+  const session = await requireSession(context, "manageMembers")
   if (isResponse(session)) return session
   try {
     const values = validate(await context.request.json() as Record<string, unknown>)

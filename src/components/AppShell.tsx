@@ -165,9 +165,12 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
   const [mobileNav, setMobileNav] = useState(false);
   const { session, logout } = useAuth();
-  const visibleNav = navItems.filter(
-    (item) => item.to !== "/users" || session?.permissions.viewAdmin,
-  );
+  const visibleNav = navItems.filter((item) => {
+    if (item.to === "/users") return session?.permissions.viewAdmin;
+    if (item.to === "/reports" || item.to === "/subscription")
+      return session?.role === "owner";
+    return true;
+  });
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
       {mobileNav && (

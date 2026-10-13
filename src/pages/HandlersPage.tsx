@@ -36,7 +36,7 @@ export default function HandlersPage() {
           <h2 className="mt-1 font-rajdhani text-3xl font-bold text-ink">Handler directory</h2>
           <p className="mt-1 text-sm text-muted">Keep your team’s contact details and roles in one place.</p>
         </div>
-        {session?.permissions.create && <Link to="/handlers/new" className="rounded-xl bg-navy px-4 py-3 text-sm font-bold text-white hover:bg-navy-light">+ Add handler</Link>}
+        {session?.role === "owner" && <Link to="/handlers/new" className="rounded-xl bg-navy px-4 py-3 text-sm font-bold text-white hover:bg-navy-light">+ Add handler</Link>}
       </div>
 
       <label className="block max-w-md">

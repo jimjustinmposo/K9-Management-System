@@ -53,7 +53,7 @@ react(),
 /** Development-only auth bridge. Cloudflare Pages Functions serve these routes
  * in deployed environments; Vite itself does not execute the functions folder. */
 function devAuthApiPlugin(): Plugin {
-  type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string }
+  type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string; role?: 'owner' | 'member'; workspaceId?: string; createdAt?: string }
   type DevPasswordReset = { email: string; expiresAt: number }
   const usersFile = path.resolve(__dirname, '.tmp-dev-auth-users.json')
   let savedUsers: DevUser[] = []
@@ -100,11 +100,40 @@ function devAuthApiPlugin(): Plugin {
         const sessionToken = (req.headers.cookie || '').split(';').map(value => value.trim()).find(value => value.startsWith('sentinel_dev_session='))?.slice('sentinel_dev_session='.length)
         const sessionEmail = sessionToken ? sessions.get(sessionToken) : undefined
         const sessionUser = sessionEmail ? users.get(sessionEmail) : undefined
+        if (pathname === '/api/handlers' && req.method === 'POST') {
+          if (!sessionUser || (sessionUser.role ?? 'owner') !== 'owner') return send(403, { error: 'You do not have permission for this action' })
+          return send(501, { error: 'Handler creation requires the Cloudflare Pages Functions development server.' })
+        }
+        if (pathname === '/api/members/create' && req.method === 'POST') {
+          if (!sessionUser || (sessionUser.role ?? 'owner') !== 'owner') return send(403, { error: 'You do not have permission for this action' })
+          const body = await readBody()
+          const name = String(body.name || '').trim()
+          const email = String(body.email || '').trim().toLowerCase()
+          const password = String(body.password || '')
+          const confirmPassword = String(body.confirmPassword || '')
+          if (!name || !/^\S+@\S+\.\S+$/.test(email)) return send(400, { error: 'A name and valid email are required' })
+          if (password.length < 6) return send(400, { error: 'Password must be at least 6 characters' })
+          if (password !== confirmPassword) return send(400, { error: 'Passwords do not match' })
+          if (users.has(email)) return send(409, { error: 'This email already belongs to an account' })
+          const workspaceId = sessionUser.workspaceId || sessionUser.id
+          const memberCount = [...users.values()].filter(user => user.workspaceId === workspaceId && user.role === 'member').length
+          if (memberCount >= 3) return send(409, { error: 'Your plan includes 3 member accounts' })
+          const member: DevUser = {
+            id: randomUUID(), email, name, workspaceName: sessionUser.workspaceName,
+            workspaceId, role: 'member', createdAt: new Date().toISOString(),
+            password: encodePassword(password),
+          }
+          users.set(email, member)
+          persistUsers()
+          return send(201, { success: true, data: { id: member.id, name, email, role: 'member' } })
+        }
         if (pathname === '/api/members' && req.method === 'GET') {
           if (!sessionUser) return send(401, { error: 'Authentication required' })
+          if ((sessionUser.role ?? 'owner') !== 'owner') return send(403, { error: 'You do not have permission for this action' })
+          const workspaceId = sessionUser.workspaceId || sessionUser.id
           return send(200, {
             data: {
-              members: [{ id: sessionUser.id, name: sessionUser.name, email: sessionUser.email, role: 'owner', created_at: new Date().toISOString() }],
+              members: [...users.values()].filter(user => (user.workspaceId || (user.role === 'member' ? '' : user.id)) === workspaceId).map(user => ({ id: user.id, name: user.name, email: user.email, role: user.role ?? 'owner', created_at: user.createdAt || new Date().toISOString() })),
               invitations: [],
               seats: { included: 3, used: 0, extra: 0 },
             },
@@ -114,7 +143,7 @@ function devAuthApiPlugin(): Plugin {
         if (memberMatch && req.method === 'PATCH') {
           if (!sessionUser) return send(401, { error: 'Authentication required' })
           const target = [...users.values()].find(user => user.id === decodeURIComponent(memberMatch[1]))
-          if (!target || target.id === sessionUser.id) return send(404, { error: 'Member not found' })
+          if (!target || target.role !== 'member' || target.workspaceId !== (sessionUser.workspaceId || sessionUser.id)) return send(404, { error: 'Member not found' })
           const body = await readBody(); const password = String(body.password || '')
           if (password.length < 6) return send(400, { error: 'Password must be at least 6 characters' })
           target.password = encodePassword(password)
@@ -126,13 +155,15 @@ function devAuthApiPlugin(): Plugin {
           const email = sessionEmail
           const user = sessionUser
           if (!user) return send(401, { error: 'Authentication required' })
-          return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.id}`, name: user.workspaceName }, role: 'owner', subscription: { status: 'active', interval: 'month', currentPeriodEnd: null, writable: true, hasSubscription: true }, permissions: { view: true, create: true, edit: true, delete: true, manageMembers: true, manageBilling: true, viewAdmin: true } } })
+          const owner = (user.role ?? 'owner') === 'owner'
+          return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.workspaceId || user.id}`, name: user.workspaceName }, role: owner ? 'owner' : 'member', subscription: { status: 'active', interval: 'month', currentPeriodEnd: null, writable: true, hasSubscription: true }, permissions: { view: true, create: true, edit: owner, delete: owner, manageMembers: owner, manageBilling: owner, viewAdmin: owner } } })
         }
         if (pathname === '/api/auth/register' && req.method === 'POST') {
           const body = await readBody(); const email = String(body.email || '').trim().toLowerCase(); const password = String(body.password || '')
           if (!body.name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 6) return send(400, { error: 'Name, valid email, and a password of at least 6 characters are required' })
           if (users.has(email)) return send(409, { error: 'An account with this email already exists' })
-          users.set(email, { id: randomUUID(), email, name: String(body.name).trim(), workspaceName: String(body.workspaceName || `${body.name}'s K9 Unit`).trim(), password: encodePassword(password) })
+          const id = randomUUID()
+          users.set(email, { id, email, name: String(body.name).trim(), workspaceName: String(body.workspaceName || `${body.name}'s K9 Unit`).trim(), workspaceId: id, role: 'owner', createdAt: new Date().toISOString(), password: encodePassword(password) })
           persistUsers()
           const token = randomUUID(); sessions.set(token, email)
           return send(201, { success: true, devMode: true }, `sentinel_dev_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`)
