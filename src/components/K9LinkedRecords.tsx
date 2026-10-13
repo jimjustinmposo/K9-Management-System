@@ -81,7 +81,10 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
         setConditions(conditionsResult.value.data)
         setTotals((current) => ({ ...current, medical: current.medical + conditionsResult.value.total }))
       }
-      if (results.some((result) => result.status === "rejected")) setLoadError("Some records could not be loaded. Try refreshing the page.")
+      const failedSections = results.flatMap((result, index) => result.status === "rejected"
+        ? [["boarding", "training", "medical records", "medical conditions"][index]]
+        : [])
+      if (failedSections.length) setLoadError(`Could not load ${failedSections.join(", ")}. The K9 profile is still available; apply the pending database migrations if this continues.`)
       setLoading(false)
     })
 
