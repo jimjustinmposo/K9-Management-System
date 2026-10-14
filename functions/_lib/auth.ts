@@ -149,7 +149,7 @@ export async function getSession(
     .prepare(`SELECT u.id user_id, u.email, u.name user_name, w.id workspace_id, w.name workspace_name,
     m.role, w.subscription_status, w.billing_interval, w.current_period_end
     FROM sessions s JOIN users u ON u.id=s.user_id JOIN memberships m ON m.user_id=u.id
-    JOIN workspaces w ON w.id=m.workspace_id WHERE s.token_hash=? AND s.expires_at>?`)
+    JOIN workspaces w ON w.id=m.workspace_id WHERE s.token_hash=? AND s.expires_at>? AND m.archived_at IS NULL`)
     .bind(await hashToken(token), new Date().toISOString())
     .first<any>()
   if (!row) return null

@@ -20,7 +20,7 @@
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
-- [x] Owner-only user administration with manual member password reset and session invalidation
+- [x] Owner-only user administration with member password reset, archive/restore, permanent delete, and session invalidation
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters, and per-dog linked boarding/training/medical/handler records with incremental paging)
@@ -74,6 +74,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added owner-only member archive/restore and permanent deletion; archived members cannot sign in and do not count toward active seats (migration `0022_member_archiving.sql`, not yet applied remotely).
 - Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
 - Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.
 - Persisted selected dogs and unsaved weights/date across refresh, navigation, and logout; added a Clear list action.

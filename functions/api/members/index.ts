@@ -11,7 +11,7 @@ import { appUrl, clean, id, json } from "../../_lib/http"
 async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
   const members = await db
     .prepare(
-      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member'",
+      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member' AND archived_at IS NULL",
     )
     .bind(workspaceId)
     .first<any>()
@@ -29,7 +29,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   if (isResponse(session)) return session
   const [members, invites] = await Promise.all([
     context.env.DB.prepare(
-      "SELECT u.id,u.name,u.email,m.role,m.created_at FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? ORDER BY m.created_at",
+      "SELECT u.id,u.name,u.email,m.role,m.created_at,m.archived_at FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.workspace_id=? ORDER BY (m.archived_at IS NOT NULL),m.created_at",
     )
       .bind(session.workspace.id)
       .all(),

@@ -8,6 +8,7 @@ type Member = {
   email: string
   role: "owner" | "member"
   created_at: string
+  archived_at: string | null
 }
 
 export default function UsersPage() {
@@ -17,6 +18,7 @@ export default function UsersPage() {
   const [selected, setSelected] = useState<Member | null>(null)
   const [saving, setSaving] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [actionId, setActionId] = useState("")
   const [success, setSuccess] = useState("")
 
   useEffect(() => {
@@ -99,6 +101,40 @@ export default function UsersPage() {
     }
   }
 
+  async function setArchived(member: Member, archived: boolean) {
+    setActionId(member.id)
+    setError("")
+    setSuccess("")
+    try {
+      await apiRequest(`/api/members/${member.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ archived }),
+      })
+      setSuccess(`${member.name} was ${archived ? "archived" : "restored"}.`)
+      await loadMembers()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to update member")
+    } finally {
+      setActionId("")
+    }
+  }
+
+  async function deleteMember(member: Member) {
+    if (!window.confirm(`Permanently delete ${member.name} (${member.email})? This cannot be undone.`)) return
+    setActionId(member.id)
+    setError("")
+    setSuccess("")
+    try {
+      await apiRequest(`/api/members/${member.id}`, { method: "DELETE" })
+      setSuccess(`${member.name} was permanently deleted.`)
+      await loadMembers()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to delete member")
+    } finally {
+      setActionId("")
+    }
+  }
+
   return (
     <AppShell title="Users">
       <div className="mx-auto max-w-5xl space-y-6">
@@ -114,8 +150,7 @@ export default function UsersPage() {
           />
           <div className="p-5">
             <p className="max-w-2xl text-sm leading-6 text-muted">
-              Reset a member's password manually. The member will be signed out on all
-              devices and can sign in with the new password you provide.
+              Manage workspace members. Archiving signs a member out and preserves their data; deleting permanently removes their account.
             </p>
             {success && (
               <p className="mt-4 rounded-xl bg-positive-soft px-4 py-3 text-sm font-bold text-positive">
@@ -180,22 +215,18 @@ export default function UsersPage() {
                       <p className="mt-1 truncate text-xs text-muted">{member.email}</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded-full bg-canvas px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-                      {member.role}
+                      {member.archived_at ? "Archived" : member.role}
                     </span>
                     {member.role === "member" && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError("")
-                          setSuccess("")
-                          setSelected(member)
-                        }}
-                        className="button-edit"
-                      >
-                        Reset password
-                      </button>
+                      <>
+                        {!member.archived_at && <button type="button" onClick={() => { setError(""); setSuccess(""); setSelected(member) }} className="button-edit">Reset password</button>}
+                        <button type="button" disabled={actionId === member.id} onClick={() => void setArchived(member, !member.archived_at)} className="button-secondary">
+                          {actionId === member.id ? "Saving…" : member.archived_at ? "Restore" : "Archive"}
+                        </button>
+                        <button type="button" disabled={actionId === member.id} onClick={() => void deleteMember(member)} className="button-delete">Delete</button>
+                      </>
                     )}
                   </div>
                 </div>

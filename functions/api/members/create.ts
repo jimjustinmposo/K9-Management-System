@@ -9,7 +9,7 @@ import { clean, id, json } from "../../_lib/http"
 async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
   const members = await db
     .prepare(
-      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member'",
+      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member' AND archived_at IS NULL",
     )
     .bind(workspaceId)
     .first<{ count: number }>()

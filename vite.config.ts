@@ -53,7 +53,7 @@ react(),
 /** Development-only auth bridge. Cloudflare Pages Functions serve these routes
  * in deployed environments; Vite itself does not execute the functions folder. */
 function devAuthApiPlugin(): Plugin {
-  type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string; role?: 'owner' | 'member'; workspaceId?: string; createdAt?: string }
+  type DevUser = { id: string; email: string; name: string; workspaceName: string; password: string; role?: 'owner' | 'member'; workspaceId?: string; createdAt?: string; archivedAt?: string | null }
   type DevPasswordReset = { email: string; expiresAt: number }
   const usersFile = path.resolve(__dirname, '.tmp-dev-auth-users.json')
   let savedUsers: DevUser[] = []
@@ -116,7 +116,7 @@ function devAuthApiPlugin(): Plugin {
           if (password !== confirmPassword) return send(400, { error: 'Passwords do not match' })
           if (users.has(email)) return send(409, { error: 'This email already belongs to an account' })
           const workspaceId = sessionUser.workspaceId || sessionUser.id
-          const memberCount = [...users.values()].filter(user => user.workspaceId === workspaceId && user.role === 'member').length
+          const memberCount = [...users.values()].filter(user => user.workspaceId === workspaceId && user.role === 'member' && !user.archivedAt).length
           if (memberCount >= 3) return send(409, { error: 'Your plan includes 3 member accounts' })
           const member: DevUser = {
             id: randomUUID(), email, name, workspaceName: sessionUser.workspaceName,
@@ -133,17 +133,32 @@ function devAuthApiPlugin(): Plugin {
           const workspaceId = sessionUser.workspaceId || sessionUser.id
           return send(200, {
             data: {
-              members: [...users.values()].filter(user => (user.workspaceId || (user.role === 'member' ? '' : user.id)) === workspaceId).map(user => ({ id: user.id, name: user.name, email: user.email, role: user.role ?? 'owner', created_at: user.createdAt || new Date().toISOString() })),
+              members: [...users.values()].filter(user => (user.workspaceId || (user.role === 'member' ? '' : user.id)) === workspaceId).map(user => ({ id: user.id, name: user.name, email: user.email, role: user.role ?? 'owner', created_at: user.createdAt || new Date().toISOString(), archived_at: user.archivedAt || null })),
               invitations: [],
               seats: { included: 3, used: 0, extra: 0 },
             },
           })
         }
         const memberMatch = pathname?.match(/^\/api\/members\/([^/]+)$/)
-        if (memberMatch && req.method === 'PATCH') {
+        if (memberMatch && (req.method === 'PATCH' || req.method === 'PUT' || req.method === 'DELETE')) {
           if (!sessionUser) return send(401, { error: 'Authentication required' })
+          if ((sessionUser.role ?? 'owner') !== 'owner') return send(403, { error: 'You do not have permission for this action' })
           const target = [...users.values()].find(user => user.id === decodeURIComponent(memberMatch[1]))
           if (!target || target.role !== 'member' || target.workspaceId !== (sessionUser.workspaceId || sessionUser.id)) return send(404, { error: 'Member not found' })
+          if (req.method === 'DELETE') {
+            users.delete(target.email)
+            persistUsers()
+            for (const [session, email] of sessions) if (email === target.email) sessions.delete(session)
+            return send(200, { success: true, devMode: true })
+          }
+          if (req.method === 'PUT') {
+            const body = await readBody()
+            if (typeof body.archived !== 'boolean') return send(400, { error: 'Archived must be true or false' })
+            target.archivedAt = body.archived ? new Date().toISOString() : null
+            persistUsers()
+            if (body.archived) for (const [session, email] of sessions) if (email === target.email) sessions.delete(session)
+            return send(200, { success: true, archived: body.archived, devMode: true })
+          }
           const body = await readBody(); const password = String(body.password || '')
           if (password.length < 6) return send(400, { error: 'Password must be at least 6 characters' })
           target.password = encodePassword(password)
@@ -154,7 +169,7 @@ function devAuthApiPlugin(): Plugin {
         if (pathname === '/api/auth/session' && req.method === 'GET') {
           const email = sessionEmail
           const user = sessionUser
-          if (!user) return send(401, { error: 'Authentication required' })
+          if (!user || user.archivedAt) return send(401, { error: 'Authentication required' })
           const owner = (user.role ?? 'owner') === 'owner'
           return send(200, { data: { user: { id: user.id, email: user.email, name: user.name }, workspace: { id: `dev-${user.workspaceId || user.id}`, name: user.workspaceName }, role: owner ? 'owner' : 'member', subscription: { status: 'active', interval: 'month', currentPeriodEnd: null, writable: true, hasSubscription: true }, permissions: { view: true, create: true, edit: owner, delete: owner, manageMembers: owner, manageBilling: owner, viewAdmin: owner } } })
         }
@@ -170,7 +185,7 @@ function devAuthApiPlugin(): Plugin {
         }
         if (pathname === '/api/auth/login' && req.method === 'POST') {
           const body = await readBody(); const email = String(body.email || '').trim().toLowerCase(); const user = users.get(email)
-          if (!user || !matchesPassword(String(body.password || ''), user.password)) return send(401, { error: 'Invalid email or password' })
+          if (!user || user.archivedAt || !matchesPassword(String(body.password || ''), user.password)) return send(401, { error: 'Invalid email or password' })
           const token = randomUUID(); sessions.set(token, email)
           return send(200, { success: true, devMode: true }, `sentinel_dev_session=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000`)
         }

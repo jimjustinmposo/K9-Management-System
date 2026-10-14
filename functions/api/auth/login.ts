@@ -5,7 +5,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const body = (await context.request.json()) as any
   const email = clean(body.email).toLowerCase()
   const row = await context.env.DB.prepare(
-    "SELECT id,password_hash,password_salt FROM users WHERE email=?",
+    "SELECT u.id,u.password_hash,u.password_salt FROM users u JOIN memberships m ON m.user_id=u.id AND m.archived_at IS NULL WHERE u.email=?",
   )
     .bind(email)
     .first<any>()

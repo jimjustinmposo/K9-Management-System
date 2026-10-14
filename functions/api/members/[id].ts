@@ -38,6 +38,40 @@ export const onRequestPatch: PagesFunction<AppEnv> = async (context) => {
   return json({ success: true })
 }
 
+export const onRequestPut: PagesFunction<AppEnv> = async (context) => {
+  const session = await requireSession(context, "manageMembers")
+  if (isResponse(session)) return session
+  const target = context.params.id as string
+  let body: { archived?: unknown }
+  try {
+    body = (await context.request.json()) as { archived?: unknown }
+  } catch {
+    return json({ error: "Invalid request body" }, 400)
+  }
+  if (typeof body.archived !== "boolean")
+    return json({ error: "Archived must be true or false" }, 400)
+
+  const member = await context.env.DB.prepare(
+    "SELECT user_id FROM memberships WHERE user_id=? AND workspace_id=? AND role='member'",
+  )
+    .bind(target, session.workspace.id)
+    .first()
+  if (!member) return json({ error: "Member not found" }, 404)
+
+  const archivedAt = body.archived ? new Date().toISOString() : null
+  await context.env.DB.prepare(
+    "UPDATE memberships SET archived_at=? WHERE user_id=? AND workspace_id=? AND role='member'",
+  )
+    .bind(archivedAt, target, session.workspace.id)
+    .run()
+  if (body.archived) {
+    await context.env.DB.prepare("DELETE FROM sessions WHERE user_id=?")
+      .bind(target)
+      .run()
+  }
+  return json({ success: true, archived: body.archived })
+}
+
 export const onRequestDelete: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageMembers")
   if (isResponse(session)) return session
