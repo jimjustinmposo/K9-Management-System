@@ -20,8 +20,9 @@ function harness(response, roster = [dog]) {
   const storage = new Map();
   const exports = {};
   const require = (name) => {
-    assert.equal(name, "./k9Api");
-    return { k9Api: { list: async () => { calls.push({ path: "/api/k9" }); return roster; } } };
+    if (name === "./k9Api") return { k9Api: { list: async () => { calls.push({ path: "/api/k9" }); return roster; } } };
+    if (name === "./apiCache") return { cachedApiFetch: (_path, load) => load(), invalidateApiCache: () => {} };
+    throw new Error(`Unexpected dependency: ${name}`);
   };
   const fetch = async (path, init) => {
     calls.push({ path, init });

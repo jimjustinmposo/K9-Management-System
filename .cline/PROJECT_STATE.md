@@ -15,6 +15,7 @@
 ## Architecture
 - K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.
 - Pages Functions return `{ data }` or `{ success, data }` / `{ success:false, error:{code,message} }`.
+- Frontend GET requests use a 30-second in-memory cache with request deduplication, mutation invalidation, workspace/user isolation, and clear-on-logout; cache is cleared when the tab returns to foreground.
 
 ## Implemented Features
 - [x] Authentication UI and APIs (email/password)
@@ -74,6 +75,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added dependency-free frontend API GET caching on branch `perf/shared-api-cache`; auth/billing excluded, requests scoped by user/workspace, mutation invalidation and foreground revalidation included. Seven cache tests plus existing focused suites pass; browser navigation metrics are not yet measured.
 - Added a Weights tab to per-K9 linked records using an optional tenant-scoped `dog_id` filter on GET `/api/weights`; displays paged dog-specific measurements and stored differences. Existing workspace/dog index reused; no migration or weight calculation/write changes. Six isolated handler/client tests pass; full 57 focused tests, typechecks and production build pass. Browser interaction check pending.
 - Register search changes now debounce for 250 ms with timer cancellation and immediate stale-result invalidation; initial/page loads and manual reloads remain immediate when search is settled. Loader tests expanded to 9; 51 focused tests, both typechecks and build pass. Medical form restored sequential reads to preserve partial-failure behavior, retaining unmount guards. Browser integration and route splitting remain pending.
 - Session refresh now coalesces background requests while explicit login/billing refreshes supersede stale reads; logout/unmount invalidate pending results. Shared latest-load protection covers handler, training, medical, feeding and weight registers, including mutation reloads using current filters. Seven session and five loader tests pass; browser integration, debounce and route splitting still pending.

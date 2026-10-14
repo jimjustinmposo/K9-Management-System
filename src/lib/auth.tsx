@@ -7,6 +7,7 @@ import {
 } from "react"
 import { Navigate, useLocation } from "react-router-dom"
 import { createSessionController } from "./sessionController"
+import { cachedApiGet, clearApiCache, invalidateApiCache, revalidateApiCache, setApiCacheScope } from "./apiCache"
 
 export type Session = {
   user: { id: string; email: string; name: string }
@@ -42,13 +43,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [controller] = useState(() => createSessionController<Session>(
     async () => {
-      const response = await fetch("/api/auth/session", {
-        credentials: "same-origin",
-      })
-      const data = await response.json()
-      return response.ok ? data.data : null
+      try {
+        const response = await fetch("/api/auth/session", { credentials: "same-origin" })
+        const data = await response.json()
+        const nextSession = response.ok ? data.data : null
+        setApiCacheScope(nextSession ? `${nextSession.workspace?.id}:${nextSession.user?.id}` : null)
+        return nextSession
+      } catch (error) {
+        setApiCacheScope(null)
+        throw error
+      }
     },
-    async () => { await fetch("/api/auth/logout", { method: "POST" }) },
+    async () => { clearApiCache(); await fetch("/api/auth/logout", { method: "POST" }) },
     setSession,
     () => setLoading(false),
   ))
@@ -56,7 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void controller.start()
     const poll = window.setInterval(() => void controller.refresh(false), 15_000)
     const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible") void controller.refresh(false)
+      if (document.visibilityState === "visible") {
+        revalidateApiCache()
+        void controller.refresh(false)
+      }
     }
     document.addEventListener("visibilitychange", refreshWhenVisible)
     window.addEventListener("focus", refreshWhenVisible)
@@ -106,22 +115,29 @@ export function ProtectedRoute({
 }
 
 export async function apiRequest(path: string, init?: RequestInit) {
-  const response = await fetch(path, {
-    ...init,
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...init?.headers,
-    },
-  })
-  const data = await response.json().catch(() => ({}))
-  if (!response.ok) {
-    const message =
-      typeof data.error === "string"
-        ? data.error
-        : typeof data.error?.message === "string"
-          ? data.error.message
-          : "Request failed"
-    throw new Error(message)
+  const method = (init?.method ?? "GET").toUpperCase()
+  const load = async () => {
+    const response = await fetch(path, {
+      ...init,
+      headers: {
+        ...(init?.body ? { "Content-Type": "application/json" } : {}),
+        ...init?.headers,
+      },
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      const message =
+        typeof data.error === "string"
+          ? data.error
+          : typeof data.error?.message === "string"
+            ? data.error.message
+            : "Request failed"
+      throw new Error(message)
+    }
+    return data
   }
-  return data
+  if (method === "GET") return cachedApiGet(path, load)
+  const result = await load()
+  invalidateApiCache(path)
+  return result
 }

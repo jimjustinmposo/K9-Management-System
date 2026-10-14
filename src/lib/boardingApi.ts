@@ -1,6 +1,7 @@
 import { k9Api } from "./k9Api";
 import type { BoardingFormValues, BoardingRecord } from "../types/boarding";
 import type { K9Record } from "../types/k9";
+import { cachedApiFetch, invalidateApiCache } from "./apiCache";
 
 const STORAGE_KEY = "sentinel-boarding-v1";
 type StoredRecord = Omit<BoardingRecord, "k9">;
@@ -85,7 +86,7 @@ function pageQuery(k9Id: string, limit: number, offset: number) {
 export const boardingApi = {
   async list(): Promise<BoardingRecord[]> {
     let response: Response;
-    try { response = await fetch("/api/boarding"); } catch { return localRecords(); }
+    try { response = await cachedApiFetch("/api/boarding", () => fetch("/api/boarding")); } catch { return localRecords(); }
     if (!(response.headers.get("content-type") ?? "").includes("application/json")) return localRecords();
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
@@ -108,7 +109,7 @@ export const boardingApi = {
   },
   async get(id: string): Promise<BoardingRecord | null> {
     let response: Response;
-    try { response = await fetch(`/api/boarding/${encodeURIComponent(id)}`); } catch {
+    try { response = await cachedApiFetch(`/api/boarding/${encodeURIComponent(id)}`, () => fetch(`/api/boarding/${encodeURIComponent(id)}`)); } catch {
       return (await localRecords()).find((record) => record.id === id) ?? null;
     }
     if (!(response.headers.get("content-type") ?? "").includes("application/json")) {
@@ -138,6 +139,7 @@ export const boardingApi = {
     }
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
+    invalidateApiCache("/api/boarding");
     return (await mapServerRows([data.data]))[0];
   },
   async update(id: string, values: BoardingFormValues): Promise<BoardingRecord> {
@@ -156,6 +158,7 @@ export const boardingApi = {
     }
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
+    invalidateApiCache(`/api/boarding/${encodeURIComponent(id)}`); invalidateApiCache("/api/boarding");
     return (await mapServerRows([data.data]))[0];
   },
   async remove(id: string): Promise<void> {
@@ -166,5 +169,6 @@ export const boardingApi = {
       return;
     }
     if (!response.ok) throw new Error(errorMessage(await jsonResponse(response), response.status));
+    invalidateApiCache(`/api/boarding/${encodeURIComponent(id)}`); invalidateApiCache("/api/boarding");
   },
 };

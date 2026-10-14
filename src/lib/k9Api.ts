@@ -1,4 +1,5 @@
 import type { K9FormValues, K9Record } from "../types/k9";
+import { cachedApiFetch, invalidateApiCache } from "./apiCache";
 
 const STORAGE_KEY = "sentinel-k9-roster-v1";
 
@@ -157,7 +158,7 @@ export const k9Api = {
       : "";
     let res: Response;
     try {
-      res = await fetch(`/api/k9${query}`);
+      res = await cachedApiFetch(`/api/k9${query}`, () => fetch(`/api/k9${query}`));
     } catch {
       return filterLocal(search);
     }
@@ -176,7 +177,7 @@ export const k9Api = {
   async get(id: string): Promise<K9Record | null> {
     let res: Response;
     try {
-      res = await fetch(`/api/k9/${encodeURIComponent(id)}`);
+      res = await cachedApiFetch(`/api/k9/${encodeURIComponent(id)}`, () => fetch(`/api/k9/${encodeURIComponent(id)}`));
     } catch {
       return readLocal().find((k9) => k9.id === id) ?? null;
     }
@@ -207,7 +208,10 @@ export const k9Api = {
     if (!res.ok) {
       throw new Error(serverMessage(data) || `Save failed with status ${res.status}.`);
     }
-    if (data) return mapRow(data.data ?? data);
+    if (data) {
+      invalidateApiCache("/api/k9");
+      return mapRow(data.data ?? data);
+    }
     throw new Error("Save failed: empty API response.");
   },
 
@@ -227,7 +231,11 @@ export const k9Api = {
     if (!res.ok) {
       throw new Error(serverMessage(data) || `Save failed with status ${res.status}.`);
     }
-    if (data) return mapRow(data.data ?? data);
+    if (data) {
+      invalidateApiCache(`/api/k9/${encodeURIComponent(id)}`);
+      invalidateApiCache("/api/k9");
+      return mapRow(data.data ?? data);
+    }
     throw new Error("Save failed: empty API response.");
   },
 
@@ -250,6 +258,8 @@ export const k9Api = {
       const data = await parseJsonSafely(res);
       throw new Error(serverMessage(data) || `Delete failed with status ${res.status}.`);
     }
+    invalidateApiCache(`/api/k9/${encodeURIComponent(id)}`);
+    invalidateApiCache("/api/k9");
   },
 };
 
