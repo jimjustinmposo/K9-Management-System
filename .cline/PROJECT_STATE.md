@@ -30,7 +30,8 @@
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
-- [~] K9 Feeding page, CRUD API, and remote-D1 migration prepared; migration awaits explicit approval/application
+- [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
+- [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
@@ -44,6 +45,7 @@
 - `k9_handlers` — workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
 - `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
 - `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
+- `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -53,12 +55,13 @@
 - Creating handlers requires owner `manageMembers` permission; members may view handlers only.
 - GET/POST `/api/training/:discipline`, GET/PUT/DELETE `/api/training/:discipline/:id`; discipline is obedience, detection, tracking, protection, or socialization.
 - GET/POST `/api/feeding`, GET/PUT/DELETE `/api/feeding/:id`; workspace-scoped feeding records linked to K9 and handler rosters.
+- GET/POST `/api/food-inventory`, GET/PUT/DELETE `/api/food-inventory/:id`; workspace-scoped stock records with computed usage and balance.
 - GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` — owner-only member administration and direct member account creation
 - POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
-- Local database testing uses `wrangler pages dev` + local D1 persisted under `.wrangler/state`; Vite-only `pnpm dev` uses the localStorage/API fallback.
+- Local Pages development is configured with D1 `remote = true` to use the shared remote D1; Vite-only `pnpm dev` does not run Pages Functions and retains localStorage/API fallback.
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
 - Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
@@ -75,6 +78,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added Food Inventory CRUD and live feeding-consumption calculation; additive schema applied directly to shared remote D1. Local Pages D1 binding set to remote; no app deployment performed.
 - Added dependency-free frontend API GET caching on branch `perf/shared-api-cache`; auth/billing excluded, requests scoped by user/workspace, mutation invalidation and foreground revalidation included. Seven cache tests plus existing focused suites pass; browser navigation metrics are not yet measured.
 - Added a Weights tab to per-K9 linked records using an optional tenant-scoped `dog_id` filter on GET `/api/weights`; displays paged dog-specific measurements and stored differences. Existing workspace/dog index reused; no migration or weight calculation/write changes. Six isolated handler/client tests pass; full 57 focused tests, typechecks and production build pass. Browser interaction check pending.
 - Register search changes now debounce for 250 ms with timer cancellation and immediate stale-result invalidation; initial/page loads and manual reloads remain immediate when search is settled. Loader tests expanded to 9; 51 focused tests, both typechecks and build pass. Medical form restored sequential reads to preserve partial-failure behavior, retaining unmount guards. Browser integration and route splitting remain pending.
@@ -84,6 +88,8 @@
 - Added owner-only member archive/restore and permanent deletion; archived members cannot sign in and do not count toward active seats (migration `0022_member_archiving.sql`, not yet applied remotely).
 - Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
 - Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.
+- Connected K9 feeding food selection to Food Inventory, added g/kg amount entry with gram persistence, and enforced inventory existence and available-stock validation on create/edit.
+- Renamed the Food Inventory create action to “New food” and added per-entry restocking in grams or kilograms, accumulating stock on the existing record.
 - Persisted selected dogs and unsaved weights/date across refresh, navigation, and logout; added a Clear list action.
 - Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.

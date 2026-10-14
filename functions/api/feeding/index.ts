@@ -44,6 +44,10 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
       context.env.DB.prepare("SELECT id FROM k9_handlers WHERE id = ? AND workspace_id = ?").bind(handler, session.workspace.id).first(),
     ])
     if (!linked[0] || !linked[1]) return json({ error: "Selected dog or handler is not available in this workspace" }, 400)
+    const stock = await context.env.DB.prepare(`SELECT COUNT(*) AS entries, COALESCE(SUM(i.amount), 0) - COALESCE((SELECT SUM(f.grams) / 1000.0 FROM k9feeding f WHERE f.workspace_id = i.workspace_id AND LOWER(TRIM(f.food)) = LOWER(TRIM(i.item))), 0) AS available FROM k9_food_inventory i WHERE i.workspace_id = ? AND LOWER(TRIM(i.item)) = LOWER(TRIM(?))`).bind(session.workspace.id, food).first<{ entries: number; available: number }>()
+    if (!stock?.entries) return json({ error: `Food “${food}” is not in the food inventory. Add it to Food Inventory before recording a feeding.` }, 400)
+    const availableGrams = Number(stock.available) * 1000
+    if (grams > availableGrams) return json({ error: `Insufficient inventory for “${food}”: only ${Math.max(0, Number(stock.available)).toFixed(3)} kg (${Math.max(0, availableGrams).toLocaleString()} g) remains. Please add stock or reduce the portion to ${Math.max(0, availableGrams).toLocaleString()} g or less.` }, 400)
     const id = crypto.randomUUID(), now = new Date().toISOString()
     await context.env.DB.prepare("INSERT INTO k9feeding (id, date, dog, handler, food, grams, noted, workspace_id, created_by_user_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
       .bind(id, date, dog, handler, food, grams, noted, session.workspace.id, session.user.id, now, now).run()

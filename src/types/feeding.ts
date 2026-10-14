@@ -18,9 +18,10 @@ export interface FeedingFormValues {
   handler: string
   food: string
   grams: string
+  unit: "g" | "kg"
   noted: string
 }
 
 export const EMPTY_FEEDING_FORM: FeedingFormValues = {
-  date: new Date().toISOString().slice(0, 10), dog: "", handler: "", food: "", grams: "", noted: "",
+  date: new Date().toISOString().slice(0, 10), dog: "", handler: "", food: "", grams: "", unit: "g", noted: "",
 }

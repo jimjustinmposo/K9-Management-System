@@ -1,0 +1,21 @@
+shopping
+date, item, description , quantity, price
+
+grooming
+date, bathing , nails , ears , brushing , price 
+
+
+food inventory
+date , item , brand, amount <---- it will be automatically compute the usage
+
+
+in season
+dog name , date , 
+
+
+car 
+time in , km start , timeout, km end
+
+
+
+

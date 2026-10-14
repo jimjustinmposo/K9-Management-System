@@ -10,5 +10,5 @@ database_id = "a67e5d3b-d14f-44b0-92c8-ee708c85a642"
 binding = "DB"
 database_name = "k9_ops_db"
 migrations_dir = "migrations"
-# Development must never read or mutate the deployed D1 database.
-remote = false
+# Local Pages development and deployment share the same Cloudflare D1 database.
+remote = true
