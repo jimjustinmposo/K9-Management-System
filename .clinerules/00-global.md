@@ -179,6 +179,10 @@ Do not continue improving unrelated areas.
 
 Keep responses concise.
 
+## 16. Project UI Design — Dark Panels and Gold Pill Buttons
+
+For panels/cards in dark mode, prefer a deep forest-green surface, softly rounded corners, a thin muted sage outline, and a subtle sage outer glow. Keep buttons professional and consistent with existing theme tokens/components. Use the supplied warm sand/gold pill style selectively for prominent actions (currently Log out and Save all weights), not as a global button treatment. Keep small icon-only utility controls compact and visually distinct. Use a compact sage pill for positive/active status when appropriate. Keep the treatment readable, responsive, and accessible; preserve light-mode styling. Apply this guidance to future features as well as current screens.
+
 After implementation report:
 
 - What changed

@@ -30,6 +30,7 @@
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
 - [~] K9 Feeding page, CRUD API, and remote-D1 migration prepared; migration awaits explicit approval/application
+- [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
 
@@ -41,6 +42,7 @@
 - `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` — workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
 - `k9_handlers` — workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
 - `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
+- `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -61,6 +63,7 @@
 - Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
 - Wrangler's D1 binding uses `remote = true`, so Pages local development targets the shared remote D1; apply schema migrations only with explicit approval.
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
+- Dark-mode shared panels use a screenshot-inspired forest surface, sage outline, and subtle glow via `.app-panel`; project-wide future UI guidance is in `.clinerules/00-global.md`.
 - Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
 - Branding assets: `/logo.jpg` for the logo mark and `/Caninelogy.png` for the wordmark
 
@@ -72,6 +75,8 @@
 
 ## Recent Changes
 - Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
+- Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.
+- Persisted selected dogs and unsaved weights/date across refresh, navigation, and logout; added a Clear list action.
 - Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.
 - Added owner-created member accounts using existing hashed user credentials/memberships; members can add records but cannot edit, delete, access reports, subscription, or user administration. Migration `0018_member_account_index.sql`.

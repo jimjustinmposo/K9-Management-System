@@ -20,6 +20,8 @@ import TrainingLogPage from "./pages/TrainingLogPage"
 import TrainingFormPage from "./pages/TrainingFormPage"
 import FeedingPage from "./pages/FeedingPage"
 import FeedingFormPage from "./pages/FeedingFormPage"
+import WeightsPage from "./pages/WeightsPage"
+import WeightFormPage from "./pages/WeightFormPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -104,6 +106,8 @@ export default function App() {
       <Route path="/feeding" element={protectedPage(<FeedingPage />)} />
       <Route path="/feeding/new" element={<ProtectedRoute requireWritable><FeedingFormPage /></ProtectedRoute>} />
       <Route path="/feeding/:id/edit" element={<ProtectedRoute owner requireWritable><FeedingFormPage /></ProtectedRoute>} />
+      <Route path="/weights" element={protectedPage(<WeightsPage />)} />
+      <Route path="/weights/:id/edit" element={<ProtectedRoute owner requireWritable><WeightFormPage /></ProtectedRoute>} />
       <Route
         path="/reports"
         element={protectedPage(<OwnerPage><ComingSoonPage title="Reports" /></OwnerPage>)}

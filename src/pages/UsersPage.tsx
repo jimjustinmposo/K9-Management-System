@@ -151,7 +151,7 @@ export default function UsersPage() {
             </label>
             <p className="text-xs leading-5 text-muted sm:col-span-2">Members can view and add records only. Editing, deleting, reports, subscription, and user administration are unavailable.</p>
             <div className="sm:col-span-2">
-              <button type="submit" disabled={creating} className="rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white ring-2 ring-transparent transition hover:bg-navy-light focus-visible:outline-none focus-visible:ring-gold disabled:cursor-not-allowed disabled:opacity-50">
+              <button type="submit" disabled={creating} className="button-primary">
                 {creating ? "Creating member…" : "Add member"}
               </button>
             </div>
@@ -192,7 +192,7 @@ export default function UsersPage() {
                           setSuccess("")
                           setSelected(member)
                         }}
-                        className="rounded-lg bg-navy px-4 py-2 text-xs font-bold text-white transition hover:bg-navy-light"
+                        className="button-edit"
                       >
                         Reset password
                       </button>
@@ -206,14 +206,14 @@ export default function UsersPage() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-navy/70 p-4">
+        <div className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-navy/70 p-4">
           <section
             role="dialog"
             aria-modal="true"
             aria-labelledby="reset-member-title"
-            className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-2xl"
+            className="max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto rounded-xl border border-line bg-surface p-5 shadow-2xl"
           >
-            <h2 id="reset-member-title" className="text-xl font-black text-ink">
+            <h2 id="reset-member-title" className="text-base font-semibold text-ink">
               Reset {selected.name}'s password
             </h2>
             <p className="mt-2 text-sm leading-6 text-muted">
@@ -223,7 +223,7 @@ export default function UsersPage() {
               <label className="block text-xs font-bold text-ink">
                 New temporary password
                 <input
-                  className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none focus:border-navy"
+                  className="mt-1.5 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm font-normal outline-none focus:border-positive"
                   name="password"
                   type="password"
                   minLength={6}
@@ -234,7 +234,7 @@ export default function UsersPage() {
               <label className="block text-xs font-bold text-ink">
                 Confirm temporary password
                 <input
-                  className="mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-semibold outline-none focus:border-navy"
+                  className="mt-1.5 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm font-normal outline-none focus:border-positive"
                   name="confirmPassword"
                   type="password"
                   minLength={6}
@@ -252,14 +252,14 @@ export default function UsersPage() {
                   type="button"
                   onClick={() => setSelected(null)}
                   disabled={saving}
-                  className="rounded-xl border border-line px-4 py-2.5 text-sm font-bold text-slate disabled:opacity-50"
+                  className="button-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
+                  className="button-primary"
                 >
                   {saving ? "Resetting…" : "Reset password"}
                 </button>

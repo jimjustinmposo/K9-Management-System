@@ -92,15 +92,15 @@ export default function K9RosterPage() {
     <AppShell title="K9 Roster">
       <div className="mb-6 flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.16em] text-positive">Live roster database</p>
-          <h2 className="mt-1 text-2xl font-black tracking-tight md:text-3xl">Every K9, one command view.</h2>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-positive">Live roster database</p>
+          <h2 className="mt-1 text-xl font-semibold tracking-tight">Every K9, one command view.</h2>
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-muted">
             {session?.permissions.edit ? <>Click <strong className="text-ink">Add new record</strong> to register a K9. Click any row to edit its profile.</> : "View the unit roster or add a new K9 record."}
           </p>
           {loadError && <p className="mt-2 text-xs font-bold text-warning">{loadError}</p>}
         </div>
         {session?.permissions.create && <Link to="/k9-roster/new"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-action transition hover:bg-navy-light">
+          className="button-primary">
           <span className="text-lg leading-none text-gold">+</span>
           Add new record
         </Link>}
@@ -117,7 +117,7 @@ export default function K9RosterPage() {
           <div className="flex flex-wrap gap-2">
             {["All", "Active", "In Training", "Medical Hold", "Retired", "Deceased"].map((status) => (
               <button key={status} type="button" aria-pressed={statusFilter === status} onClick={() => setStatusFilter(status)}
-                className={`rounded-lg border px-3 py-2 text-[11px] font-extrabold transition ${
+                className={`rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition ${
                   statusFilter === status ? "selection-active text-ink" : "border-transparent bg-canvas text-muted hover:text-ink"
                 }`}>
                 {status}
@@ -147,7 +147,7 @@ export default function K9RosterPage() {
             <table className="w-full min-w-[820px] border-collapse text-left">
               <thead>
                 <tr className="bg-canvas/70 text-[10px] font-extrabold uppercase tracking-[0.12em] text-muted">
-                  <th className="px-5 py-3">K9</th>
+                  <th className="px-5 py-2.5">K9</th>
                   <th className="px-4 py-3">Breed</th>
                   <th className="px-4 py-3">Sex / Age</th>
                   <th className="px-4 py-3">Microchip</th>
@@ -177,24 +177,24 @@ export default function K9RosterPage() {
                         </span>
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-xs font-bold">{k9.breed || "—"}</td>
-                    <td className="px-4 py-3 text-xs font-semibold text-slate">
+                    <td className="px-4 py-2.5 text-[13px]">{k9.breed || "—"}</td>
+                    <td className="px-4 py-2.5 text-[13px] text-slate">
                       {[k9.sex, k9Age(k9.dateOfBirth)].filter(Boolean).join(" · ") || "—"}
                     </td>
-                    <td className="px-4 py-3 font-mono text-[11px] font-semibold">{k9.microchipNumber || "—"}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5 font-mono text-[11px]">{k9.microchipNumber || "—"}</td>
+                    <td className="px-4 py-2.5">
                       <span className={`inline-block rounded-full px-2.5 py-1 text-[10px] font-extrabold ${statusStyle(k9.status)}`}>
                         {k9.status || "Unset"}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-2.5">
                       {session?.permissions.edit && <div className="flex justify-end gap-2">
                         <Link to={`/k9-roster/${k9.id}/edit`}
-                          className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-extrabold text-info hover:bg-info-soft">
+                          className="button-edit">
                           Edit
                         </Link>
                         <button type="button" disabled={deletingId === k9.id} onClick={() => handleDelete(k9.id, k9.dogName)}
-                          className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-extrabold text-danger hover:bg-danger-soft disabled:opacity-50">
+                          className="button-delete disabled:opacity-50">
                           {deletingId === k9.id ? "..." : "Delete"}
                         </button>
                       </div>}

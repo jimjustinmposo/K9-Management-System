@@ -15,7 +15,7 @@ export default function TrainingPage() {
     return () => { active = false }
   }, [])
   return <AppShell title="Training"><div className="mx-auto max-w-6xl space-y-6">
-    <div><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-positive">K9 operations · training</p><h2 className="mt-1 font-rajdhani text-3xl font-bold text-ink">Training registers</h2><p className="mt-1 text-sm text-muted">Record each session with a registered K9 and handler.</p></div>
+    <div><p className="text-[10px] font-semibold uppercase tracking-[.12em] text-positive">K9 operations · training</p><h2 className="mt-1 text-xl font-semibold text-ink">Training registers</h2><p className="mt-1 text-sm text-muted">Record each session with a registered K9 and handler.</p></div>
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{TRAINING_DISCIPLINES.map((discipline) => <Link key={discipline.id} to={`/training/${discipline.id}`} className="group"><Panel className="h-full p-5 transition hover:border-positive/40"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-positive">Training log</p><h3 className="mt-2 text-lg font-bold text-ink group-hover:text-positive">{discipline.name}</h3><p className="mt-1 text-sm text-muted">{discipline.description}</p></div><span className="rounded-full bg-positive-soft px-3 py-1 text-xs font-bold text-positive">{counts[discipline.id] ?? "—"} entries</span></div><p className="mt-5 text-xs font-bold text-positive">Open register →</p></Panel></Link>)}</div>
   </div></AppShell>
 }

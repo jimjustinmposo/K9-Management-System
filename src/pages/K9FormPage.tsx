@@ -14,9 +14,9 @@ import {
 import SearchableSelect from "../components/SearchableSelect";
 
 const inputClass =
-  "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm font-semibold text-ink outline-none transition placeholder:font-medium placeholder:text-muted/70 focus:border-navy";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm font-normal text-ink outline-none transition placeholder:font-normal placeholder:text-muted/70 focus:border-positive focus-visible:ring-2 focus-visible:ring-positive/30";
 
-const labelClass = "mb-1.5 block text-[11px] font-extrabold uppercase tracking-[0.1em] text-slate";
+const labelClass = "mb-1.5 block text-xs font-medium text-slate";
 
 export default function K9FormPage() {
   const { id } = useParams<{ id: string }>();
@@ -203,7 +203,8 @@ export default function K9FormPage() {
                   <div className="flex gap-2">
                     {K9_SEX_OPTIONS.map((sex) => (
                       <button key={sex} type="button" onClick={() => set("sex", form.sex === sex ? "" : sex)}
-                        className={`flex-1 rounded-xl border px-3 py-2.5 text-sm font-bold transition ${
+                        aria-pressed={form.sex === sex}
+                        className={`min-h-9 flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
                           form.sex === sex ? "border-navy bg-navy text-white" : "border-line bg-surface text-muted"
                         }`}>
                         {sex}
@@ -249,11 +250,11 @@ export default function K9FormPage() {
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Link to="/k9-roster"
-                className="rounded-xl border border-line bg-surface px-6 py-3 text-center text-sm font-bold text-slate hover:bg-canvas">
+                className="button-secondary">
                 Cancel
               </Link>
               <button type="submit" disabled={saving}
-                className="rounded-xl bg-navy px-8 py-3 text-sm font-bold text-white shadow-action transition hover:bg-navy-light disabled:opacity-60">
+                className="button-primary">
                 {saving ? "Saving..." : isEdit ? "Save changes" : "Add K9 record"}
               </button>
             </div>

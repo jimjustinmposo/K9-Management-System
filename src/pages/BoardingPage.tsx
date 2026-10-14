@@ -197,7 +197,7 @@ export default function BoardingPage() {
             aria-labelledby="checkout-confirmation-title"
             className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-2xl"
           >
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-positive">Checkout summary</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-positive">Checkout summary</p>
             <h2 id="checkout-confirmation-title" className="mt-1 text-xl font-black">Confirm checkout</h2>
             <dl className="mt-5 space-y-3 rounded-xl border border-line bg-canvas p-4 text-sm">
               <div className="flex justify-between gap-4"><dt className="text-muted">Dog</dt><dd className="font-bold">{checkoutConfirmation.record.k9.dogName}</dd></div>
@@ -206,8 +206,8 @@ export default function BoardingPage() {
               <div className="flex justify-between gap-4 border-t border-line pt-3"><dt className="text-muted">Total ({checkoutDays} {checkoutDays === 1 ? "day" : "days"})</dt><dd className="font-black">{checkoutConfirmation.record.currency} {checkoutTotal.toFixed(2)}</dd></div>
             </dl>
             <div className="mt-5 flex justify-end gap-2">
-              <button type="button" onClick={() => setCheckoutConfirmation(null)} className="rounded-xl border border-line px-4 py-2.5 text-sm font-bold text-slate hover:bg-canvas">Cancel</button>
-              <button type="button" disabled={!checkoutConfirmation.checkOutDate || checkoutConfirmation.checkOutDate < checkoutConfirmation.record.checkInDate || updatingStatusId === checkoutConfirmation.record.id} onClick={() => { const pending = checkoutConfirmation; setCheckoutConfirmation(null); void updateStatus(pending.record, "Checked Out", pending.checkOutDate) }} className="rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white hover:bg-navy-light disabled:opacity-50">{updatingStatusId === checkoutConfirmation.record.id ? "Saving…" : "Confirm checkout"}</button>
+              <button type="button" onClick={() => setCheckoutConfirmation(null)} className="button-secondary">Cancel</button>
+              <button type="button" disabled={!checkoutConfirmation.checkOutDate || checkoutConfirmation.checkOutDate < checkoutConfirmation.record.checkInDate || updatingStatusId === checkoutConfirmation.record.id} onClick={() => { const pending = checkoutConfirmation; setCheckoutConfirmation(null); void updateStatus(pending.record, "Checked Out", pending.checkOutDate) }} className="button-primary">{updatingStatusId === checkoutConfirmation.record.id ? "Saving…" : "Confirm checkout"}</button>
             </div>
           </section>
         </div>
@@ -233,7 +233,7 @@ export default function BoardingPage() {
         {session?.permissions.create && (
           <Link
             to="/boarding/new"
-            className="inline-flex items-center justify-center rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-action hover:bg-navy-light"
+            className="button-primary"
           >
             + New boarding record
           </Link>
@@ -269,7 +269,7 @@ export default function BoardingPage() {
                 : "border-line hover:border-positive/50"
             }`}
           >
-            <Panel className="h-full rounded-[inherit] border-0 bg-transparent p-4">
+            <Panel className="h-full rounded-[inherit] border-0 bg-transparent p-3 sm:p-4">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-muted">
                   {item.label}
@@ -280,7 +280,7 @@ export default function BoardingPage() {
                   </span>
                 )}
               </div>
-              <p className="mt-1 font-rajdhani text-3xl font-bold text-ink">
+              <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">
                 {item.value}
               </p>
             </Panel>

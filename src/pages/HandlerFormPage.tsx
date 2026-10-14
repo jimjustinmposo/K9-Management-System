@@ -54,7 +54,7 @@ export default function HandlerFormPage() {
         <div><label htmlFor="email" className={labelClass}>Gmail / email <span className="text-danger">*</span></label><input id="email" required type="email" maxLength={160} autoComplete="email" className={inputClass} value={form.email} onChange={(event) => set("email", event.target.value)} placeholder="name@gmail.com" /></div>
         <div className="md:col-span-2"><label htmlFor="phone" className={labelClass}>Number / phone <span className="text-danger">*</span></label><input id="phone" required type="tel" maxLength={160} autoComplete="tel" className={inputClass} value={form.phone} onChange={(event) => set("phone", event.target.value)} placeholder="Phone number, including country code" /></div>
       </Panel>
-      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Link to="/handlers" className="rounded-xl border border-line bg-surface px-6 py-3 text-center text-sm font-bold text-slate hover:bg-canvas">Cancel</Link><button type="submit" disabled={saving} className="rounded-xl bg-navy px-8 py-3 text-sm font-bold text-white shadow-action hover:bg-navy-light disabled:opacity-60">{saving ? "Saving…" : id ? "Save changes" : "Create handler"}</button></div>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><Link to="/handlers" className="button-secondary">Cancel</Link><button type="submit" disabled={saving} className="button-primary">{saving ? "Saving…" : id ? "Save changes" : "Create handler"}</button></div>
     </form>
   </AppShell>
 }

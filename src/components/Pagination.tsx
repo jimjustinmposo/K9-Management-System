@@ -18,9 +18,9 @@ export default function Pagination({ page, totalItems, pageSize, onPageChange, o
           <option value={10}>10</option><option value={20}>20</option>
         </select>
       </label>}
-      <button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => onPageChange(page - 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">Previous</button>
+      <button type="button" aria-label="Previous page" disabled={page === 1} onClick={() => onPageChange(page - 1)} className="button-secondary min-h-9 rounded-lg px-3 py-1.5 text-xs">Previous</button>
       <span aria-live="polite" className="px-2 text-xs font-bold text-muted">Page {page} of {totalPages}</span>
-      <button type="button" aria-label="Next page" disabled={page === totalPages} onClick={() => onPageChange(page + 1)} className="rounded-lg border border-line px-3 py-2 text-xs font-extrabold text-slate hover:bg-canvas disabled:cursor-not-allowed disabled:opacity-40">Next</button>
+      <button type="button" aria-label="Next page" disabled={page === totalPages} onClick={() => onPageChange(page + 1)} className="button-secondary min-h-9 rounded-lg px-3 py-1.5 text-xs">Next</button>
     </div>
   </nav>
 }
