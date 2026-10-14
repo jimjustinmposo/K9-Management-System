@@ -5,12 +5,14 @@ import { boardingApi } from "../lib/boardingApi"
 import { medicalApi } from "../lib/medicalApi"
 import { trainingApi } from "../lib/trainingApi"
 import { weightsApi } from "../lib/weightsApi"
+import { feedingApi } from "../lib/feedingApi"
 import type { BoardingRecord } from "../types/boarding"
 import type { WeightRecord } from "../types/weights"
+import type { FeedingRecord } from "../types/feeding"
 import type { MedicalCondition, MedicalRecord } from "../types/medical"
 import { TRAINING_DISCIPLINES, type TrainingSession } from "../types/training"
 
-type RecordTab = "boarding" | "training" | "medical" | "handlers" | "weights"
+type RecordTab = "boarding" | "training" | "medical" | "handlers" | "weights" | "feeding"
 type TrainingEntry = TrainingSession & { disciplineName: string }
 
 const tabs: { id: RecordTab; label: string }[] = [
@@ -19,6 +21,7 @@ const tabs: { id: RecordTab; label: string }[] = [
   { id: "medical", label: "Medical" },
   { id: "handlers", label: "Handlers" },
   { id: "weights", label: "Weights" },
+  { id: "feeding", label: "Feeding" },
 ]
 
 const relationshipStyles: Record<RecordTab, { accent: string; soft: string; dot: string }> = {
@@ -27,6 +30,7 @@ const relationshipStyles: Record<RecordTab, { accent: string; soft: string; dot:
   medical: { accent: "text-danger", soft: "bg-danger-soft", dot: "bg-danger" },
   handlers: { accent: "text-violet", soft: "bg-violet-soft", dot: "bg-violet" },
   weights: { accent: "text-positive", soft: "bg-positive-soft", dot: "bg-positive" },
+  feeding: { accent: "text-info", soft: "bg-info-soft", dot: "bg-info" },
 }
 
 const dateLabel = (value: string) => value ? new Date(`${value}T00:00:00`).toLocaleDateString() : "—"
@@ -39,9 +43,10 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
   const [medicalRecords, setMedicalRecords] = useState<MedicalRecord[]>([])
   const [conditions, setConditions] = useState<MedicalCondition[]>([])
   const [weights, setWeights] = useState<WeightRecord[]>([])
+  const [feeding, setFeeding] = useState<FeedingRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState("")
-  const [totals, setTotals] = useState({ boarding: 0, training: 0, medical: 0, weights: 0 })
+  const [totals, setTotals] = useState({ boarding: 0, training: 0, medical: 0, weights: 0, feeding: 0 })
   const [loadingMore, setLoadingMore] = useState(false)
   const [trainingOffsets, setTrainingOffsets] = useState<Record<string, number>>({})
 
@@ -54,7 +59,8 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
     setMedicalRecords([])
     setConditions([])
     setWeights([])
-    setTotals({ boarding: 0, training: 0, medical: 0, weights: 0 })
+    setFeeding([])
+    setTotals({ boarding: 0, training: 0, medical: 0, weights: 0, feeding: 0 })
     setTrainingOffsets({})
 
     void Promise.allSettled([
@@ -66,9 +72,10 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
       medicalApi.records.listForK9(k9Id, pageSize, 0),
       medicalApi.conditions.listForK9(k9Id, pageSize, 0),
       weightsApi.listForK9(k9Id, pageSize, 0),
+      feedingApi.listForK9(k9Id, pageSize, 0),
     ]).then((results) => {
       if (!active) return
-      const [boardingResult, trainingResult, recordsResult, conditionsResult, weightsResult] = results
+      const [boardingResult, trainingResult, recordsResult, conditionsResult, weightsResult, feedingResult] = results
       if (boardingResult.status === "fulfilled") {
         setBoarding(boardingResult.value.data)
         setTotals((current) => ({ ...current, boarding: boardingResult.value.total }))
@@ -92,8 +99,12 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
         setWeights(weightsResult.value.data)
         setTotals((current) => ({ ...current, weights: weightsResult.value.total }))
       }
+      if (feedingResult.status === "fulfilled") {
+        setFeeding(feedingResult.value.data)
+        setTotals((current) => ({ ...current, feeding: feedingResult.value.total }))
+      }
       const failedSections = results.flatMap((result, index) => result.status === "rejected"
-        ? [["boarding", "training", "medical records", "medical conditions", "weights"][index]]
+        ? [["boarding", "training", "medical records", "medical conditions", "weights", "feeding"][index]]
         : [])
       if (failedSections.length) setLoadError(`Could not load ${failedSections.join(", ")}. The K9 profile is still available; apply the pending database migrations if this continues.`)
       setLoading(false)
@@ -127,6 +138,9 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
       } else if (activeTab === "weights") {
         const page = await weightsApi.listForK9(k9Id, pageSize, weights.length)
         setWeights((current) => [...current, ...page.data])
+      } else if (activeTab === "feeding") {
+        const page = await feedingApi.listForK9(k9Id, pageSize, feeding.length)
+        setFeeding((current) => [...current, ...page.data])
       }
     } catch {
       setLoadError("Could not load more linked records. Please try again.")
@@ -151,6 +165,7 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
     medical: medicalRecords.length + conditions.length,
     handlers: handlers.length,
     weights: weights.length,
+    feeding: feeding.length,
   }
   const counts: Record<RecordTab, number> = {
     boarding: totals.boarding,
@@ -158,12 +173,14 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
     medical: totals.medical,
     handlers: handlers.length,
     weights: totals.weights,
+    feeding: totals.feeding,
   }
   const totalRelationships = Object.values(counts).reduce((total, count) => total + count, 0)
   const hasMore = activeTab === "boarding" ? boarding.length < totals.boarding
     : activeTab === "training" || activeTab === "handlers" ? training.length < totals.training
       : activeTab === "medical" ? displayedCounts.medical < totals.medical
         : activeTab === "weights" ? weights.length < totals.weights
+          : activeTab === "feeding" ? feeding.length < totals.feeding
         : false
 
   return (
@@ -178,7 +195,7 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
             {loading ? "Loading links…" : `${totalRelationships} linked ${totalRelationships === 1 ? "record" : "records"}`}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2 py-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 py-3 sm:grid-cols-3 lg:grid-cols-6">
           {tabs.map((tab) => {
             const style = relationshipStyles[tab.id]
             return (
@@ -196,7 +213,7 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
             )
           })}
         </div>
-        <div role="tablist" aria-label="Dog records" className="mt-3 grid grid-cols-2 gap-1 sm:grid-cols-5">
+        <div role="tablist" aria-label="Dog records" className="mt-3 grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-6">
           {tabs.map((tab) => (
             <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
@@ -285,6 +302,18 @@ export default function K9LinkedRecords({ k9Id }: { k9Id: string }) {
                     {record.difference == null ? "Initial" : `${record.difference > 0 ? "+" : ""}${record.difference} kg`}
                   </span>
                 </div>
+              </article>
+            ))}
+
+            {activeTab === "feeding" && feeding.map((record) => (
+              <article key={record.id} className="relative rounded-lg border border-line bg-canvas/70 p-3 transition hover:border-line-strong">
+                <span aria-hidden="true" className={`absolute -left-[21px] top-4 size-[10px] rounded-full border-2 border-surface ${relationshipStyles.feeding.dot}`} />
+                <div className="flex items-start justify-between gap-2">
+                  <div><p className="text-xs font-extrabold text-ink">{record.food}</p><p className="mt-1 text-[11px] text-muted">{dateLabel(record.date)} · {record.grams.toLocaleString()} g</p></div>
+                  <Link to={`/feeding/${encodeURIComponent(record.id)}/edit`} className="text-[10px] font-extrabold text-info hover:underline">Open</Link>
+                </div>
+                <p className="mt-2 text-[11px] text-slate">Handler: <span className="font-bold">{record.handler_name}</span></p>
+                {record.noted && <p className="mt-1 break-words text-[11px] text-muted">{record.noted}</p>}
               </article>
             ))}
           </div>

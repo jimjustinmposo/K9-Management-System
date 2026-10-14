@@ -24,7 +24,7 @@
 - [x] Owner-only user administration with member password reset, archive/restore, permanent delete, and session invalidation
 - [x] Developer-secret password reset page and server-side password update
 - [x] Dashboard removed; root and unknown routes redirect to K9 Roster
-- [x] K9 Roster (list/create/edit/delete, photo, search, filters, and per-dog linked boarding/training/medical/handler records with incremental paging)
+- [x] K9 Roster (list/create/edit/delete, photo, search, filters, and per-dog linked boarding/training/medical/handler/weight/feeding records with incremental paging)
 - [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes, daily rate/currency and checked-out total)
 - [x] Five training registers (Obedience, Detection, Tracking, Protection, Socialization) with linked K9/handler records and CRUD
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
@@ -90,6 +90,7 @@
 - Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.
 - Connected K9 feeding food selection to Food Inventory, added g/kg amount entry with gram persistence, and enforced inventory existence and available-stock validation on create/edit.
 - Renamed the Food Inventory create action to “New food” and added per-entry restocking in grams or kilograms, accumulating stock on the existing record.
+- Added feeding records to the K9 operational-relationships panel with workspace-scoped per-dog API filtering and incremental pagination.
 - Persisted selected dogs and unsaved weights/date across refresh, navigation, and logout; added a Clear list action.
 - Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
 - Added per-dog bounded loading and incremental pagination for operational links on K9 records; API list endpoints optionally return totals with a capped page size.

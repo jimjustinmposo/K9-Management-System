@@ -8,11 +8,16 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   if (isResponse(session)) return session
   const params = new URL(context.request.url).searchParams
   const search = params.get("search")?.trim() ?? ""
+  const k9Id = params.get("k9_id")?.trim() ?? ""
   const hasPagination = params.has("limit")
   const limit = Math.max(1, Math.min(200, Math.floor(Number(params.get("limit")) || 10)))
   const offset = Math.max(0, Math.floor(Number(params.get("offset")) || 0))
   const where = ["f.workspace_id = ?"]
   const bindings: (string | number)[] = [session.workspace.id]
+  if (k9Id) {
+    where.push("f.dog = ?")
+    bindings.push(k9Id)
+  }
   if (search) {
     where.push("(k.dog_name LIKE ? OR h.full_name LIKE ? OR f.food LIKE ? OR f.noted LIKE ?)")
     bindings.push(...Array(4).fill(`%${search}%`))
