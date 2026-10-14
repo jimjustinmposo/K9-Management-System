@@ -1,0 +1,1 @@
+ALTER TABLE k9weights ADD COLUMN difference REAL;

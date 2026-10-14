@@ -14,7 +14,7 @@ export default function ComingSoonPage({ title }: { title: string }) {
         </p>
         <Link
           to="/k9-roster"
-          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-xs font-bold text-white"
+          className="button-primary mt-5"
         >
           Go to K9 Roster
         </Link>

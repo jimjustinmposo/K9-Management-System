@@ -43,4 +43,4 @@ export default function AuthLayout({
 export const authInput =
   "mt-1.5 w-full rounded-xl border border-line bg-canvas px-3.5 py-3 text-sm font-medium text-ink outline-none placeholder:text-muted/70 focus:border-gold"
 export const primaryButton =
-  "w-full rounded-xl bg-navy px-5 py-3 text-sm font-bold text-white shadow-action transition hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-60"
+  "button-primary w-full"
