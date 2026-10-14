@@ -9,11 +9,13 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   if (isResponse(session)) return session
   const params = new URL(context.request.url).searchParams
   const search = params.get("search")?.trim() ?? ""
+  const dogId = params.get("dog_id")?.trim() ?? ""
   const hasPagination = params.has("limit")
   const limit = Math.max(1, Math.min(200, Math.floor(Number(params.get("limit")) || 10)))
   const offset = Math.max(0, Math.floor(Number(params.get("offset")) || 0))
   const where = ["w.workspace_id = ?"]
   const bindings: (string | number)[] = [session.workspace.id]
+  if (dogId) { where.push("w.dog_id = ?"); bindings.push(dogId) }
   if (search) { where.push("(k.dog_name LIKE ? OR w.nickname LIKE ?)"); bindings.push(`%${search}%`, `%${search}%`) }
   const from = `FROM k9weights w JOIN k9_roster k ON k.id = w.dog_id AND k.workspace_id = w.workspace_id WHERE ${where.join(" AND ")}`
   try {

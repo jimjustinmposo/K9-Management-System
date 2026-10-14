@@ -88,3 +88,12 @@
 - Loader tests expanded from 5 to 9: rapid changes, canceled timers, immediate manual reload without duplicate timer requests, and zero-delay reads. All 51 focused tests pass, frontend/backend typechecks pass, production build passes (422.57 kB JS / 115.92 kB gzip), diff check passes.
 - Tests execute standalone coordinators, not mounted hooks. Browser typing, pagination-reset timing, accessibility, routing and full authenticated integration still need verification. No new browser or D1 performance measurements.
 - Rollback debounce independently by removing scheduler/search wiring in the loader/hook and five register call sites; keep latest-response protection. No database, deployment or dependency changes.
+
+## Feature: per-K9 weight history in linked records
+- Added Weights as a fifth linked-record tab, using the existing timeline/card style and sage-positive tokens. Shows date, kg, saved nickname and persisted difference (or Initial), paginated in batches of 10.
+- Added optional `dog_id` GET filter to `/api/weights`. The mandatory authenticated `w.workspace_id = ?` predicate remains; filter is parameter-bound and applies to both rows and total. No `dog_id` means legacy query behavior is unchanged.
+- Added `weightsApi.listForK9`; existing `idx_k9weights_workspace_dog` migration index is reused; no schema/data/write/calculation/permission changes.
+- Added `test:weights`, six isolated handler/client tests for tenant-scoped filter/bindings, pagination/order/search legacy behavior, blank filter, denied auth, sanitized DB errors and encoded client URL. These tests inspect handler SQL using D1 spies, not actual database execution.
+- Validation: all 57 focused tests pass (10 boarding, 25 count, 7 session, 9 latest-load, 6 weights), frontend/backend TypeScript checks pass, production build passes (424.01 kB JS / 116.27 kB gzip), `git diff --check` passes.
+- Browser click-through with an existing K9 and actual weight history is still pending. No migration, production access, deployment, dependency installation or commit.
+- Rollback: remove weights endpoint filter, client method, tab state/fetch/render branches and focused test/script entry. No data rollback required.

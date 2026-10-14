@@ -8,6 +8,11 @@ export const weightsApi = {
     const result = await apiRequest(`/api/weights?${params}`)
     return { data: result.data ?? [], total: Number(result.total ?? 0) }
   },
+  async listForK9(dogId: string, limit: number, offset: number): Promise<{ data: WeightRecord[]; total: number }> {
+    const params = new URLSearchParams({ dog_id: dogId, limit: String(limit), offset: String(offset) })
+    const result = await apiRequest(`/api/weights?${params}`)
+    return { data: result.data ?? [], total: Number(result.total ?? 0) }
+  },
   async create(date: string, entries: WeightInput[]): Promise<void> {
     await apiRequest("/api/weights", { method: "POST", body: JSON.stringify({ date, entries: entries.map((entry) => ({ ...entry, weight: Number(entry.weight) })) }) })
   },
