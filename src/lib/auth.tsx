@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react"
 import { Navigate, useLocation } from "react-router-dom"
+import { createSessionController } from "./sessionController"
 
 export type Session = {
   user: { id: string; email: string; name: string }
@@ -39,39 +40,35 @@ const AuthContext = createContext<{
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  async function refresh() {
-    try {
+  const [controller] = useState(() => createSessionController<Session>(
+    async () => {
       const response = await fetch("/api/auth/session", {
         credentials: "same-origin",
       })
       const data = await response.json()
-      setSession(response.ok ? data.data : null)
-    } catch {
-      setSession(null)
-    } finally {
-      setLoading(false)
-    }
-  }
+      return response.ok ? data.data : null
+    },
+    async () => { await fetch("/api/auth/logout", { method: "POST" }) },
+    setSession,
+    () => setLoading(false),
+  ))
   useEffect(() => {
-    void refresh()
-    const poll = window.setInterval(() => void refresh(), 15_000)
+    void controller.start()
+    const poll = window.setInterval(() => void controller.refresh(false), 15_000)
     const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible") void refresh()
+      if (document.visibilityState === "visible") void controller.refresh(false)
     }
     document.addEventListener("visibilitychange", refreshWhenVisible)
     window.addEventListener("focus", refreshWhenVisible)
     return () => {
+      controller.stop()
       window.clearInterval(poll)
       document.removeEventListener("visibilitychange", refreshWhenVisible)
       window.removeEventListener("focus", refreshWhenVisible)
     }
-  }, [])
-  async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" })
-    setSession(null)
-  }
+  }, [controller])
   return (
-    <AuthContext.Provider value={{ session, loading, refresh, logout }}>
+    <AuthContext.Provider value={{ session, loading, refresh: controller.refresh, logout: controller.logout }}>
       {children}
     </AuthContext.Provider>
   )

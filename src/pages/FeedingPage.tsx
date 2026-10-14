@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useLatestLoad } from "../lib/useLatestLoad"
 import { Link } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import Pagination from "../components/Pagination"
@@ -13,13 +14,9 @@ export default function FeedingPage() {
   const { session } = useAuth()
   const [items, setItems] = useState<FeedingRecord[]>([]), [total, setTotal] = useState(0)
   const [search, setSearch] = useState(""), [page, setPage] = useState(1), [loading, setLoading] = useState(true), [error, setError] = useState("")
-  const load = useCallback(async () => {
-    setLoading(true); setError("")
-    try { const result = await feedingApi.page(search, PAGE_SIZE, (page - 1) * PAGE_SIZE); setItems(result.data); setTotal(result.total) }
-    catch (err) { setError(err instanceof Error ? err.message : "Could not load feeding records.") }
-    finally { setLoading(false) }
-  }, [search, page])
-  useEffect(() => { void load() }, [load])
+  const read = useCallback(() => feedingApi.page(search, PAGE_SIZE, (page - 1) * PAGE_SIZE), [search, page])
+  const accept = useCallback((result: { data: FeedingRecord[]; total: number }) => { setItems(result.data); setTotal(result.total) }, [])
+  const load = useLatestLoad(read, accept, setLoading, setError, "Could not load feeding records.", search)
   useEffect(() => { setPage(1) }, [search])
 
   async function remove(item: FeedingRecord) {

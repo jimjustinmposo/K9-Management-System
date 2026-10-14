@@ -65,6 +65,16 @@ async function localRecords(k9Id?: string): Promise<BoardingRecord[]> {
   return readLocal().map((record) => mapRow(record, dogs)).filter((record) => !k9Id || record.k9Id === k9Id).sort((a, b) => b.checkInDate.localeCompare(a.checkInDate));
 }
 
+async function mapServerRows(rows: Record<string, unknown>[]): Promise<BoardingRecord[]> {
+  // Current API responses include these joined fields. Keep enrichment for
+  // older/partial responses, but do not fetch the entire roster unnecessarily.
+  const needsRoster = rows.some((row) =>
+    ["dog_name", "nick_name", "breed", "profile_photo"].some((key) => row[key] == null),
+  );
+  const dogs = needsRoster ? await k9Api.list() : [];
+  return rows.map((row) => mapRow(row, dogs));
+}
+
 export interface BoardingPage { data: BoardingRecord[]; total: number }
 
 function pageQuery(k9Id: string, limit: number, offset: number) {
@@ -79,8 +89,7 @@ export const boardingApi = {
     if (!(response.headers.get("content-type") ?? "").includes("application/json")) return localRecords();
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
-    const dogs = await k9Api.list();
-    return (data?.data ?? []).map((row: any) => mapRow(row, dogs));
+    return mapServerRows(data?.data ?? []);
   },
   async listForK9(k9Id: string, limit: number, offset: number): Promise<BoardingPage> {
     let response: Response;
@@ -108,7 +117,7 @@ export const boardingApi = {
     if (response.status === 404) return null;
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
-    return data?.data ? mapRow(data.data, await k9Api.list()) : null;
+    return data?.data ? (await mapServerRows([data.data]))[0] : null;
   },
   async create(values: BoardingFormValues): Promise<BoardingRecord> {
     let response: Response;
@@ -129,7 +138,7 @@ export const boardingApi = {
     }
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
-    return mapRow(data.data, await k9Api.list());
+    return (await mapServerRows([data.data]))[0];
   },
   async update(id: string, values: BoardingFormValues): Promise<BoardingRecord> {
     let response: Response;
@@ -147,7 +156,7 @@ export const boardingApi = {
     }
     const data = await jsonResponse(response);
     if (!response.ok) throw new Error(errorMessage(data, response.status));
-    return mapRow(data.data, await k9Api.list());
+    return (await mapServerRows([data.data]))[0];
   },
   async remove(id: string): Promise<void> {
     let response: Response;

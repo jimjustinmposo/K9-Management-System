@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useLatestLoad } from "../lib/useLatestLoad"
 import { Link } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { useAuth } from "../lib/auth"
@@ -18,15 +19,9 @@ export default function HandlersPage() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  async function load() {
-    setLoading(true)
-    setError("")
-    try { const result = await handlersApi.page(search, pageSize, (page - 1) * pageSize); setItems(result.data); setTotal(result.total) }
-    catch (err) { setError(err instanceof Error ? err.message : "Could not load handlers.") }
-    finally { setLoading(false) }
-  }
-
-  useEffect(() => { void load() }, [search, page, pageSize])
+  const read = useCallback(() => handlersApi.page(search, pageSize, (page - 1) * pageSize), [search, page, pageSize])
+  const accept = useCallback((result: { data: Handler[]; total: number }) => { setItems(result.data); setTotal(result.total) }, [])
+  const load = useLatestLoad(read, accept, setLoading, setError, "Could not load handlers.", search)
   useEffect(() => { setPage(1) }, [search])
 
   async function remove(handler: Handler) {

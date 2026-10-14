@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useLatestLoad } from "../lib/useLatestLoad"
 import { Link, Navigate, useParams } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { useAuth } from "../lib/auth"
@@ -21,14 +22,9 @@ export default function TrainingLogPage() {
   const [page, setPage] = useState(1)
   const valid = isTrainingDiscipline(raw)
   const definition = TRAINING_DISCIPLINES.find((item) => item.id === raw)
-  const load = useCallback(async () => {
-    if (!valid || !raw) return
-    setLoading(true); setError("")
-    try { const result = await trainingApi.page(raw, search, PAGE_SIZE, (page - 1) * PAGE_SIZE); setItems(result.data); setTotal(result.total) }
-    catch (err) { setError(err instanceof Error ? err.message : "Could not load training records.") }
-    finally { setLoading(false) }
-  }, [raw, search, valid, page])
-  useEffect(() => { void load() }, [load])
+  const read = useCallback(() => valid && raw ? trainingApi.page(raw, search, PAGE_SIZE, (page - 1) * PAGE_SIZE) : Promise.resolve({ data: [], total: 0 }), [raw, search, valid, page])
+  const accept = useCallback((result: { data: TrainingSession[]; total: number }) => { setItems(result.data); setTotal(result.total) }, [])
+  const load = useLatestLoad(read, accept, setLoading, setError, "Could not load training records.", search)
   useEffect(() => { setPage(1) }, [search, raw])
   if (!valid || !definition) return <Navigate to="/training" replace />
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useLatestLoad } from "../lib/useLatestLoad"
 import { Link } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import Pagination from "../components/Pagination"
@@ -71,13 +72,9 @@ export default function WeightsPage() {
   }, [date, draftReadyKey, entries, selected, storageKey])
   useEffect(() => { void k9Api.list().then(setDogs).catch((err) => setError(err instanceof Error ? err.message : "Could not load K9 roster.")) }, [])
 
-  const load = useCallback(async () => {
-    setLoading(true); setError("")
-    try { const result = await weightsApi.page(search, PAGE_SIZE, (page - 1) * PAGE_SIZE); setItems(result.data); setTotal(result.total) }
-    catch (err) { setError(err instanceof Error ? err.message : "Could not load weight records.") }
-    finally { setLoading(false) }
-  }, [page, search])
-  useEffect(() => { void load() }, [load])
+  const read = useCallback(() => weightsApi.page(search, PAGE_SIZE, (page - 1) * PAGE_SIZE), [page, search])
+  const accept = useCallback((result: { data: WeightRecord[]; total: number }) => { setItems(result.data); setTotal(result.total) }, [])
+  const load = useLatestLoad(read, accept, setLoading, setError, "Could not load weight records.", search)
   useEffect(() => { setPage(1) }, [search])
 
   const availableDogs = useMemo(() => dogs.filter((dog) => `${dog.dogName} ${dog.nickName}`.toLowerCase().includes(dogSearch.trim().toLowerCase())), [dogs, dogSearch])

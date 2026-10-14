@@ -61,7 +61,7 @@
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
 - Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
-- Wrangler's D1 binding uses `remote = true`, so Pages local development targets the shared remote D1; apply schema migrations only with explicit approval.
+- Wrangler's D1 binding explicitly uses `remote = false` for safe local development. The original local state remains at migration 0018; a separate `.wrangler/performance-baseline` copy has migrations 0019–0022 applied and integrity/data preservation verified.
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
 - Dark-mode shared panels use a screenshot-inspired forest surface, sage outline, and subtle glow via `.app-panel`; project-wide future UI guidance is in `.clinerules/00-global.md`.
 - Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
@@ -74,6 +74,10 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Register search changes now debounce for 250 ms with timer cancellation and immediate stale-result invalidation; initial/page loads and manual reloads remain immediate when search is settled. Loader tests expanded to 9; 51 focused tests, both typechecks and build pass. Medical form restored sequential reads to preserve partial-failure behavior, retaining unmount guards. Browser integration and route splitting remain pending.
+- Session refresh now coalesces background requests while explicit login/billing refreshes supersede stale reads; logout/unmount invalidate pending results. Shared latest-load protection covers handler, training, medical, feeding and weight registers, including mutation reloads using current filters. Seven session and five loader tests pass; browser integration, debounce and route splitting still pending.
+- Training/medical overview cards use opt-in `count_only=true` queries retaining existing joins/filters and default list contracts; 25 isolated handler tests pass. Medical form reads run concurrently with unmount protection; shared shell has skip navigation. Boarding tests 10/10, both TypeScript checks and production build pass. Real-D1 count equivalence, browser checks, route splitting, session deduplication and search protection remain pending.
+- Optimization branch `optimization/local-baseline-2026-10-14` from `ea4a2dd`; synthetic authenticated baseline passes 17 check groups. Boarding client now skips redundant roster fetches for complete joined responses, retaining partial-response enrichment and offline fallback; 10 focused tests, frontend typecheck and build pass. Measurements/rollback in `.cline/PERFORMANCE_BASELINE.md`; full workflow/browser coverage and remaining optimizations pending.
 - Added owner-only member archive/restore and permanent deletion; archived members cannot sign in and do not count toward active seats (migration `0022_member_archiving.sql`, not yet applied remotely).
 - Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
 - Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.

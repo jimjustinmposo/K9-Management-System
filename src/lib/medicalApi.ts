@@ -17,6 +17,9 @@ async function save<T>(path: string, method: "POST" | "PUT", data: unknown): Pro
 async function remove(path: string): Promise<void> { await apiRequest(path, { method: "DELETE" }) }
 
 export const medicalApi = {
+  async count(kind: "medications" | "records" | "conditions"): Promise<number> {
+    return Number((await apiRequest(`/api/medical/${kind}?count_only=true`)).total ?? 0)
+  },
   page: async <T,>(path: string, search: string, limit: number, offset: number): Promise<{ data: T[]; total: number }> => {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
     if (search.trim()) params.set("search", search.trim())

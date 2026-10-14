@@ -9,7 +9,7 @@ export default function TrainingPage() {
   useEffect(() => {
     let active = true
     void Promise.all(TRAINING_DISCIPLINES.map(async ({ id }) => {
-      try { return [id, (await trainingApi.list(id)).length] as const }
+      try { return [id, await trainingApi.count(id)] as const }
       catch { return [id, null] as const }
     })).then((entries) => { if (active) setCounts(Object.fromEntries(entries)) })
     return () => { active = false }

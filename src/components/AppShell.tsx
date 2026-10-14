@@ -189,6 +189,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
   });
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-3 focus:text-ink">Skip to content</a>
       {mobileNav && (
         <button type="button" aria-label="Close menu"
           className="fixed inset-0 z-30 bg-navy/60 lg:hidden" onClick={() => setMobileNav(false)} />
@@ -263,7 +264,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             <div className="hidden sm:block"><SubscriptionStatusBar /></div>
           </div>
         </header>
-        <main className="min-w-0 p-4 md:p-5 lg:p-6">{children}</main>
+        <main id="main-content" tabIndex={-1} className="min-w-0 p-4 md:p-5 lg:p-6">{children}</main>
       </div>
     </div>
   );

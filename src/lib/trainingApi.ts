@@ -2,6 +2,9 @@ import { apiRequest } from "./auth"
 import type { TrainingDiscipline, TrainingFormValues, TrainingSession } from "../types/training"
 
 export const trainingApi = {
+  async count(discipline: TrainingDiscipline): Promise<number> {
+    return Number((await apiRequest(`/api/training/${discipline}?count_only=true`)).total ?? 0)
+  },
   async page(discipline: TrainingDiscipline, search: string, limit: number, offset: number): Promise<{ data: TrainingSession[]; total: number }> {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) })
     if (search.trim()) params.set("search", search.trim())

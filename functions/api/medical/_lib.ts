@@ -71,6 +71,10 @@ export async function list(context: Context, resource: Resource) {
     const requestedOffset = Number(params.get("offset") ?? 0)
     const offset = Number.isFinite(requestedOffset) ? Math.max(0, Math.floor(requestedOffset)) : 0
     const base = `${selectSql(resource)} WHERE ${conditions.join(" AND ")}`
+    if (params.get("count_only") === "true") {
+      const count = await context.env.DB.prepare(`SELECT COUNT(*) AS total${base.slice(base.indexOf(" FROM "))}`).bind(...bindings).first<{ total: number }>()
+      return json({ data: [], total: Number(count?.total ?? 0) })
+    }
     const [result, count] = await Promise.all([
       context.env.DB.prepare(`${base} ORDER BY ${alias(resource)}.${config.order}${hasPagination ? " LIMIT ? OFFSET ?" : ""}`)
         .bind(...bindings, ...(hasPagination ? [limit, offset] : [])).all(),

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useLatestLoad } from "../lib/useLatestLoad"
 import { Link } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { medicalApi } from "../lib/medicalApi"
@@ -23,7 +24,11 @@ export function MedicalHomePage() {
 }
 function MedicalCard({ kind }: { kind: Kind }) {
   const [count, setCount] = useState<number | null>(null)
-  useEffect(() => { void ({ medications: medicalApi.medications.list, records: medicalApi.records.list, conditions: medicalApi.conditions.list }[kind]()).then((items) => setCount(items.length)).catch(() => setCount(null)) }, [kind])
+  useEffect(() => {
+    let active = true
+    void medicalApi.count(kind).then((total) => { if (active) setCount(total) }).catch(() => { if (active) setCount(null) })
+    return () => { active = false }
+  }, [kind])
   const item = config[kind]
   const href = `/medical/${kind}`
   return <Link to={href} className="group rounded-2xl border border-line bg-surface p-5 shadow-filter transition hover:-translate-y-0.5 hover:border-positive/40"><div className="flex items-center justify-between"><span className="grid size-10 place-items-center rounded-xl bg-positive-soft text-positive font-mono text-sm font-black">{kind === "records" ? "RX" : kind === "conditions" ? "HX" : "M"}</span><span className="text-xs font-bold text-muted">{count ?? "—"} entries ↗</span></div><p className="mt-5 text-[10px] font-extrabold uppercase tracking-[.16em] text-muted">{item.eyebrow}</p><h3 className="mt-1 text-lg font-bold text-ink group-hover:text-positive">{item.title}</h3></Link>
@@ -39,17 +44,9 @@ export function MedicalListPage({ kind }: { kind: Kind }) {
   const [error, setError] = useState("")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  async function load() {
-    setLoading(true); setError("")
-    try {
-      const endpoint = `/api/medical/${kind}`
-      const result = await medicalApi.page<Medication | MedicalRecord | MedicalCondition>(endpoint, kind === "medications" ? search : "", pageSize, (page - 1) * pageSize)
-      setItems(result.data); setTotal(result.total)
-    }
-    catch (err) { setError(err instanceof Error ? err.message : "Could not load medical data.") }
-    finally { setLoading(false) }
-  }
-  useEffect(() => { void load() }, [kind, search, page, pageSize])
+  const read = useCallback(() => medicalApi.page<Medication | MedicalRecord | MedicalCondition>(`/api/medical/${kind}`, kind === "medications" ? search : "", pageSize, (page - 1) * pageSize), [kind, search, page, pageSize])
+  const accept = useCallback((result: { data: (Medication | MedicalRecord | MedicalCondition)[]; total: number }) => { setItems(result.data); setTotal(result.total) }, [])
+  const load = useLatestLoad(read, accept, setLoading, setError, "Could not load medical data.", kind === "medications" ? search : "")
   useEffect(() => { setPage(1) }, [kind, search])
   async function deleteItem(id: string) {
     if (!window.confirm(`Delete this ${config[kind].label.toLowerCase()}?`)) return

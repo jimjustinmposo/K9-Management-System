@@ -19,8 +19,16 @@ export default function MedicalFormPage({ kind }: { kind: Kind }) {
     let active = true
     const load = async () => {
       try {
-        if (kind === "records" || kind === "conditions") setDogs(await k9Api.list())
-        if (kind === "records") setMedications(await medicalApi.medications.list())
+        if (kind === "records" || kind === "conditions") {
+          const dogs = await k9Api.list()
+          if (!active) return
+          setDogs(dogs)
+        }
+        if (kind === "records") {
+          const medications = await medicalApi.medications.list()
+          if (!active) return
+          setMedications(medications)
+        }
         if (id) {
           const record = kind === "medications" ? await medicalApi.medications.get(id) : kind === "records" ? await medicalApi.records.get(id) : await medicalApi.conditions.get(id)
           if (active) {
