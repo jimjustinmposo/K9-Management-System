@@ -32,7 +32,7 @@
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
-- [~] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` is not yet applied to remote D1.
+- [x] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` applied to shared remote D1 on 2026-10-16.
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
@@ -79,6 +79,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Applied additive migration `0024_shopping.sql` to shared remote D1; verified migration registry, Shopping table, and both indexes. No unrelated pending migrations or data changes.
 - Added Shopping register and auto-add food purchases to matching/new Food Inventory rows. Typecheck and production build pass; migration `0024_shopping.sql` awaits remote application.
 - Added Food Inventory CRUD and live feeding-consumption calculation; additive schema applied directly to shared remote D1. Local Pages D1 binding set to remote; no app deployment performed.
 - Added dependency-free frontend API GET caching on branch `perf/shared-api-cache`; auth/billing excluded, requests scoped by user/workspace, mutation invalidation and foreground revalidation included. Seven cache tests plus existing focused suites pass; browser navigation metrics are not yet measured.
