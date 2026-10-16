@@ -24,6 +24,8 @@ import WeightsPage from "./pages/WeightsPage"
 import WeightFormPage from "./pages/WeightFormPage"
 import FoodInventoryPage from "./pages/FoodInventoryPage"
 import FoodInventoryFormPage from "./pages/FoodInventoryFormPage"
+import ShoppingPage from "./pages/ShoppingPage"
+import ShoppingFormPage from "./pages/ShoppingFormPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -113,6 +115,9 @@ export default function App() {
       <Route path="/food-inventory" element={protectedPage(<FoodInventoryPage />)} />
       <Route path="/food-inventory/new" element={<ProtectedRoute requireWritable><FoodInventoryFormPage /></ProtectedRoute>} />
       <Route path="/food-inventory/:id/edit" element={<ProtectedRoute owner requireWritable><FoodInventoryFormPage /></ProtectedRoute>} />
+      <Route path="/shopping" element={protectedPage(<ShoppingPage />)} />
+      <Route path="/shopping/new" element={<ProtectedRoute requireWritable><ShoppingFormPage /></ProtectedRoute>} />
+      <Route path="/shopping/:id/edit" element={<ProtectedRoute owner requireWritable><ShoppingFormPage /></ProtectedRoute>} />
       <Route
         path="/reports"
         element={protectedPage(<OwnerPage><ComingSoonPage title="Reports" /></OwnerPage>)}

@@ -7,6 +7,7 @@ interface D1PreparedStatement {
 
 interface D1Database {
   prepare(query: string): D1PreparedStatement;
+  batch<T = any>(statements: D1PreparedStatement[]): Promise<Array<{ results?: T[]; success: boolean; meta?: any }>>;
 }
 
 interface PagesFunctionContext<E = any> {

@@ -8,6 +8,7 @@ export type IconName =
   | "boarding"
   | "feeding"
   | "inventory"
+  | "shopping"
   | "weight"
   | "task"
   | "training"
@@ -49,6 +50,12 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
       <>
         <path d="M4 7 12 3l8 4v10l-8 4-8-4Z" />
         <path d="m4 7 8 4 8-4M12 11v10M8 5l8 4" />
+      </>
+    ),
+    shopping: (
+      <>
+        <path d="M3 4h2l2.5 12h11l2-8H6" />
+        <circle cx="9" cy="20" r="1" /><circle cx="17" cy="20" r="1" />
       </>
     ),
     weight: (
@@ -177,6 +184,7 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "Boarding", to: "/boarding", icon: "boarding" },
   { label: "K9 Feeding", to: "/feeding", icon: "feeding" },
   { label: "Food Inventory", to: "/food-inventory", icon: "inventory" },
+  { label: "Shopping", to: "/shopping", icon: "shopping" },
   { label: "K9 Weights", to: "/weights", icon: "weight" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Medical", to: "/medical", icon: "heart" },
