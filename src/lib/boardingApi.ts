@@ -135,6 +135,7 @@ export const boardingApi = {
         : null;
       const record: StoredRecord = { ...values, totalAmount, id: uid(), createdAt: now, updatedAt: now };
       localStorage.setItem(STORAGE_KEY, JSON.stringify([...readLocal(), record]));
+      invalidateApiCache("/api/boarding");
       return mapRow(record, dogs);
     }
     const data = await jsonResponse(response);
@@ -154,6 +155,7 @@ export const boardingApi = {
       const records = readLocal().map((item) => item.id === id ? (updated = { ...item, ...values, totalAmount: values.status === "Checked Out" && values.checkOutDate ? Math.round((Math.ceil((Date.parse(`${values.checkOutDate}T00:00:00Z`) - Date.parse(`${values.checkInDate}T00:00:00Z`)) / 86400000) + 1) * values.pricePerDay * 100) / 100 : null, updatedAt: new Date().toISOString() }) : item);
       if (!updated) throw new Error("Boarding record not found.");
       localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      invalidateApiCache("/api/boarding");
       return mapRow(updated, dogs);
     }
     const data = await jsonResponse(response);
@@ -166,6 +168,7 @@ export const boardingApi = {
     try { response = await fetch(`/api/boarding/${encodeURIComponent(id)}`, { method: "DELETE" }); } catch { response = new Response(null); }
     if (!(response.headers.get("content-type") ?? "").includes("application/json")) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(readLocal().filter((record) => record.id !== id)));
+      invalidateApiCache("/api/boarding");
       return;
     }
     if (!response.ok) throw new Error(errorMessage(await jsonResponse(response), response.status));

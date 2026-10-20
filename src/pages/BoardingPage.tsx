@@ -12,19 +12,21 @@ import { boardingDays, boardingStayDays, type BoardingRecord } from "../types/bo
 import Pagination from "../components/Pagination"
 import SearchableSelect from "../components/SearchableSelect"
 
+import { useCachedResource } from "../lib/useCachedResource"
+const readBoarding = () => boardingApi.list()
 const PAGE_SIZE = 10
 
 export default function BoardingPage() {
   const { session } = useAuth()
   const [searchParams] = useSearchParams()
 
-  const [staysData, setStaysData] = useState<BoardingRecord[]>([])
+  const { data: staysData = [], setData: setStaysData, loading, error, setError } = useCachedResource("/api/boarding/view", readBoarding)
 
   const [activePanel, setActivePanel] = useState<"boarding" | "checkedout" | "total">(() => searchParams.get("status") === "Boarding" ? "boarding" : searchParams.get("status") === "Checked Out" ? "checkedout" : "total")
 
-  const [loading, setLoading] = useState(true)
 
-  const [error, setError] = useState("")
+
+
 
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -39,34 +41,6 @@ export default function BoardingPage() {
     record: BoardingRecord
     checkOutDate: string
   } | null>(null)
-
-  useEffect(() => {
-    let active = true
-
-    boardingApi
-      .list()
-      .then((rows) => {
-        if (active) {
-          setStaysData(rows)
-          setError("")
-        }
-      })
-
-      .catch(() => {
-        if (active)
-          setError(
-            "Could not load boarding records. Check your connection and retry.",
-          )
-      })
-
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-
-    return () => {
-      active = false
-    }
-  }, [])
 
   function filterByPanel(rows: BoardingRecord[]) {
     if (activePanel === "boarding") return rows.filter((row) => row.status === "Boarding")
@@ -103,7 +77,7 @@ export default function BoardingPage() {
 
     try {
       await boardingApi.remove(record.id)
-      setStaysData((rows) => rows.filter((row) => row.id !== record.id))
+      setStaysData((rows) => (rows ?? []).filter((row) => row.id !== record.id))
     } catch (err) {
       setError(
         err instanceof Error
@@ -166,7 +140,7 @@ export default function BoardingPage() {
       })
 
       setStaysData((rows) =>
-        rows.map((row) => (row.id === updated.id ? updated : row)),
+        (rows ?? []).map((row) => (row.id === updated.id ? updated : row)),
       )
     } catch (err) {
       setError(

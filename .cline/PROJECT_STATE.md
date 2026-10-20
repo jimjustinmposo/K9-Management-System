@@ -15,7 +15,8 @@
 ## Architecture
 - K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.
 - Pages Functions return `{ data }` or `{ success, data }` / `{ success:false, error:{code,message} }`.
-- Frontend GET requests use a 30-second in-memory cache with request deduplication, mutation invalidation, workspace/user isolation, and clear-on-logout; cache is cleared when the tab returns to foreground.
+- Frontend GET requests use a bounded (200-entry), five-minute in-memory cache with request deduplication, dependent-resource mutation invalidation, and workspace/user/permission/subscription isolation; logout clears it. Focus no longer clears fresh data. Auth/billing/member administration bypass caching.
+- Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
 - [x] Authentication UI and APIs (email/password)

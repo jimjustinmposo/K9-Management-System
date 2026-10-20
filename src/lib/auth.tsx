@@ -7,7 +7,7 @@ import {
 } from "react"
 import { Navigate, useLocation } from "react-router-dom"
 import { createSessionController } from "./sessionController"
-import { cachedApiGet, clearApiCache, invalidateApiCache, revalidateApiCache, setApiCacheScope } from "./apiCache"
+import { cachedApiGet, clearApiCache, invalidateApiCache, setApiCacheScope } from "./apiCache"
 
 export type Session = {
   user: { id: string; email: string; name: string }
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const response = await fetch("/api/auth/session", { credentials: "same-origin" })
         const data = await response.json()
         const nextSession = response.ok ? data.data : null
-        setApiCacheScope(nextSession ? `${nextSession.workspace?.id}:${nextSession.user?.id}` : null)
+        setApiCacheScope(nextSession ? `${nextSession.workspace?.id}:${nextSession.user?.id}:${JSON.stringify(nextSession.permissions)}:${JSON.stringify(nextSession.subscription)}` : null)
         return nextSession
       } catch (error) {
         setApiCacheScope(null)
@@ -63,7 +63,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const poll = window.setInterval(() => void controller.refresh(false), 15_000)
     const refreshWhenVisible = () => {
       if (document.visibilityState === "visible") {
-        revalidateApiCache()
         void controller.refresh(false)
       }
     }
@@ -111,7 +110,7 @@ export function ProtectedRoute({
   if (owner && session.role !== "owner") return <Navigate to="/" replace />
   if (requireWritable && !session.subscription.writable)
     return <Navigate to="/" replace />
-  return children
+  return <div className="contents" key={`${session.workspace.id}:${session.user.id}:${JSON.stringify(session.permissions)}:${JSON.stringify(session.subscription)}`}>{children}</div>
 }
 
 export async function apiRequest(path: string, init?: RequestInit) {

@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useMemo } from "react"
+import { useCachedResource } from "../lib/useCachedResource"
 import { Link } from "react-router-dom"
 import { AppShell, Icon, Panel, PanelHeader } from "../components/AppShell"
 import { boardingApi } from "../lib/boardingApi"
@@ -74,22 +75,9 @@ function TrainingBars({ counts }: { counts: Record<string, number> }) {
 
 export default function DashboardPage() {
   const { session } = useAuth()
-  const [result, setResult] = useState<DashboardResult | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  useEffect(() => {
-    let alive = true
-    void loadDashboard().then((value) => { if (alive) { setResult(value); setError("") } }).catch((reason) => { if (alive) setError(reason instanceof Error ? reason.message : "Could not load operations data") }).finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [])
-
+  const { data: result, loading, error, refresh } = useCachedResource("/api/dashboard/view", loadDashboard)
   const data = result?.data
   const today = localDate()
-  const refresh = useCallback(() => {
-    setLoading(true)
-    setError("")
-    void loadDashboard().then((value) => { setResult(value) }).catch((reason) => setError(reason instanceof Error ? reason.message : "Could not load operations data")).finally(() => setLoading(false))
-  }, [])
   const alerts = useMemo(() => {
     if (!data) return [] as { id: string; title: string; detail: string; href: string; severity: "danger" | "warning" }[]
     const items: { id: string; title: string; detail: string; href: string; severity: "danger" | "warning" }[] = []
@@ -174,7 +162,7 @@ export default function DashboardPage() {
             <p className="border-t border-line px-4 py-3 text-[10px] leading-4 text-muted">Vaccination due dates are not represented in current records; vaccine counts reflect distinct vaccine medications linked to treatment history, not upcoming appointments.</p>
           </Panel>
         </div>
-        <p className="text-[10px] leading-4 text-muted">Data reflects records available to this workspace. Dashboard requests use existing APIs and 30-second in-memory caching; refresh or return to the tab to revalidate.</p>
+        <p className="text-[10px] leading-4 text-muted">Data reflects records available to this workspace. Dashboard requests use existing APIs and five-minute in-memory caching; use Refresh to request current records.</p>
       </>}
     </div>
   </AppShell>

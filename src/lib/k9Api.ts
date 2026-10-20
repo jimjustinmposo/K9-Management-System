@@ -28,6 +28,7 @@ function readLocal(): K9Record[] {
 function writeLocal(records: K9Record[]): boolean {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    invalidateApiCache("/api/k9");
     return true;
   } catch {
     // storage unavailable or quota exceeded (large photos)

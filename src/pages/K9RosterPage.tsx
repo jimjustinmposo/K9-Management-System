@@ -3,8 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { AppShell, Panel } from "../components/AppShell";
 import { k9Api } from "../lib/k9Api";
 import { useAuth } from "../lib/auth";
-import { k9Age, k9Initials, type K9Record } from "../types/k9";
+import { k9Age, k9Initials } from "../types/k9";
 import Pagination from "../components/Pagination";
+import { useCachedResource } from "../lib/useCachedResource";
+const readRoster = () => k9Api.list();
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -20,36 +22,12 @@ function statusStyle(status: string): string {
 export default function K9RosterPage() {
   const { session } = useAuth();
   const [searchParams] = useSearchParams();
-  const [records, setRecords] = useState<K9Record[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState("");
+  const { data: records = [], setData: setRecords, loading, error: loadError } = useCachedResource("/api/k9/view", readRoster);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") || "All");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [deletingId, setDeletingId] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    k9Api
-      .list()
-      .then((rows) => {
-        if (active) {
-          setRecords(rows);
-          setLoadError("");
-        }
-      })
-      .catch(() => {
-        if (active) setLoadError("Cloudflare unreachable — showing local records.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -81,7 +59,7 @@ export default function K9RosterPage() {
     setDeletingId(id);
     try {
       await k9Api.remove(id);
-      setRecords((prev) => prev.filter((k9) => k9.id !== id));
+      setRecords((prev) => (prev ?? []).filter((k9) => k9.id !== id));
     } catch {
       alert("Delete failed. Check the Cloudflare connection and retry.");
     } finally {
