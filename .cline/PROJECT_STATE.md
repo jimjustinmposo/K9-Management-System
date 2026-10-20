@@ -32,12 +32,12 @@
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
-- [x] Car Usage register with workspace-scoped CRUD, K9 association, driver/time/odometer fields, and computed distance; migration `0027_car_usage.sql` added but not applied
+- [x] Car Usage register with workspace-scoped CRUD, K9 association, driver/time/odometer fields, and persisted calculated distance; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely
 <<<<<<< HEAD
 - [x] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` applied to shared remote D1 on 2026-10-16.
 =======
 - [~] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` is not yet applied to remote D1.
-- [~] In Season register with heat start/end tracking, workspace-scoped API, owner/member create and owner-only edit/delete, and computed Day 1/7/9/14/21/28 in-app reminders; migration `0025_in_season.sql` is not yet applied remotely.
+- [~] In Season register with heat start/end tracking, workspace-scoped API, owner/member create and owner-only edit/delete, and computed Day 1/7/9/14/21/28 in-app reminders; migration `0025_in_season.sql` applied remotely.
 >>>>>>> season
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
@@ -53,8 +53,9 @@
 - `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
 - `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
 - `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
-- `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; additive migration `0025_in_season.sql` is not yet applied.
-- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings, and persisted `km_used`; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` are pending application.
+- `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; migration `0025_in_season.sql` applied remotely.
+- `k9_grooming` — workspace-scoped grooming records linked to `k9_roster`; migration `0026_grooming.sql` applied remotely.
+- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings, and persisted `km_used`; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -90,7 +91,7 @@
 
 ## Recent Changes
 - Added persisted `km_used` to Car Usage with a backfill migration; create/edit APIs calculate it from KM end minus KM start.
-- Added Car Usage register with K9 linkage, CRUD API/pages, odometer validation, and migration `0027_car_usage.sql` (typecheck/build pass; migration not applied).
+- Applied remote D1 migrations `0025_in_season.sql` through `0028_car_usage_km_used.sql`; verified no pending migrations and confirmed `k9_car_usage.km_used` exists.
 <<<<<<< HEAD
 - Applied additive migration `0024_shopping.sql` to shared remote D1; verified migration registry, Shopping table, and both indexes. No unrelated pending migrations or data changes.
 =======
