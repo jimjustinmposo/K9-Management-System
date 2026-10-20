@@ -32,6 +32,7 @@
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
+- [x] Car Usage register with workspace-scoped CRUD, K9 association, driver/time/odometer fields, and computed distance; migration `0027_car_usage.sql` added but not applied
 <<<<<<< HEAD
 - [x] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` applied to shared remote D1 on 2026-10-16.
 =======
@@ -53,6 +54,7 @@
 - `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
 - `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
 - `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; additive migration `0025_in_season.sql` is not yet applied.
+- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings; migration `0027_car_usage.sql` is pending application.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -64,6 +66,7 @@
 - GET/POST `/api/training/:discipline`, GET/PUT/DELETE `/api/training/:discipline/:id`; discipline is obedience, detection, tracking, protection, or socialization.
 - GET/POST `/api/feeding`, GET/PUT/DELETE `/api/feeding/:id`; workspace-scoped feeding records linked to K9 and handler rosters.
 - GET/POST `/api/food-inventory`, GET/PUT/DELETE `/api/food-inventory/:id`; workspace-scoped stock records with computed usage and balance.
+- GET/POST `/api/car-usage`, GET/PUT/DELETE `/api/car-usage/:id`; workspace-scoped trip logs; create permitted to owner/member, edit/delete owner-only.
 - GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` — owner-only member administration and direct member account creation
 - POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
@@ -86,6 +89,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added Car Usage register with K9 linkage, CRUD API/pages, odometer validation, and migration `0027_car_usage.sql` (typecheck/build pass; migration not applied).
 <<<<<<< HEAD
 - Applied additive migration `0024_shopping.sql` to shared remote D1; verified migration registry, Shopping table, and both indexes. No unrelated pending migrations or data changes.
 =======

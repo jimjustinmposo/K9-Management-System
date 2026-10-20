@@ -30,6 +30,8 @@ import InSeasonPage from "./pages/InSeasonPage"
 import InSeasonFormPage from "./pages/InSeasonFormPage"
 import GroomingPage from "./pages/GroomingPage"
 import GroomingFormPage from "./pages/GroomingFormPage"
+import CarUsagePage from "./pages/CarUsagePage"
+import CarUsageFormPage from "./pages/CarUsageFormPage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -75,6 +77,9 @@ export default function App() {
       <Route path="/grooming" element={protectedPage(<GroomingPage />)} />
       <Route path="/grooming/new" element={<ProtectedRoute requireWritable><GroomingFormPage /></ProtectedRoute>} />
       <Route path="/grooming/:id/edit" element={<ProtectedRoute owner requireWritable><GroomingFormPage /></ProtectedRoute>} />
+      <Route path="/car-usage" element={protectedPage(<CarUsagePage />)} />
+      <Route path="/car-usage/new" element={<ProtectedRoute requireWritable><CarUsageFormPage /></ProtectedRoute>} />
+      <Route path="/car-usage/:id/edit" element={<ProtectedRoute owner requireWritable><CarUsageFormPage /></ProtectedRoute>} />
       <Route path="/boarding" element={protectedPage(<BoardingPage />)} />
       <Route
         path="/boarding/new"

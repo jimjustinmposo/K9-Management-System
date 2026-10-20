@@ -14,6 +14,7 @@ export type IconName =
   | "task"
   | "training"
   | "grooming"
+  | "car"
   | "heart"
   | "shield"
   | "clipboard"
@@ -80,6 +81,7 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
       </>
     ),
     grooming: <><path d="M12 3c-3 4-6 7-6 11a6 6 0 0 0 12 0c0-4-3-7-6-11Z" /><path d="M9 15a3 3 0 0 0 3 3" /></>,
+    car: <><path d="m5 11 1.5-5h11L19 11" /><path d="M3 11h18v8H3z" /><circle cx="7" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /><path d="M5 14h2M17 14h2" /></>,
     heart: <path d="M20.8 5.7a5.4 5.4 0 0 0-7.6 0L12 6.9l-1.2-1.2a5.4 5.4 0 0 0-7.6 7.6L12 22l8.8-8.7a5.4 5.4 0 0 0 0-7.6Z" />,
     shield: (
       <>
@@ -193,6 +195,7 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "K9 Weights", to: "/weights", icon: "weight" },
   { label: "Training", to: "/training", icon: "training" },
   { label: "Grooming", to: "/grooming", icon: "grooming" },
+  { label: "Car Usage", to: "/car-usage", icon: "car" },
   { label: "Medical", to: "/medical", icon: "heart" },
   { label: "Handlers", to: "/handlers", icon: "users" },
   { label: "Reports", to: "/reports", icon: "reports" },
