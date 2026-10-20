@@ -30,8 +30,9 @@ export const onRequestPut: PagesFunction<AppEnv> = async (context) => {
     ])
     if (!existing) return json({ error: "Car usage record not found" }, 404)
     if (!k9) return json({ error: "Selected K9 is not available in this workspace" }, 400)
-    await context.env.DB.prepare("UPDATE k9_car_usage SET k9_id=?,date=?,driver=?,time_in=?,km_start=?,time_out=?,km_end=?,updated_at=? WHERE id=? AND workspace_id=?")
-      .bind(k9Id, date, driver, timeIn, kmStart, timeOut, kmEnd, new Date().toISOString(), id, session.workspace.id).run()
+    const kmUsed = kmEnd - kmStart
+    await context.env.DB.prepare("UPDATE k9_car_usage SET k9_id=?,date=?,driver=?,time_in=?,km_start=?,time_out=?,km_end=?,km_used=?,updated_at=? WHERE id=? AND workspace_id=?")
+      .bind(k9Id, date, driver, timeIn, kmStart, timeOut, kmEnd, kmUsed, new Date().toISOString(), id, session.workspace.id).run()
     const row = await context.env.DB.prepare(`${select} WHERE c.id=? AND c.workspace_id=?`).bind(id, session.workspace.id).first()
     return json({ data: row })
   } catch { return json({ error: "Failed to update car usage record" }, 500) }

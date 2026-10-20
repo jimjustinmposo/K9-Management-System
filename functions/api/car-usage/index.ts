@@ -38,8 +38,9 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
     const k9 = await context.env.DB.prepare("SELECT id FROM k9_roster WHERE id=? AND workspace_id=?").bind(k9Id, session.workspace.id).first()
     if (!k9) return json({ error: "Selected K9 is not available in this workspace" }, 400)
     const id = crypto.randomUUID(), now = new Date().toISOString()
-    await context.env.DB.prepare("INSERT INTO k9_car_usage (id,k9_id,date,driver,time_in,km_start,time_out,km_end,workspace_id,created_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)")
-      .bind(id, k9Id, date, driver, timeIn, kmStart, timeOut, kmEnd, session.workspace.id, session.user.id, now, now).run()
+    const kmUsed = kmEnd - kmStart
+    await context.env.DB.prepare("INSERT INTO k9_car_usage (id,k9_id,date,driver,time_in,km_start,time_out,km_end,km_used,workspace_id,created_by_user_id,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      .bind(id, k9Id, date, driver, timeIn, kmStart, timeOut, kmEnd, kmUsed, session.workspace.id, session.user.id, now, now).run()
     const row = await context.env.DB.prepare(`${select} WHERE c.id=? AND c.workspace_id=?`).bind(id, session.workspace.id).first()
     return json({ data: row }, 201)
   } catch { return json({ error: "Failed to create car usage record" }, 500) }

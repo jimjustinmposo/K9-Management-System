@@ -54,7 +54,7 @@
 - `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
 - `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
 - `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; additive migration `0025_in_season.sql` is not yet applied.
-- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings; migration `0027_car_usage.sql` is pending application.
+- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings, and persisted `km_used`; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` are pending application.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -89,6 +89,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added persisted `km_used` to Car Usage with a backfill migration; create/edit APIs calculate it from KM end minus KM start.
 - Added Car Usage register with K9 linkage, CRUD API/pages, odometer validation, and migration `0027_car_usage.sql` (typecheck/build pass; migration not applied).
 <<<<<<< HEAD
 - Applied additive migration `0024_shopping.sql` to shared remote D1; verified migration registry, Shopping table, and both indexes. No unrelated pending migrations or data changes.

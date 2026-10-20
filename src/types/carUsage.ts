@@ -9,6 +9,7 @@ export interface CarUsageRecord {
   kmStart: number
   timeOut: string
   kmEnd: number
+  kmUsed: number
   createdAt: string
   updatedAt: string
 }

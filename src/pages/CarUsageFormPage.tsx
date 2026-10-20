@@ -31,6 +31,11 @@ export default function CarUsageFormPage() {
     return () => { active = false }
   }, [id])
   function set<K extends keyof CarUsageFormValues>(key: K, value: CarUsageFormValues[K]) { setForm((current) => ({ ...current, [key]: value })) }
+  const kmStart = Number(form.kmStart)
+  const kmEnd = Number(form.kmEnd)
+  const kmUsed = form.kmStart !== "" && form.kmEnd !== "" && Number.isFinite(kmStart) && Number.isFinite(kmEnd) && kmEnd >= kmStart
+    ? kmEnd - kmStart
+    : null
   async function submit(event: FormEvent) {
     event.preventDefault(); setError("")
     if (!form.k9Id) { setError("Select a K9 from the roster."); return }
@@ -52,6 +57,9 @@ export default function CarUsageFormPage() {
       <div><label htmlFor="car-usage-km-start" className={label}>KM start *</label><input id="car-usage-km-start" type="number" min="0" step="0.1" required className={input} value={form.kmStart} onChange={(event) => set("kmStart", event.target.value)} /></div>
       <div><label htmlFor="car-usage-time-out" className={label}>Time out *</label><input id="car-usage-time-out" type="time" required className={input} value={form.timeOut} onChange={(event) => set("timeOut", event.target.value)} /></div>
       <div><label htmlFor="car-usage-km-end" className={label}>KM end *</label><input id="car-usage-km-end" type="number" min={form.kmStart || "0"} step="0.1" required className={input} value={form.kmEnd} onChange={(event) => set("kmEnd", event.target.value)} /></div>
+      <div><label htmlFor="car-usage-km-used" className={label}>KM used (calculated)</label><output id="car-usage-km-used" aria-live="polite" className={`${input} flex items-center bg-canvas`}>
+        {kmUsed === null ? "Enter valid KM start and KM end" : `${kmUsed.toLocaleString()} km`}
+      </output></div>
     </>}
       {!loading && dogs.length === 0 && <p className="text-sm text-warning md:col-span-2">Add a K9 to the roster before recording car usage.</p>}
       {error && <p role="alert" className="rounded-lg border border-danger/30 bg-danger/10 p-3 text-sm text-danger md:col-span-2">{error}</p>}
