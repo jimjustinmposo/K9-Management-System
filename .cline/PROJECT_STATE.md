@@ -33,6 +33,7 @@
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
 - [~] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` is not yet applied to remote D1.
+- [~] In Season register with heat start/end tracking, workspace-scoped API, owner/member create and owner-only edit/delete, and computed Day 1/7/9/14/21/28 in-app reminders; migration `0025_in_season.sql` is not yet applied remotely.
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 - [ ] Reports (ComingSoonPage)
@@ -47,10 +48,12 @@
 - `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
 - `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
 - `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
+- `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; additive migration `0025_in_season.sql` is not yet applied.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
 - GET/POST `/api/boarding`, GET/PUT/DELETE `/api/boarding/:id`; writes validate that the selected K9 belongs to the same workspace
+- GET/POST `/api/in-season`, GET/PUT/DELETE `/api/in-season/:id`; workspace-scoped season records; create permitted to owner/member, edit/delete owner-only.
 - GET/POST `/api/medical/{medications,records,conditions}`, GET/PUT/DELETE `/api/medical/{medications,records,conditions}/:id`; writes are workspace-scoped and validate related K9/medication ownership.
 - GET/POST `/api/handlers`, GET/PUT/DELETE `/api/handlers/:id`; handler records and searches are workspace-scoped.
 - Creating handlers requires owner `manageMembers` permission; members may view handlers only.
@@ -62,11 +65,11 @@
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
-- Local Pages development is configured with D1 `remote = true` to use the shared remote D1; Vite-only `pnpm dev` does not run Pages Functions and retains localStorage/API fallback.
+- Local Pages development is configured with D1 `remote = true` to use the shared remote D1; Vite-only `pnpm dev` does not run Pages Functions and retains localStorage/API fallback. For an isolated additive change, execute only its SQL file rather than applying unrelated pending migrations.
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
 - Training records link to the K9 and handler rosters; the API validates both associations against the active workspace.
-- Wrangler's D1 binding explicitly uses `remote = false` for safe local development. The original local state remains at migration 0018; a separate `.wrangler/performance-baseline` copy has migrations 0019–0022 applied and integrity/data preservation verified.
+- Wrangler D1 binding has `remote = true`; local Pages development and deployed Pages use the shared remote `k9_ops_db`.
 - UI conventions: AppShell/Panel components, tactical dark palette with Rajdhani/Inter/JetBrains Mono typography and status badges
 - Dark-mode shared panels use a screenshot-inspired forest surface, sage outline, and subtle glow via `.app-panel`; project-wide future UI guidance is in `.clinerules/00-global.md`.
 - Theme choice persists in localStorage; dark is the default, with a light content palette and dark navigation sidebar
@@ -79,6 +82,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Added In Season heat cycle tracking with computed in-app milestone reminders and additive SQL migration; typecheck and production build pass. Remote SQL check found the table absent; no schema change or deployment performed.
 - Added Shopping register and auto-add food purchases to matching/new Food Inventory rows. Typecheck and production build pass; migration `0024_shopping.sql` awaits remote application.
 - Added Food Inventory CRUD and live feeding-consumption calculation; additive schema applied directly to shared remote D1. Local Pages D1 binding set to remote; no app deployment performed.
 - Added dependency-free frontend API GET caching on branch `perf/shared-api-cache`; auth/billing excluded, requests scoped by user/workspace, mutation invalidation and foreground revalidation included. Seven cache tests plus existing focused suites pass; browser navigation metrics are not yet measured.

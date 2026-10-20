@@ -9,6 +9,7 @@ export type IconName =
   | "feeding"
   | "inventory"
   | "shopping"
+  | "season"
   | "weight"
   | "task"
   | "training"
@@ -58,6 +59,7 @@ export function Icon({ name, className = "size-5" }: { name: IconName; className
         <circle cx="9" cy="20" r="1" /><circle cx="17" cy="20" r="1" />
       </>
     ),
+    season: <><path d="M12 3v18M3 12h18" /><path d="M12 3c-3 2-5 5-5 9s2 7 5 9M12 3c3 2 5 5 5 9s-2 7-5 9" /></>,
     weight: (
       <>
         <path d="M12 3v3M7 6h10l2 14H5L7 6Z" />
@@ -182,6 +184,7 @@ export function SubscriptionStatusBar() {
 const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "K9 Roster", to: "/k9-roster", icon: "dog" },
   { label: "Boarding", to: "/boarding", icon: "boarding" },
+  { label: "In Season", to: "/in-season", icon: "season" },
   { label: "K9 Feeding", to: "/feeding", icon: "feeding" },
   { label: "Food Inventory", to: "/food-inventory", icon: "inventory" },
   { label: "Shopping", to: "/shopping", icon: "shopping" },
