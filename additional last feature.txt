@@ -1,0 +1,4 @@
+remove the k9 to car usage make it note instead
+add report daily weakly monthly yearly per selected dog multiple 
+create a log page
+make the member can edit only the boarding they can check the check box
