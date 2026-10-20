@@ -23,13 +23,14 @@
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
 - [x] Owner-only user administration with member password reset, archive/restore, permanent delete, and session invalidation
 - [x] Developer-secret password reset page and server-side password update
-- [x] Dashboard removed; root and unknown routes redirect to K9 Roster
+- [x] Workspace-scoped K9 Operations Dashboard at `/dashboard` and root route; live operational KPIs, alerts, upcoming season/boarding events, training totals, quick actions, and recent activity via existing APIs/cache
 - [x] K9 Roster (list/create/edit/delete, photo, search, filters, and per-dog linked boarding/training/medical/handler/weight/feeding records with incremental paging)
 - [x] Boarding stays linked to registered K9 roster records (create/edit/delete, dates, status, owner contact, notes, daily rate/currency and checked-out total)
 - [x] Five training registers (Obedience, Detection, Tracking, Protection, Socialization) with linked K9/handler records and CRUD
 - [x] Persistent dark/light theme toggle across authenticated pages and authentication screens
 - [x] Medical overview, medications, treatment records, and conditions pages with workspace-scoped CRUD APIs
 - [x] Workspace-scoped handler directory with create/edit/delete, search, contact details, and position
+- [x] Dashboard deep links initialize K9, boarding, and in-season status filters; inventory low-stock view supported
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
 - [x] Car Usage register with workspace-scoped CRUD, K9 association, driver/time/odometer fields, and persisted calculated distance; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely

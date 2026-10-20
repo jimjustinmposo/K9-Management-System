@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 import Pagination from "../components/Pagination"
 import { AppShell, Panel } from "../components/AppShell"
 import { useAuth } from "../lib/auth"
@@ -16,8 +16,9 @@ const formatDate = (value: string) => value ? new Date(`${value}T00:00:00`).toLo
 
 export default function InSeasonPage() {
   const { session } = useAuth()
+  const [searchParams] = useSearchParams()
   const [records, setRecords] = useState<SeasonRecord[]>([])
-  const [filter, setFilter] = useState<Filter>("Active")
+  const [filter, setFilter] = useState<Filter>(() => searchParams.get("status") === "Ended" ? "Ended" : searchParams.get("status") === "All" ? "All" : "Active")
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(true)

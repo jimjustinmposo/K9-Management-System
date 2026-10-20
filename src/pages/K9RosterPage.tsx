@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AppShell, Panel } from "../components/AppShell";
 import { k9Api } from "../lib/k9Api";
 import { useAuth } from "../lib/auth";
@@ -19,11 +19,12 @@ function statusStyle(status: string): string {
 
 export default function K9RosterPage() {
   const { session } = useAuth();
+  const [searchParams] = useSearchParams();
   const [records, setRecords] = useState<K9Record[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState(() => searchParams.get("status") || "All");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [deletingId, setDeletingId] = useState("");

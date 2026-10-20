@@ -5,6 +5,7 @@ import ThemeToggle from "./ThemeToggle";
 
 export type IconName =
   | "dog"
+  | "dashboard"
   | "boarding"
   | "feeding"
   | "inventory"
@@ -31,6 +32,7 @@ export type IconName =
 
 export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
   const paths: Record<IconName, React.ReactNode> = {
+    dashboard: <><rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="3" width="8" height="5" rx="1" /><rect x="13" y="10" width="8" height="11" rx="1" /><rect x="3" y="13" width="8" height="8" rx="1" /></>,
     dog: (
       <>
         <path d="M7 9.5 4 7V4l5 2h6l5-2v3l-3 2.5V15a5 5 0 0 1-10 0Z" />
@@ -186,6 +188,7 @@ export function SubscriptionStatusBar() {
 }
 
 const navItems: { label: string; to: string; icon: IconName }[] = [
+  { label: "Operations Dashboard", to: "/dashboard", icon: "dashboard" },
   { label: "K9 Roster", to: "/k9-roster", icon: "dog" },
   { label: "Boarding", to: "/boarding", icon: "boarding" },
   { label: "In Season", to: "/in-season", icon: "season" },

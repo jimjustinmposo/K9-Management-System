@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { Link } from "react-router-dom"
+import { Link, useSearchParams } from "react-router-dom"
 
 import { AppShell, Panel } from "../components/AppShell"
 
@@ -16,10 +16,11 @@ const PAGE_SIZE = 10
 
 export default function BoardingPage() {
   const { session } = useAuth()
+  const [searchParams] = useSearchParams()
 
   const [staysData, setStaysData] = useState<BoardingRecord[]>([])
 
-  const [activePanel, setActivePanel] = useState<"boarding" | "checkedout" | "total">("total")
+  const [activePanel, setActivePanel] = useState<"boarding" | "checkedout" | "total">(() => searchParams.get("status") === "Boarding" ? "boarding" : searchParams.get("status") === "Checked Out" ? "checkedout" : "total")
 
   const [loading, setLoading] = useState(true)
 
