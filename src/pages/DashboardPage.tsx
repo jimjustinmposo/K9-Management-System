@@ -114,7 +114,7 @@ export default function DashboardPage() {
     const rows = [
       ...data.trainingRecent.map((row, index) => ({ id: `training:${row.href}:${row.date}:${row.dog}:${index}`, date: row.date, title: `${row.dog} · training`, category: row.discipline, href: row.href })),
       ...data.groomingRecent.map((row) => ({ id: `grooming:${row.id}`, date: row.date, title: `${row.dogName} · grooming`, category: "Care", href: "/grooming" })),
-      ...data.vehicleRecent.map((row) => ({ id: `vehicle:${row.id}`, date: row.date, title: `${row.dogName} · vehicle activity`, category: row.driver, href: "/car-usage" })),
+      ...data.vehicleRecent.map((row) => ({ id: `vehicle:${row.id}`, date: row.date, title: `${row.driver} · vehicle activity`, category: row.driver, href: "/car-usage" })),
     ]
     return rows.filter((row) => row.date <= today).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)
   }, [data, today])

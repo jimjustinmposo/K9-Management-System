@@ -75,6 +75,8 @@
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
+- User preferences are recorded in `.cline/USER_PREFERENCES.md`: preserve sidebar scroll, use Car Usage Notes instead of K9 selection, allow member care-checkbox updates, and hide numeric spinner arrows.
+- Members with writable access can PATCH boarding status/checkout date and individual grooming care flags; full edits and deletes remain owner-only.
 - Local Pages development is configured with D1 `remote = true` to use the shared remote D1; Vite-only `pnpm dev` does not run Pages Functions and retains localStorage/API fallback. For an isolated additive change, execute only its SQL file rather than applying unrelated pending migrations.
 - Local Pages development uses port `8790` because `8788` is occupied in the current environment.
 - Wrangler local development uses ignored `.dev.vars` setting `LOCAL_DEV_FULL_ACCESS=true` to bypass subscription gating; deployed payment/subscription enforcement is unchanged. Account roles still apply.
@@ -92,6 +94,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Preserved sidebar scroll across page navigation; globally hid numeric spinner arrows. Car Usage uses Notes (migration `0029_car_usage_notes.sql` tested in isolated SQLite but NOT applied remotely). Added restricted boarding/grooming PATCH controls. Typecheck/build and 13 focused tests pass; browser verification pending.
 - Added persisted `km_used` to Car Usage with a backfill migration; create/edit APIs calculate it from KM end minus KM start.
 - Applied remote D1 migrations `0025_in_season.sql` through `0028_car_usage_km_used.sql`; verified no pending migrations and confirmed `k9_car_usage.km_used` exists.
 <<<<<<< HEAD

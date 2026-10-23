@@ -13,6 +13,21 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   } catch { return json({ error: "Failed to load grooming record" }, 500) }
 }
 
+export const onRequestPatch: PagesFunction<AppEnv> = async (context) => {
+  const session = await requireSession(context, "create"); if (isResponse(session)) return session
+  try {
+    const body = await context.request.json() as Record<string, unknown>
+    const keys = body ? Object.keys(body) : []
+    if (keys.length !== 1 || !["bathing", "nails", "brushing"].includes(keys[0]) || typeof body[keys[0]] !== "boolean") return json({ error: "Select one grooming checkbox to update" }, 400)
+    const field = keys[0], id = context.params.id as string
+    const result = await context.env.DB.prepare(`UPDATE k9_grooming SET ${field}=?, updated_at=? WHERE id=? AND workspace_id=?`)
+      .bind(body[field] ? 1 : 0, new Date().toISOString(), id, session.workspace.id).run()
+    if (!result.meta.changes) return json({ error: "Grooming record not found" }, 404)
+    const row = await context.env.DB.prepare(`${select} WHERE g.id=? AND g.workspace_id=?`).bind(id, session.workspace.id).first()
+    return json({ data: row })
+  } catch { return json({ error: "Could not update grooming checkbox" }, 500) }
+}
+
 export const onRequestPut: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "edit"); if (isResponse(session)) return session
   try {

@@ -95,7 +95,7 @@ export default function BoardingPage() {
     confirmedCheckOutDate?: string,
   ) {
     if (
-      !session?.permissions.edit ||
+      !session?.permissions.create ||
       record.status === status ||
       updatingStatusId
     )
@@ -119,25 +119,7 @@ export default function BoardingPage() {
         : ""
 
     try {
-      const updated = await boardingApi.update(record.id, {
-        k9Id: record.k9Id,
-
-        ownerName: record.ownerName,
-
-        ownerPhone: record.ownerPhone,
-
-        checkInDate: record.checkInDate,
-
-        checkOutDate,
-
-        currency: record.currency,
-
-        pricePerDay: record.pricePerDay,
-
-        status,
-
-        notes: record.notes,
-      })
+      const updated = await boardingApi.updateStatus(record.id, status, checkOutDate)
 
       setStaysData((rows) =>
         (rows ?? []).map((row) => (row.id === updated.id ? updated : row)),
@@ -365,14 +347,14 @@ export default function BoardingPage() {
                         <div className="flex flex-col gap-1.5">
                           <label
                             className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                              session?.permissions.edit ? "cursor-pointer" : ""
+                              session?.permissions.create ? "cursor-pointer" : ""
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={record.status === "Boarding"}
                               disabled={
-                                !session?.permissions.edit ||
+                                !session?.permissions.create ||
                                 updatingStatusId === record.id
                               }
                               onChange={() =>
@@ -385,14 +367,14 @@ export default function BoardingPage() {
                           </label>
                           <label
                             className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                              session?.permissions.edit ? "cursor-pointer" : ""
+                              session?.permissions.create ? "cursor-pointer" : ""
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={record.status === "Checked Out"}
                               disabled={
-                                !session?.permissions.edit ||
+                                !session?.permissions.create ||
                                 updatingStatusId === record.id
                               }
                               onChange={() =>
@@ -450,14 +432,14 @@ export default function BoardingPage() {
                     <div className="grid shrink-0 gap-1">
                       <label
                         className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                          session?.permissions.edit ? "cursor-pointer" : ""
+                          session?.permissions.create ? "cursor-pointer" : ""
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={record.status === "Boarding"}
                           disabled={
-                            !session?.permissions.edit ||
+                            !session?.permissions.create ||
                             updatingStatusId === record.id
                           }
                           onChange={() => void updateStatus(record, "Boarding")}
@@ -468,14 +450,14 @@ export default function BoardingPage() {
                       </label>
                       <label
                         className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                          session?.permissions.edit ? "cursor-pointer" : ""
+                          session?.permissions.create ? "cursor-pointer" : ""
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={record.status === "Checked Out"}
                           disabled={
-                            !session?.permissions.edit ||
+                            !session?.permissions.create ||
                             updatingStatusId === record.id
                           }
                           onChange={() =>

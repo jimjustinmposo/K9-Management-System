@@ -6,7 +6,7 @@ type Page = { data: CarUsageRecord[]; total: number }
 
 function mapRow(row: Row): CarUsageRecord {
   return {
-    id: String(row.id), k9Id: String(row.k9_id), dogName: String(row.dog_name ?? "Registered K9"), nickName: String(row.nick_name ?? ""),
+    id: String(row.id), notes: String(row.notes ?? ""),
     date: String(row.date), driver: String(row.driver), timeIn: String(row.time_in), kmStart: Number(row.km_start),
     timeOut: String(row.time_out), kmEnd: Number(row.km_end), kmUsed: Number(row.km_used ?? Number(row.km_end) - Number(row.km_start)), createdAt: String(row.created_at ?? ""), updatedAt: String(row.updated_at ?? ""),
   }
@@ -20,7 +20,7 @@ async function request(path: string, init?: RequestInit): Promise<any> {
 }
 
 function payload(values: CarUsageFormValues) {
-  return { k9_id: values.k9Id, date: values.date, driver: values.driver.trim(), time_in: values.timeIn, km_start: Number(values.kmStart), time_out: values.timeOut, km_end: Number(values.kmEnd) }
+  return { notes: values.notes.trim(), date: values.date, driver: values.driver.trim(), time_in: values.timeIn, km_start: Number(values.kmStart), time_out: values.timeOut, km_end: Number(values.kmEnd) }
 }
 
 export const carUsageApi = {

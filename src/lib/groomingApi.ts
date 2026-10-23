@@ -25,6 +25,11 @@ function payload(values: GroomingFormValues) {
 }
 
 export const groomingApi = {
+  async updateCare(id: string, field: "bathing" | "nails" | "brushing", checked: boolean): Promise<GroomingRecord> {
+    const data = await request(`/api/grooming/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ [field]: checked }) })
+    invalidateApiCache(`/api/grooming/${encodeURIComponent(id)}`); invalidateApiCache("/api/grooming")
+    return mapRow(data.data)
+  },
   async list(options: { search?: string; limit?: number; offset?: number } = {}): Promise<Page> {
     const params = new URLSearchParams({ limit: String(options.limit ?? 50), offset: String(options.offset ?? 0) })
     if (options.search?.trim()) params.set("search", options.search.trim())

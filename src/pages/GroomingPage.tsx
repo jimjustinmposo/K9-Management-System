@@ -8,7 +8,6 @@ import type { GroomingRecord } from "../types/grooming"
 
 const PAGE_SIZE = 10
 const formatDate = (value: string) => value ? new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString() : "—"
-const mark = (value: boolean) => <span className={`inline-grid size-5 place-items-center rounded border text-xs font-bold ${value ? "border-positive bg-positive-soft text-positive" : "border-line text-muted"}`} aria-label={value ? "Done" : "Not done"}>{value ? "✓" : "—"}</span>
 
 export default function GroomingPage() {
   const { session } = useAuth()
@@ -19,6 +18,18 @@ export default function GroomingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [deletingId, setDeletingId] = useState("")
+  const [updatingId, setUpdatingId] = useState("")
+  async function updateCare(record: GroomingRecord, field: "bathing" | "nails" | "brushing", checked: boolean) {
+    if (!session?.permissions.create || updatingId) return
+    setUpdatingId(record.id)
+    setError("")
+    try {
+      const updated = await groomingApi.updateCare(record.id, field, checked)
+      setRecords((rows) => rows.map((row) => row.id === updated.id ? updated : row))
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Could not update grooming checkbox.") }
+    finally { setUpdatingId("") }
+  }
+  const mark = (record: GroomingRecord, field: "bathing" | "nails" | "brushing") => <input type="checkbox" checked={record[field]} disabled={!session?.permissions.create || Boolean(updatingId)} onChange={(event) => void updateCare(record, field, event.target.checked)} aria-label={`${record.dogName} ${field}`} className="size-4 accent-emerald-700 disabled:cursor-not-allowed" />
   const load = useCallback(async () => {
     setLoading(true)
     try { const result = await groomingApi.list({ search, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }); setRecords(result.data); setTotal(result.total); setError("") }
@@ -41,7 +52,7 @@ export default function GroomingPage() {
     <label className="sr-only" htmlFor="grooming-search">Search grooming records</label><input id="grooming-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by K9…" className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-positive md:max-w-sm" />
     {error && <p role="alert" className="rounded-xl border border-danger/30 bg-danger/10 p-3 text-sm text-danger">{error}</p>}
     <Panel><PanelHeader eyebrow="Grooming register" title={`${total} record${total === 1 ? "" : "s"}`} />
-      {loading ? <p className="p-8 text-center text-sm text-muted">Loading grooming records…</p> : records.length === 0 ? <div className="p-10 text-center"><p className="font-semibold text-ink">{search ? "No matching records" : "No grooming records yet"}</p><p className="mt-1 text-sm text-muted">{search ? "Try another K9 name." : "Add the first grooming entry to get started."}</p></div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left"><thead className="bg-canvas text-[10px] uppercase tracking-wider text-muted"><tr>{["Date", "K9", "Bathing", "Nails", "Ears", "Brushing", "Price (AED)", "Actions"].map((label) => <th key={label} className="px-4 py-3">{label}</th>)}</tr></thead><tbody className="divide-y divide-line">{records.map((record) => <tr key={record.id} className="align-middle"><td className="whitespace-nowrap px-4 py-4 text-sm text-ink">{formatDate(record.date)}</td><td className="px-4 py-4 text-sm font-bold text-ink">{record.dogName}{record.nickName && <span className="ml-1 font-normal text-muted">({record.nickName})</span>}</td><td className="px-4 py-4">{mark(record.bathing)}</td><td className="px-4 py-4">{mark(record.nails)}</td><td className="max-w-40 whitespace-pre-wrap px-4 py-4 text-sm text-muted">{record.ears || "—"}</td><td className="px-4 py-4">{mark(record.brushing)}</td><td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-ink">AED {record.price.toFixed(2)}</td><td className="whitespace-nowrap px-4 py-4"><div className="flex gap-2">{session?.permissions.edit && <Link className="button-edit" to={`/grooming/${encodeURIComponent(record.id)}/edit`}>Edit</Link>}{session?.permissions.delete && <button type="button" disabled={deletingId === record.id} className="button-delete disabled:opacity-50" onClick={() => void remove(record)}>{deletingId === record.id ? "Deleting…" : "Delete"}</button>}</div></td></tr>)}</tbody></table></div>}
+      {loading ? <p className="p-8 text-center text-sm text-muted">Loading grooming records…</p> : records.length === 0 ? <div className="p-10 text-center"><p className="font-semibold text-ink">{search ? "No matching records" : "No grooming records yet"}</p><p className="mt-1 text-sm text-muted">{search ? "Try another K9 name." : "Add the first grooming entry to get started."}</p></div> : <div className="overflow-x-auto"><table className="w-full min-w-[760px] text-left"><thead className="bg-canvas text-[10px] uppercase tracking-wider text-muted"><tr>{["Date", "K9", "Bathing", "Nails", "Ears", "Brushing", "Price (AED)", "Actions"].map((label) => <th key={label} className="px-4 py-3">{label}</th>)}</tr></thead><tbody className="divide-y divide-line">{records.map((record) => <tr key={record.id} className="align-middle"><td className="whitespace-nowrap px-4 py-4 text-sm text-ink">{formatDate(record.date)}</td><td className="px-4 py-4 text-sm font-bold text-ink">{record.dogName}{record.nickName && <span className="ml-1 font-normal text-muted">({record.nickName})</span>}</td><td className="px-4 py-4">{mark(record, "bathing")}</td><td className="px-4 py-4">{mark(record, "nails")}</td><td className="max-w-40 whitespace-pre-wrap px-4 py-4 text-sm text-muted">{record.ears || "—"}</td><td className="px-4 py-4">{mark(record, "brushing")}</td><td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-ink">AED {record.price.toFixed(2)}</td><td className="whitespace-nowrap px-4 py-4"><div className="flex gap-2">{session?.permissions.edit && <Link className="button-edit" to={`/grooming/${encodeURIComponent(record.id)}/edit`}>Edit</Link>}{session?.permissions.delete && <button type="button" disabled={deletingId === record.id} className="button-delete disabled:opacity-50" onClick={() => void remove(record)}>{deletingId === record.id ? "Deleting…" : "Delete"}</button>}</div></td></tr>)}</tbody></table></div>}
       {total > 0 && <Pagination page={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} label="grooming records" />}
     </Panel>
   </div></AppShell>

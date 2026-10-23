@@ -25,6 +25,27 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   }
 }
 
+export const onRequestPatch: PagesFunction<AppEnv> = async (context) => {
+  const session = await requireSession(context, "create")
+  if (isResponse(session)) return session
+  try {
+    const body = await context.request.json() as Record<string, unknown>
+    if (!body || Object.keys(body).some((key) => !["status", "check_out_date"].includes(key))) return json({ error: "Only boarding status and checkout date can be changed" }, 400)
+    const status = clean(body.status)
+    if (!["Boarding", "Checked Out"].includes(status)) return json({ error: "Invalid boarding status" }, 400)
+    const id = context.params.id as string
+    const existing = await context.env.DB.prepare("SELECT check_in_date, price_per_day FROM boarding_records WHERE id = ? AND workspace_id = ?")
+      .bind(id, session.workspace.id).first<{ check_in_date: string; price_per_day: number }>()
+    if (!existing) return json({ error: "Boarding record not found" }, 404)
+    const date = status === "Checked Out" ? clean(body.check_out_date) : ""
+    if (status === "Checked Out" && (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(`${date}T00:00:00Z`)) || new Date(`${date}T00:00:00Z`).toISOString().slice(0, 10) !== date || date < existing.check_in_date)) return json({ error: "Enter a valid checkout date on or after check-in" }, 400)
+    await context.env.DB.prepare("UPDATE boarding_records SET status = ?, check_out_date = ?, total_amount = ?, updated_at = ? WHERE id = ? AND workspace_id = ?")
+      .bind(status, date, status === "Checked Out" ? calculateTotal(existing.check_in_date, date, existing.price_per_day) : null, new Date().toISOString(), id, session.workspace.id).run()
+    const row = await context.env.DB.prepare(`${selectRecord} WHERE b.id = ? AND b.workspace_id = ?`).bind(id, session.workspace.id).first()
+    return json({ data: row })
+  } catch { return json({ error: "Could not update boarding status" }, 500) }
+}
+
 export const onRequestPut: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "edit")
   if (isResponse(session)) return session

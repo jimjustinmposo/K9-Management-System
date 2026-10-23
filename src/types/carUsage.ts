@@ -1,8 +1,6 @@
 export interface CarUsageRecord {
   id: string
-  k9Id: string
-  dogName: string
-  nickName: string
+  notes: string
   date: string
   driver: string
   timeIn: string
@@ -15,7 +13,7 @@ export interface CarUsageRecord {
 }
 
 export interface CarUsageFormValues {
-  k9Id: string
+  notes: string
   date: string
   driver: string
   timeIn: string
@@ -25,7 +23,7 @@ export interface CarUsageFormValues {
 }
 
 export const EMPTY_CAR_USAGE_FORM: CarUsageFormValues = {
-  k9Id: "",
+  notes: "",
   date: new Date().toISOString().slice(0, 10),
   driver: "",
   timeIn: "",

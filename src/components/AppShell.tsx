@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import ThemeToggle from "./ThemeToggle";
@@ -206,7 +206,13 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "Subscription", to: "/subscription", icon: "shield" },
 ];
 
+let navigationScrollTop = 0;
+
 export function AppShell({ title, children }: { title: string; children: ReactNode }) {
+  const navigationRef = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    if (navigationRef.current) navigationRef.current.scrollTop = navigationScrollTop;
+  }, []);
   const [mobileNav, setMobileNav] = useState(false);
   const { session, logout } = useAuth();
   const visibleNav = navItems.filter((item) => {
@@ -236,7 +242,7 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
             <Icon name="cross" />
           </button>
         </div>
-        <nav className="flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
+        <nav ref={navigationRef} onScroll={(event) => { navigationScrollTop = event.currentTarget.scrollTop; }} className="min-h-0 flex-1 overflow-y-auto px-4 py-5" aria-label="Main navigation">
           <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/45">Operations</p>
           <div className="mt-3 space-y-1">
             {visibleNav.map((item) => (

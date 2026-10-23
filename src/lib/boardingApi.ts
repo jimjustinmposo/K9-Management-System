@@ -143,6 +143,18 @@ export const boardingApi = {
     invalidateApiCache("/api/boarding");
     return (await mapServerRows([data.data]))[0];
   },
+  async updateStatus(id: string, status: BoardingRecord["status"], checkOutDate: string): Promise<BoardingRecord> {
+    const response = await fetch(`/api/boarding/${encodeURIComponent(id)}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ status, check_out_date: checkOutDate }) });
+    if (!(response.headers.get("content-type") ?? "").includes("application/json")) {
+      const record = (await localRecords()).find((item) => item.id === id);
+      if (!record) throw new Error("Boarding record not found.");
+      return boardingApi.update(id, { ...record, status, checkOutDate });
+    }
+    const data = await jsonResponse(response);
+    if (!response.ok) throw new Error(errorMessage(data, response.status));
+    invalidateApiCache(`/api/boarding/${encodeURIComponent(id)}`); invalidateApiCache("/api/boarding");
+    return (await mapServerRows([data.data]))[0];
+  },
   async update(id: string, values: BoardingFormValues): Promise<BoardingRecord> {
     let response: Response;
     try {
