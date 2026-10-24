@@ -4,6 +4,7 @@ import BoardingFormPage from "./pages/BoardingFormPage"
 import BoardingPage from "./pages/BoardingPage"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
 import ComingSoonPage from "./pages/ComingSoonPage"
+import ReportsPage from "./pages/ReportsPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import K9FormPage from "./pages/K9FormPage"
 import K9RosterPage from "./pages/K9RosterPage"
@@ -137,7 +138,7 @@ export default function App() {
       <Route path="/in-season/:id/edit" element={<ProtectedRoute owner requireWritable><InSeasonFormPage /></ProtectedRoute>} />
       <Route
         path="/reports"
-        element={protectedPage(<OwnerPage><ComingSoonPage title="Reports" /></OwnerPage>)}
+        element={protectedPage(<OwnerPage><ReportsPage /></OwnerPage>)}
       />
       <Route path="*" element={<Navigate to="/k9-roster" replace />} />
     </Routes>

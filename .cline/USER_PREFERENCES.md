@@ -4,3 +4,4 @@
 - Car Usage should use free-text Notes, not a required K9 selector.
 - Members must be able to change boarding status and grooming care checkboxes without receiving general edit/delete access.
 - Hide number-input up/down spinner arrows throughout the application; retain numeric validation and keyboard entry.
+- Owners can choose Food, Stock, Dog, Car, and Sales reports for PDF download/printing by daily, weekly, monthly, or yearly period.

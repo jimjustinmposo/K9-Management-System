@@ -3,7 +3,7 @@
 ## Project
 - Name: Martina's K9 System
 - Purpose: Manage K9 roster, training sessions/goals/readiness, medical, deployments, handlers, reports
-- Status: K9 Roster, Training logs, Boarding, Medical, and Handlers modules implemented; Reports coming soon
+- Status: Core registers and owner-only Reports implemented; reports browser/print verification pending.
 
 ## Current Stack
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
@@ -19,6 +19,7 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
+- [~] Owner-only Food, Stock, Dog registrations, Car, and Sales reports at `/reports`, with daily/weekly/monthly/yearly ranges, multi-selection, PDF export and print. API/SQLite/PDF tests, typecheck and build pass; browser verification pending.
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
@@ -43,7 +44,6 @@
 >>>>>>> season
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
-- [ ] Reports (ComingSoonPage)
 
 ## Database
 - `k9_roster` — K9 records (id, dog_name, breed, status, microchip, lineage...)
@@ -146,5 +146,8 @@
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
 
 ## Known Limitations
+- Reports require Pages Functions/D1 (no localStorage fallback) and existing migrations including `0029_car_usage_notes.sql`; no remote migration or deployment performed. A report over 5,000 rows is rejected rather than truncated.
+- Report stock balances/statuses are current, not historical; dog filtering is registration date. Sales are charges, not payment receipts; grooming/shopping have unspecified currencies. PDF export directs unsupported font characters to browser Print/Save as PDF.
+- Pre-existing merge-conflict markers remain in this handoff file; unrelated sections were not resolved during reports work.
 - Training logs require the Pages Functions/D1 backend; they do not provide a localStorage fallback.
 

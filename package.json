@@ -27,6 +27,8 @@
   },
   "dependencies": {
     "dodopayments": "^2.54.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.9",
     "lucide-react": "^1.54.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

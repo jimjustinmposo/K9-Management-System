@@ -309,6 +309,28 @@ input[type="number"]::-webkit-outer-spin-button {
   background: var(--color-gold);
 }
 
+.report-print { display: none; }
+@media print {
+  @page { size: A4 landscape; margin: 12mm; }
+  body:has(.reports-page) { background: white !important; }
+  body:has(.reports-page) aside,
+  body:has(.reports-page) header,
+  body:has(.reports-page) .report-controls,
+  body:has(.reports-page) .report-screen { display: none !important; }
+  body:has(.reports-page) #root,
+  body:has(.reports-page) #root > *,
+  body:has(.reports-page) #root > * > *,
+  body:has(.reports-page) .lg\:pl-64,
+  body:has(.reports-page) main { margin: 0 !important; padding: 0 !important; min-height: 0 !important; }
+  .reports-page * { color: black !important; background: white !important; box-shadow: none !important; }
+  .report-print { display: block; }
+  .report-section { overflow: visible; border: none; border-radius: 0; break-before: page; }
+  .report-section:first-of-type { break-before: auto; }
+  .report-section tr { break-inside: avoid; }
+  .report-section thead { display: table-header-group; }
+  .report-section td, .report-section th { padding: 2mm; font-size: 8pt; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
