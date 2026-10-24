@@ -18,6 +18,16 @@ export class DogReportError extends Error {
   constructor(message: string, public status: number) { super(message) }
 }
 
+function isUnavailableSchema(error: unknown): boolean {
+  const seen = new Set<Error>()
+  while (error instanceof Error && !seen.has(error)) {
+    if (/\bno such (table|column):/i.test(error.message)) return true
+    seen.add(error)
+    error = error.cause
+  }
+  return false
+}
+
 export async function populateDogReport(db: D1Database, ws: string, ids: string[], report: ReportData) {
   if (ids.length > 90 || ids.some(id => !id.trim() || id.length > 200)) throw new DogReportError("Select up to 90 valid dogs per report.", 400)
   const unique = [...new Set(ids)]
@@ -33,6 +43,7 @@ export async function populateDogReport(db: D1Database, ws: string, ids: string[
   const grouped = new Map<string, NonNullable<ReportData["sections"]>>()
   const profiles: [string, string][] = [["dog_name", "Name"], ["nick_name", "Nickname"], ["breed", "Breed"], ["date_of_birth", "Born"], ["sex", "Sex"], ["status", "Current status"], ["microchip_number", "Microchip"], ["father_sire", "Father / sire"], ["mother_dam", "Mother / dam"], ["notes", "Notes"], ["created_at", "Registered"]]
   let count = 0
+  const unavailable: string[] = []
   for (const dog of dogs) {
     grouped.set(String(dog.id), [{ title: `${dog.dog_name} / Current profile`, note: `Dog ID: ${dog.id}. Current information, independent of the activity period.`, columns: [{ key: "field", label: "Field" }, { key: "value", label: "Value" }], rows: profiles.map(([field, label]) => ({ field: label, value: dog[field] })) }])
   }
@@ -40,7 +51,16 @@ export async function populateDogReport(db: D1Database, ws: string, ids: string[
     // Source identifiers are fixed above, never supplied by the client. Dates and IDs are bound.
     const dateFilter = source.end ? `r.${source.date} <= ? AND (r.${source.end} >= ? OR r.${source.end}='' OR r.${source.end} IS NULL)` : `r.${source.date} >= ? AND r.${source.date} <= ?`
     const dates = source.end ? [report.end, report.start] : [report.start, report.end]
-    const rows = (await db.prepare(`SELECT r.${source.dogKey ?? "k9_id"} AS dog_id, ${source.fields.map(([field], index) => `${field} AS c${index}`).join(", ")} FROM ${source.table} r ${source.join ?? ""} WHERE r.workspace_id=? AND r.${source.dogKey ?? "k9_id"} IN (${dogs.map(() => "?").join(",")}) AND ${dateFilter} ORDER BY r.${source.date}, r.id LIMIT ?`).bind(ws, ...dogs.map(dog => dog.id), ...dates, 5001 - count).all<Row>()).results
+    let rows: Row[]
+    try {
+      rows = (await db.prepare(`SELECT r.${source.dogKey ?? "k9_id"} AS dog_id, ${source.fields.map(([field], index) => `${field} AS c${index}`).join(", ")} FROM ${source.table} r ${source.join ?? ""} WHERE r.workspace_id=? AND r.${source.dogKey ?? "k9_id"} IN (${dogs.map(() => "?").join(",")}) AND ${dateFilter} ORDER BY r.${source.date}, r.id LIMIT ?`).bind(ws, ...dogs.map(dog => dog.id), ...dates, 5001 - count).all<Row>()).results
+    } catch (error) {
+      if (!isUnavailableSchema(error)) throw error
+      unavailable.push(source.title)
+      console.warn("Dog report category unavailable", { category: source.title, reason: "missing_table_or_column" })
+      if (source.title === "Food intake") for (const row of report.rows) row.intake = null
+      continue
+    }
     count += rows.length
     if (count > 5000) throw new DogReportError("This report exceeds 5,000 activity records. Select fewer dogs or a shorter period; no partial report was generated.", 422)
     for (const dog of dogs) {
@@ -53,5 +73,6 @@ export async function populateDogReport(db: D1Database, ws: string, ids: string[
   }
   // Keep all sections for each dog together for preview and export.
   report.sections = [...grouped.values()].flat()
-  report.totals = [{ label: "Dogs", value: String(dogs.length) }, { label: "Activity records", value: String(count) }, { label: "Food intake (kg)", value: report.rows.reduce((total, row) => total + Number(row.intake), 0).toFixed(3) }]
+  if (unavailable.length) report.note = `INCOMPLETE REPORT. Unavailable categories: ${unavailable.join(", ")}. These categories were not loaded, not confirmed empty. Activity counts and totals include available categories only. Verify database migrations before relying on a complete history. ${report.note}`
+  report.totals = [{ label: "Dogs", value: String(dogs.length) }, { label: "Activity records", value: String(count) }, { label: "Food intake (kg)", value: unavailable.includes("Food intake") ? "Unavailable" : report.rows.reduce((total, row) => total + Number(row.intake), 0).toFixed(3) }]
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
@@ -13,8 +13,12 @@ function load(path, overrides = {}) {
 }
 const types = load("../src/types/reports.ts");
 const dogReport = load("../functions/_lib/dogReport.ts");
-function setup(role = "owner") {
+function setup(role = "owner", migrationLimit = null) {
   const db = new DatabaseSync(":memory:");
+  if (migrationLimit !== null) {
+    const directory = new URL("../migrations/", import.meta.url);
+    for (const file of readdirSync(directory).filter(file => file.endsWith(".sql") && Number(file.slice(0, 4)) <= migrationLimit).sort()) db.exec(readFileSync(new URL(file, directory), "utf8"));
+  } else {
   db.exec(`CREATE TABLE k9_roster (id TEXT, workspace_id TEXT, dog_name TEXT, breed TEXT, sex TEXT, date_of_birth TEXT, status TEXT, microchip_number TEXT, created_at TEXT);
     CREATE TABLE k9feeding (workspace_id TEXT, date TEXT, food TEXT, grams REAL, dog TEXT);
     CREATE TABLE k9_food_inventory (id TEXT, workspace_id TEXT, item TEXT, amount REAL);
@@ -36,10 +40,11 @@ function setup(role = "owner") {
     CREATE TABLE k9_medical_conditions (id TEXT, workspace_id TEXT, k9_id TEXT, diagnosis_date TEXT, condition_name TEXT, severity TEXT, notes TEXT);
     CREATE TABLE k9_seasons (id TEXT, workspace_id TEXT, k9_id TEXT, start_date TEXT, end_date TEXT, status TEXT, notes TEXT);`);
   for (const discipline of ["obedience", "detection", "tracking", "protection", "socialization"]) db.exec(`CREATE TABLE k9_training_${discipline} (id TEXT, workspace_id TEXT, k9_id TEXT, handler_id TEXT, session_date TEXT, note TEXT)`);
+  }
   const auth = { requireSession: async () => role === null ? new Response(null, { status: 401 }) : { role, workspace: { id: "a", name: "Test workspace" } }, isResponse: value => value instanceof Response };
   const api = load("../functions/api/reports/[type].ts", { "../../_lib/dogReport": dogReport, "../../_lib/auth": auth, "../../_lib/http": { json: (body, status = 200) => Response.json(body, { status }) }, "../../../src/types/reports": types });
   const DB = { prepare: sql => ({ bind: (...values) => ({ all: async () => ({ results: db.prepare(sql).all(...values) }) }) }) };
-  return { db, get: (type, query = "period=monthly&date=2026-10-24") => api.onRequestGet({ request: new Request(`https://test/api/reports/${type}?${query}`), params: { type }, env: { DB } }) };
+  return { db, DB, get: (type, query = "period=monthly&date=2026-10-24") => api.onRequestGet({ request: new Request(`https://test/api/reports/${type}?${query}`), params: { type }, env: { DB } }) };
 }
 test("period boundaries and invalid dates", () => {
   assert.deepEqual(types.reportRange("weekly", "2026-01-01"), { start: "2025-12-29", end: "2026-01-04" });
@@ -134,4 +139,62 @@ test("dog report rejects oversized activity instead of exporting a partial histo
   db.exec(`INSERT INTO k9_roster (id,workspace_id,dog_name) VALUES ('h','a','Hilda');
     WITH RECURSIVE n(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM n WHERE x<5001) INSERT INTO k9feeding (id,workspace_id,dog,date,grams) SELECT x,'a','h','2026-10-01',1 FROM n;`);
   assert.equal((await get("dogs")).status, 422);
+});
+
+test("real migrations support all dog categories and flag the pre-notes schema", async () => {
+  for (const limit of [28, 29]) {
+    const { db, get } = setup("owner", limit);
+    try {
+      db.exec(`INSERT INTO k9_roster (id,workspace_id,dog_name,created_at,updated_at) VALUES ('h','a','Hilda','2020-01-01','2020-01-01'),('r','a','Rex','2020-01-01','2020-01-01');
+        INSERT INTO k9weights (id,workspace_id,dog_id,date,weight,created_by_user_id,created_at,updated_at) VALUES ('w','a','h','2026-10-01',25,'u','2026-10-01','2026-10-01');`);
+      for (const selection of ["", "&dog=h", "&dog=h&dog=r"]) {
+        const response = await get("dogs", `period=monthly&date=2026-10-24${selection}`);
+        assert.equal(response.status, 200);
+        const report = (await response.json()).data;
+        assert.equal(report.rows.length, selection === "&dog=h" ? 1 : 2);
+        assert.equal(report.totals[1].value, "1");
+        assert.equal(report.note.includes("INCOMPLETE REPORT"), limit === 28);
+        assert.equal(report.sections.length, report.rows.length * (limit === 28 ? 13 : 14));
+        if (limit === 28) {
+          assert.match(report.note, /Unavailable categories: Legacy linked car trips/);
+          assert.ok(!report.sections.some(section => section.title.includes("car trips")));
+          const { buildReportPdf } = load("../src/lib/reportPdf.ts", { "../types/reports": types });
+          assert.ok(buildReportPdf([report]).output().includes("INCOMPLETE REPORT"));
+        }
+      }
+    } finally { db.close(); }
+  }
+});
+
+test("missing category and joined tables do not masquerade as empty activity", async () => {
+  const { db, get } = setup("owner", 29);
+  try {
+    db.exec(`INSERT INTO k9_roster (id,workspace_id,dog_name,created_at,updated_at) VALUES ('h','a','Hilda','2020-01-01','2020-01-01');
+      DROP TABLE k9feeding; DROP TABLE k9_medications;`);
+    const response = await get("dogs");
+    assert.equal(response.status, 200);
+    const report = (await response.json()).data;
+    assert.match(report.note, /Unavailable categories: Food intake, Health \/ treatments/);
+    assert.equal(report.rows[0].intake, null);
+    assert.equal(report.totals[2].value, "Unavailable");
+    assert.equal(report.sections.length, 12);
+  } finally { db.close(); }
+});
+
+test("unexpected database failures and missing roster still fail the dog report", async () => {
+  const { db, DB, get } = setup();
+  try {
+    db.exec(`INSERT INTO k9_roster (id,workspace_id,dog_name) VALUES ('h','a','Hilda');`);
+    const prepare = DB.prepare;
+    DB.prepare = sql => {
+      if (sql.includes("FROM k9feeding")) throw new Error("Database unavailable: sensitive internal details");
+      return prepare(sql);
+    };
+    const response = await get("dogs");
+    assert.equal(response.status, 500);
+    assert.ok(!(await response.text()).includes("sensitive internal details"));
+    DB.prepare = prepare;
+    db.exec("DROP TABLE k9_roster");
+    assert.equal((await get("dogs")).status, 500);
+  } finally { db.close(); }
 });

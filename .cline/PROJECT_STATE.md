@@ -19,7 +19,7 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
-- [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print. Dogs supports multi-selection, current profiles, feeding, weights, grooming, treatments/conditions, all five training disciplines, boarding, seasons and legacy linked trips. Nine API/SQLite/PDF tests, typecheck and build pass; browser/print verification pending.
+- [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print. Dogs supports multi-selection, current profiles and grouped care/activity. Missing category tables/columns produce an incomplete-report warning; other database failures remain errors. Twelve API/SQLite/PDF tests (including actual migration schemas) and both typechecks pass; browser/print verification pending.
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
@@ -146,7 +146,7 @@
 - [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
 
 ## Known Limitations
-- Reports require Pages Functions/D1 (no localStorage fallback) and existing migrations including `0029_car_usage_notes.sql`; no remote migration or deployment performed. A report over 5,000 rows is rejected rather than truncated.
+- Reports require Pages Functions/D1 (no localStorage fallback). Complete dog history requires existing migrations including `0029_car_usage_notes.sql`; missing category schema is skipped with a preview/export warning, and unavailable food intake is not reported as zero. The pre-0029 failure is reproduced locally; the actual remote exception/migration state remains unverified. No remote migration or deployment performed. A report over 5,000 rows is rejected rather than truncated.
 - Report stock balances/statuses and dog profiles are current, not historical. Dog activity uses event dates; boarding/treatments/seasons include overlapping ranges (blank ends treated as open-ended). No dog selection means all dogs, capped at 90; aggregate activity capped at 5,000. Unlinked trips cannot be attributed to a dog.
 - Sales are charges, not payment receipts; grooming/shopping have unspecified currencies. PDF export directs unsupported font characters to browser Print/Save as PDF.
 - Pre-existing merge-conflict markers remain in this handoff file; unrelated sections were not resolved during reports work.
