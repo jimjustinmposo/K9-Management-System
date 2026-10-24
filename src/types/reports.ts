@@ -12,6 +12,14 @@ export interface ReportData {
   columns: { key: string; label: string }[]
   rows: Record<string, string | number | null>[]
   totals: { label: string; value: string }[]
+  sections?: { title: string; note: string; columns: ReportData["columns"]; rows: ReportData["rows"] }[]
+}
+
+export function expandReports(reports: ReportData[]): ReportData[] {
+  return reports.flatMap(report => report.sections ? [
+    { ...report, sections: undefined },
+    ...report.sections.map(section => ({ ...report, ...section, sections: undefined, totals: [], note: section.note })),
+  ] : [report])
 }
 
 export function reportRange(period: ReportPeriod, reference: string) {

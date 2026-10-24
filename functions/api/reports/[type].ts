@@ -1,5 +1,6 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
+import { DogReportError, populateDogReport } from "../../_lib/dogReport"
 import { REPORT_TYPES, reportRange, type ReportData, type ReportPeriod, type ReportType } from "../../../src/types/reports"
 
 type Row = ReportData["rows"][number]
@@ -17,6 +18,16 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   const { start, end } = range
   const ws = session.workspace.id
   const report: ReportData = { type, title: "", start, end, generatedAt: new Date().toISOString(), workspace: session.workspace.name, note: "", columns: [], rows: [], totals: [] }
+  if (type === "dogs") {
+    try {
+      await populateDogReport(context.env.DB, ws, params.getAll("dog"), report)
+      const response = json({ data: report })
+      response.headers.set("Cache-Control", "private, no-store")
+      return response
+    } catch (error) {
+      return json({ error: error instanceof DogReportError ? error.message : "Unable to load dog records. Verify database migrations and try again." }, error instanceof DogReportError ? error.status : 500)
+    }
+  }
   let sql = ""
   let bindings: (string | number)[] = [ws, start, end]
   if (type === "food") {
@@ -38,14 +49,6 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
       CASE WHEN i.id IS NOT NULL THEN ROUND(i.amount - COALESCE((SELECT SUM(f.grams)/1000.0 FROM k9feeding f WHERE f.workspace_id = i.workspace_id AND LOWER(TRIM(f.food)) = LOWER(TRIM(i.item))), 0), 3) END AS remaining
       FROM k9_shopping s LEFT JOIN k9_food_inventory i ON i.id = s.food_inventory_id AND i.workspace_id = s.workspace_id
       WHERE s.workspace_id = ? AND s.date >= ? AND s.date <= ? ORDER BY s.date, s.id`
-  } else if (type === "dogs") {
-    report.title = "Dog registrations report"
-    report.note = "Dogs registered during the selected period (UTC creation date). Status and identifying details are current, not historical snapshots."
-    report.columns = columns([["registered", "Registered"], ["dog_name", "Dog"], ["breed", "Breed"], ["sex", "Sex"], ["date_of_birth", "Born"], ["status", "Current status"], ["microchip_number", "Microchip"]])
-    sql = "SELECT substr(created_at,1,10) AS registered, dog_name, breed, sex, date_of_birth, status, microchip_number FROM k9_roster WHERE workspace_id = ? AND created_at >= ? AND created_at < ? ORDER BY created_at, id"
-    const nextDay = new Date(`${end}T00:00:00Z`)
-    nextDay.setUTCDate(nextDay.getUTCDate() + 1)
-    bindings = [ws, `${start}T00:00:00`, nextDay.toISOString().slice(0, 10)]
   } else if (type === "car") {
     report.title = "Car usage report"
     report.note = "Trips by recorded trip date; distance uses the saved odometer difference."
@@ -71,7 +74,6 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
       if (type === "stock") report.totals.push({ label: "Purchase cost (currency unspecified)", value: (report.rows.reduce((total, row) => total + Math.round(Number(row.cost) * 100), 0) / 100).toFixed(2) })
     }
     if (type === "car") report.totals.push({ label: "Distance (km)", value: sum("km_used").toFixed(2) }, { label: "Drivers", value: String(new Set(report.rows.map(row => row.driver)).size) })
-    if (type === "dogs") for (const status of new Set(report.rows.map(row => String(row.status || "Unspecified")))) report.totals.push({ label: status, value: String(report.rows.filter(row => (row.status || "Unspecified") === status).length) })
     if (type === "sales") {
       const totals = new Map<string, number>()
       for (const row of report.rows) { const key = `${row.service} / ${row.currency || "Unspecified"}`; totals.set(key, (totals.get(key) ?? 0) + Math.round(Number(row.amount ?? 0) * 100)) }
