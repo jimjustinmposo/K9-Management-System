@@ -19,7 +19,7 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
-- [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print. Dogs supports multi-selection, current profiles and grouped care/activity. Missing category tables/columns produce an incomplete-report warning; other database failures remain errors. Twelve API/SQLite/PDF tests (including actual migration schemas) and both typechecks pass; browser/print verification pending.
+- [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print; all report headers display Caninelogy without renaming workspace records or changing isolation. Car reports retry without Notes only when that column is missing, with an explicit warning. Dogs supports multi-selection, current profiles and grouped care/activity; missing category schema produces an incomplete-report warning. Fourteen API/SQLite/PDF tests pass, including pre/post-0029 car schemas; browser/print verification pending.
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged

@@ -5,6 +5,15 @@ import { REPORT_TYPES, reportRange, type ReportData, type ReportPeriod, type Rep
 
 type Row = ReportData["rows"][number]
 const columns = (pairs: string[][]) => pairs.map(([key, label]) => ({ key, label }))
+function isMissingNotes(error: unknown): boolean {
+  const seen = new Set<Error>()
+  while (error instanceof Error && !seen.has(error)) {
+    if (/\bno such column:\s*notes\b/i.test(error.message)) return true
+    seen.add(error)
+    error = error.cause
+  }
+  return false
+}
 export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "view")
   if (isResponse(session)) return session
@@ -17,7 +26,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   catch { return json({ error: "Invalid report period or reference date." }, 400) }
   const { start, end } = range
   const ws = session.workspace.id
-  const report: ReportData = { type, title: "", start, end, generatedAt: new Date().toISOString(), workspace: session.workspace.name, note: "", columns: [], rows: [], totals: [] }
+  const report: ReportData = { type, title: "", start, end, generatedAt: new Date().toISOString(), workspace: "Caninelogy", note: "", columns: [], rows: [], totals: [] }
   if (type === "dogs") {
     try {
       await populateDogReport(context.env.DB, ws, params.getAll("dog"), report)
@@ -63,7 +72,15 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
     bindings = [ws, start, end, ws, start, end]
   }
   try {
-    const result = await context.env.DB.prepare(`${sql} LIMIT 5001`).bind(...bindings).all<Row>()
+    let result: { results: Row[] }
+    try {
+      result = await context.env.DB.prepare(`${sql} LIMIT 5001`).bind(...bindings).all<Row>()
+    } catch (error) {
+      if (type !== "car" || !isMissingNotes(error)) throw error
+      result = await context.env.DB.prepare(`${sql.replace(", notes FROM", " FROM")} LIMIT 5001`).bind(...bindings).all<Row>()
+      report.columns = report.columns.filter(column => column.key !== "notes")
+      report.note += " Notes are unavailable because the database notes column is missing. Trip records and distance totals are included; apply the notes migration to include notes."
+    }
     if (result.results.length > 5000) return json({ error: "This report exceeds 5,000 rows. Choose a shorter period; no partial report has been generated." }, 422)
     report.rows = result.results
     const sum = (key: string) => report.rows.reduce((total, row) => total + Number(row[key] ?? 0), 0)

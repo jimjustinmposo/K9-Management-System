@@ -97,6 +97,51 @@ test("car totals and over-limit guard", async () => {
   db.exec("WITH RECURSIVE n(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM n WHERE x<5001) INSERT INTO k9_grooming (workspace_id,k9_id,date,price) SELECT 'a','dog','2026-10-01',1 FROM n");
   assert.equal((await get("sales")).status, 422);
 });
+test("all report headers and PDF exports use Caninelogy", async () => {
+  const { db, get } = setup();
+  try {
+    const reports = [];
+    for (const type of types.REPORT_TYPES) {
+      const response = await get(type);
+      assert.equal(response.status, 200);
+      const report = (await response.json()).data;
+      assert.equal(report.workspace, "Caninelogy");
+      reports.push(report);
+    }
+    const { buildReportPdf } = load("../src/lib/reportPdf.ts", { "../types/reports": types });
+    const output = buildReportPdf(reports).output();
+    assert.ok(output.includes("Caninelogy"));
+    assert.ok(!output.includes("Test workspace"));
+  } finally { db.close(); }
+});
+test("car reports work before and after notes migration with isolated period totals", async () => {
+  for (const limit of [28, 29]) {
+    const { db, get } = setup("owner", limit);
+    try {
+      db.exec(`INSERT INTO k9_roster (id,workspace_id,dog_name,created_at,updated_at) VALUES ('h','a','Hilda','','');`);
+      const insert = db.prepare(`INSERT INTO k9_car_usage (id,k9_id,workspace_id,date,driver,time_in,time_out,km_start,km_end,km_used,created_by_user_id,created_at,updated_at) VALUES (?,'h',?,?,'Driver','08:00','09:00',100,112.5,12.5,'u','','')`);
+      insert.run("1", "a", "2026-10-01");
+      insert.run("2", "a", "2026-10-31");
+      insert.run("3", "b", "2026-10-15");
+      insert.run("4", "a", "2026-11-01");
+      if (limit === 29) db.exec("UPDATE k9_car_usage SET notes='Saved trip note'");
+      const response = await get("car");
+      assert.equal(response.status, 200);
+      const report = (await response.json()).data;
+      assert.equal(report.rows.length, 2);
+      assert.equal(report.totals[1].value, "25.00");
+      assert.equal(report.columns.some(column => column.key === "notes"), limit === 29);
+      assert.equal(report.note.includes("Notes are unavailable"), limit === 28);
+      if (limit === 29) assert.equal(report.rows[0].notes, "Saved trip note");
+      db.exec(`WITH RECURSIVE n(x) AS (VALUES(1) UNION ALL SELECT x+1 FROM n WHERE x<5001)
+        INSERT INTO k9_car_usage (id,k9_id,workspace_id,date,driver,time_in,time_out,km_start,km_end,km_used,created_by_user_id,created_at,updated_at)
+        SELECT 'extra-'||x,'h','a','2026-10-01','Driver','08:00','09:00',0,1,1,'u','','' FROM n`);
+      assert.equal((await get("car")).status, 422);
+      db.exec("DROP TABLE k9_car_usage");
+      assert.equal((await get("car")).status, 500);
+    } finally { db.close(); }
+  }
+});
 test("PDF includes full table, totals, page numbers, and rejects unsupported text", () => {
   const { buildReportPdf } = load("../src/lib/reportPdf.ts", { "../types/reports": types });
   const report = { title: "Car report", workspace: "Test", start: "2026-10-01", end: "2026-10-31", generatedAt: "2026-10-24", note: "Test report", columns: [{ key: "name", label: "Name" }], rows: Array.from({ length: 150 }, (_, index) => ({ name: `Trip-${index}` })), totals: [{ label: "Trips", value: "150" }] };
