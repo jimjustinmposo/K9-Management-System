@@ -300,6 +300,13 @@ export function AppShell({ title, children }: { title: string; children: ReactNo
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="min-w-0 p-4 md:p-5 lg:p-6">{children}</main>
+        <footer className="mt-12 border-t border-line px-4 py-8 text-xs text-muted print:hidden">
+          <nav aria-label="Policies" className="flex flex-wrap justify-center gap-x-6 gap-y-3">
+            <Link to="/terms" className="rounded transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">Terms of Service</Link>
+            <Link to="/privacy" className="rounded transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">Privacy Notice</Link>
+            <Link to="/refund" className="rounded transition-colors hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">Refund Policy</Link>
+          </nav>
+        </footer>
       </div>
     </div>
   );
