@@ -15,20 +15,17 @@ export default function AuthLayout({
     <main className="relative grid min-h-screen place-items-center bg-canvas p-4">
       <ThemeToggle className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
-        <Link to="/" className="mb-7 flex items-center justify-center gap-4">
+        <Link to="/" className="mb-7 flex items-center justify-center gap-2.5">
           <img
-            src="/logo.png"
-            alt="K9 Management System logo"
-            className="size-16 shrink-0 rounded-xl bg-white p-1 object-contain shadow-sm ring-1 ring-white/10 sm:size-[4.5rem]"
+            src="/logo.jpg"
+            alt=""
+            className="size-[46px] shrink-0 rounded-xl bg-white p-[3px] object-contain shadow-sm"
           />
-          <span>
-            <span className="block text-xs font-extrabold uppercase tracking-[0.18em] text-gold sm:text-sm">
-              K9 MANAGEMENT
-            </span>
-            <span className="block text-lg font-black tracking-wide text-ink sm:text-xl">
-              SYSTEM
-            </span>
-          </span>
+          <img
+            src="/Caninelogy.png"
+            alt="Caninelogy"
+            className="h-auto min-w-0 max-w-[calc(100%-56px)] object-contain"
+          />
         </Link>
         <section className="rounded-2xl border border-line bg-surface p-7 shadow-action">
           <h1 className="text-2xl font-black tracking-tight">{title}</h1>
