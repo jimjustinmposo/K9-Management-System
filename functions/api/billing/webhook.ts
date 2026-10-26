@@ -1,5 +1,7 @@
 import type { AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
+import { verifyPaddleSignature } from "../../_lib/paddle-signature"
+import { processBillingEvent } from "../../_lib/billing-webhook"
 
 type PaddleSubscription = {
   id?: string
@@ -18,48 +20,6 @@ type PaddleEvent = {
   data?: PaddleSubscription
 }
 
-async function verifySignature(
-  rawBody: string,
-  signatureHeader: string,
-  secret: string,
-): Promise<boolean> {
-  const parts = new Map(
-    signatureHeader.split(";").map((part) => {
-      const separator = part.indexOf("=")
-      return separator < 0
-        ? ["", ""]
-        : [part.slice(0, separator).trim(), part.slice(separator + 1).trim()]
-    }),
-  )
-  const timestamp = parts.get("ts")
-  const receivedSignature = parts.get("h1")
-  if (!timestamp || !receivedSignature || !/^\d+$/.test(timestamp)) return false
-  if (Math.abs(Date.now() / 1000 - Number(timestamp)) > 5) return false
-
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  )
-  const digest = new Uint8Array(
-    await crypto.subtle.sign(
-      "HMAC",
-      key,
-      new TextEncoder().encode(`${timestamp}:${rawBody}`),
-    ),
-  )
-  const expected = [...digest]
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("")
-  if (expected.length !== receivedSignature.length) return false
-  let difference = 0
-  for (let index = 0; index < expected.length; index += 1)
-    difference |= expected.charCodeAt(index) ^ receivedSignature.charCodeAt(index)
-  return difference === 0
-}
-
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const secret = context.env.PADDLE_WEBHOOK_SECRET
   if (!secret) return json({ error: "Webhook endpoint is not configured" }, 503)
@@ -67,7 +27,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const rawBody = await context.request.text()
   const signature = context.request.headers.get("Paddle-Signature") ?? ""
   try {
-    if (!(await verifySignature(rawBody, signature, secret)))
+    if (!(await verifyPaddleSignature(rawBody, signature, secret)))
       return json({ error: "Invalid webhook signature" }, 401)
   } catch {
     return json({ error: "Invalid webhook signature" }, 401)
@@ -79,6 +39,7 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   } catch {
     return json({ error: "Invalid webhook payload" }, 400)
   }
+  if (context.env.BILLING_V2_ENABLED === "true") return processBillingEvent(context.env, event)
   const { event_id: eventId, event_type: eventType, occurred_at: occurredAt, data } = event
   const eventTime = occurredAt ? Date.parse(occurredAt) : Number.NaN
   if (!eventId || !eventType || !Number.isFinite(eventTime))

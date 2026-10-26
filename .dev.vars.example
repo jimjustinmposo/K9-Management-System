@@ -8,3 +8,9 @@ PADDLE_ENVIRONMENT=sandbox
 PADDLE_MONTHLY_PRICE_ID=pri_replace_me
 PADDLE_YEARLY_PRICE_ID=pri_replace_me
 PADDLE_WEBHOOK_SECRET=pdl_ntfset_replace_me
+# Pauses new checkouts only; does not stop webhook processing or portal access.
+PADDLE_CHECKOUT_ENABLED=false
+# Enable only after migration 0030 and a reviewed environment-specific backfill.
+BILLING_V2_ENABLED=false
+PADDLE_MONTHLY_PRODUCT_ID=pro_replace_me
+PADDLE_YEARLY_PRODUCT_ID=pro_replace_me

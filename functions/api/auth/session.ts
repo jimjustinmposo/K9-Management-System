@@ -6,6 +6,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
     context.request,
     context.env.DB,
     context.env.LOCAL_DEV_FULL_ACCESS === "true",
+    context.env,
   )
   return session
     ? json({ data: session })

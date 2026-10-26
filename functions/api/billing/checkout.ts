@@ -1,10 +1,17 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
-import { paddleRequest } from "../../_lib/paddle"
+import { assertPaddleCheckoutEnabled, paddleRequest } from "../../_lib/paddle"
+import { createBillingCheckout } from "../../_lib/billing-checkout"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
   if (isResponse(session)) return session
+
+  try {
+    assertPaddleCheckoutEnabled(context.env)
+  } catch {
+    return json({ error: "New checkouts are currently unavailable" }, 503)
+  }
 
   let interval: "month" | "year"
   try {
@@ -15,6 +22,9 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   } catch {
     return json({ error: "Invalid request body" }, 400)
   }
+
+  if (context.env.BILLING_V2_ENABLED === "true")
+    return createBillingCheckout(context.env, session.workspace.id, interval)
 
   const existing = await context.env.DB.prepare(
     "SELECT paddle_subscription_id, subscription_status, current_period_end FROM workspaces WHERE id=?",

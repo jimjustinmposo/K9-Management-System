@@ -19,6 +19,7 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
+- [~] Public `/terms`, `/privacy`, `/refund` pages linked from sign-in/signup; concise policy copy and themed layout. Typechecks/build pass; browser review and operator legal name/contact, retention details and policy approval pending before publication.
 - [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print; all report headers display Caninelogy without renaming workspace records or changing isolation. Car reports retry without Notes only when that column is missing, with an explicit warning. Dogs supports multi-selection, current profiles and grouped care/activity; missing category schema produces an incomplete-report warning. Fourteen API/SQLite/PDF tests pass, including pre/post-0029 car schemas; browser/print verification pending.
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
@@ -94,6 +95,7 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Paddle migration remains NOT ready to deploy. Optional V2 billing path adds environment isolation, trusted checkout associations, atomic receipt/state batches and fixed legacy grants; migration 0030 and snapshot SQL are local only. 27 focused tests, typechecks/build pass; backup-copy SQLite rehearsal preserves workspace rows, integrity ok/no FK violations. Live checkout remains blocked; V2 not enabled remotely. D1 rehearsal, sandbox E2E, backfill/replay/reconciliation tooling and production verification pending; see PADDLE_MIGRATION.md.
 - Preserved sidebar scroll across page navigation; globally hid numeric spinner arrows. Car Usage uses Notes (migration `0029_car_usage_notes.sql` tested in isolated SQLite but NOT applied remotely). Added restricted boarding/grooming PATCH controls. Typecheck/build and 13 focused tests pass; browser verification pending.
 - Added persisted `km_used` to Car Usage with a backfill migration; create/edit APIs calculate it from KM end minus KM start.
 - Applied remote D1 migrations `0025_in_season.sql` through `0028_car_usage_km_used.sql`; verified no pending migrations and confirmed `k9_car_usage.km_used` exists.

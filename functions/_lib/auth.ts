@@ -1,4 +1,5 @@
 import { json } from "./http"
+import { billingAccess } from "./billing-state"
 
 export interface AppEnv {
   DB: D1Database
@@ -13,6 +14,10 @@ export interface AppEnv {
   PADDLE_MONTHLY_PRICE_ID?: string
   PADDLE_YEARLY_PRICE_ID?: string
   PADDLE_WEBHOOK_SECRET?: string
+  PADDLE_CHECKOUT_ENABLED?: string
+  BILLING_V2_ENABLED?: string
+  PADDLE_MONTHLY_PRODUCT_ID?: string
+  PADDLE_YEARLY_PRODUCT_ID?: string
 }
 
 export interface SessionInfo {
@@ -142,6 +147,7 @@ export async function getSession(
   request: Request,
   db: D1Database,
   localDevFullAccess = false,
+  billingEnv?: AppEnv,
 ): Promise<SessionInfo | null> {
   const token = cookie(request, "sentinel_session")
   if (!token) return null
@@ -153,6 +159,17 @@ export async function getSession(
     .bind(await hashToken(token), new Date().toISOString())
     .first<any>()
   if (!row) return null
+  if (billingEnv?.BILLING_V2_ENABLED === "true") {
+    if (billingEnv.PADDLE_ENVIRONMENT !== "sandbox" && billingEnv.PADDLE_ENVIRONMENT !== "production")
+      throw new Error("Billing environment is required")
+    const access = await billingAccess(db, row.workspace_id, billingEnv.PADDLE_ENVIRONMENT)
+    row.subscription_status = access.writable ? "active" : access.status
+    row.billing_interval = access.interval
+    row.current_period_end = access.periodEnd
+    // Paid access is always server-derived; the legacy flag is not a live subscription.
+    row.billing_access_status = access.status
+    localDevFullAccess = localDevFullAccess && billingEnv.PADDLE_ENVIRONMENT === "sandbox"
+  }
   const subscriptionStatus = String(row.subscription_status ?? "").toLowerCase()
   const hasSubscription = localDevFullAccess || subscriptionStatus === "active"
   const periodEnd = row.current_period_end
@@ -168,7 +185,7 @@ export async function getSession(
     workspace: { id: row.workspace_id, name: row.workspace_name },
     role: row.role,
     subscription: {
-      status: localDevFullAccess ? "active" : row.subscription_status,
+      status: localDevFullAccess ? "active" : row.billing_access_status ?? row.subscription_status,
       interval: row.billing_interval,
       currentPeriodEnd: localDevFullAccess
         ? null
@@ -196,6 +213,7 @@ export async function requireSession(
     context.request,
     context.env.DB,
     context.env.LOCAL_DEV_FULL_ACCESS === "true",
+    context.env,
   )
   if (!session) return json({ error: "Authentication required" }, 401)
   if (permission && !session.permissions[permission])

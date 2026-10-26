@@ -254,6 +254,10 @@ export default function AuthSwitch({
         .auth-switch__container--signup .auth-switch__panel--right { pointer-events: auto; }
         .auth-switch__container--signup .auth-switch__panel--left .auth-switch__panel-content { transform: translateX(-800px); }
         .auth-switch__container--signup .auth-switch__panel--right .auth-switch__panel-content { transform: translateX(0); }
+        .auth-switch__legal { max-width: 360px; margin: 12px 0 0; text-align: center; font-size: .72rem; line-height: 1.6; color: var(--auth-muted); }
+        .auth-switch__legal a { color: var(--auth-text); text-decoration: underline; text-decoration-color: var(--auth-accent); text-underline-offset: 3px; }
+        .auth-switch__legal a:hover { color: var(--auth-accent); }
+        .auth-switch__legal a:focus-visible { outline: 2px solid var(--auth-accent); outline-offset: 3px; }
         @media (max-width: 870px) {
           .auth-switch { padding: 0; }
           .auth-switch__container { min-height: 760px; height: 100vh; border: 0; border-radius: 0; }
@@ -309,6 +313,7 @@ export default function AuthSwitch({
                 {saving ? "Signing in…" : "Sign in"}
               </button>
               <Link className="auth-switch__link" to="/forgot-password">Forgot your password?</Link>
+              <PolicyLinks />
             </form>
 
             <form className="auth-switch__form auth-switch__form--signup" onSubmit={submitSignUp}>
@@ -328,6 +333,7 @@ export default function AuthSwitch({
                 <input name="password" type="password" placeholder="Password" minLength={6} autoComplete="new-password" required />
               </AuthField>
               <p className="auth-switch__hint">Use at least 6 characters.</p>
+              <PolicyLinks signup />
               {isSignUp && error && (
                 <p className="auth-switch__error" role="alert">
                   {error}{error.toLowerCase().includes("already exists") && (
@@ -360,6 +366,19 @@ export default function AuthSwitch({
         </div>
       </div>
     </main>
+  )
+}
+
+function PolicyLinks({ signup = false }: { signup?: boolean }) {
+  return (
+    <p className="auth-switch__legal">
+      {signup && "By creating an account, you agree to our "}
+      <Link to="/terms">Terms of Service</Link>
+      {signup ? " and acknowledge our " : " · "}
+      <Link to="/privacy">Privacy Notice</Link>
+      {signup ? " and " : " · "}
+      <Link to="/refund">Refund Policy</Link>{signup && "."}
+    </p>
   )
 }
 

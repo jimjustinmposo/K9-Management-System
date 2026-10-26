@@ -6,10 +6,11 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
   if (isResponse(session)) return session
 
-  const workspace = await context.env.DB.prepare(
-    "SELECT paddle_customer_id, paddle_subscription_id FROM workspaces WHERE id=?",
-  )
-    .bind(session.workspace.id)
+  const v2 = context.env.BILLING_V2_ENABLED === "true"
+  const workspace = await context.env.DB.prepare(v2
+    ? "SELECT customer_id paddle_customer_id,subscription_id paddle_subscription_id FROM billing_subscriptions WHERE workspace_id=? AND environment=? ORDER BY version DESC LIMIT 1"
+    : "SELECT paddle_customer_id, paddle_subscription_id FROM workspaces WHERE id=?")
+    .bind(...(v2 ? [session.workspace.id, context.env.PADDLE_ENVIRONMENT] : [session.workspace.id]))
     .first<{
       paddle_customer_id: string | null
       paddle_subscription_id: string | null
