@@ -204,6 +204,7 @@ const navItems: { label: string; to: string; icon: IconName }[] = [
   { label: "Reports", to: "/reports", icon: "reports" },
   { label: "Users", to: "/users", icon: "users" },
   { label: "Subscription", to: "/subscription", icon: "shield" },
+  { label: "Contact Support", to: "/contact-support", icon: "users" },
 ];
 
 let navigationScrollTop = 0;

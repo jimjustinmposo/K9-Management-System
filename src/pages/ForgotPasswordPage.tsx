@@ -138,6 +138,9 @@ export default function ForgotPasswordPage() {
       <Link to="/login" className="mt-5 block text-center text-xs font-bold text-info">
         Back to sign in
       </Link>
+      <Link to="/contact-support" className="mt-3 block text-center text-xs font-bold text-info">
+        Contact Support
+      </Link>
     </AuthLayout>
   )
 }

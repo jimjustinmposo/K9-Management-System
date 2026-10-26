@@ -19,6 +19,7 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
+- [~] Public `/contact-support` page with developer phone/email and a whitespace-guarded, URL-encoded WhatsApp message composer; linked from login, forgot-password and sidebar. Typecheck/build pass; real-device WhatsApp handoff pending. Users confirm Send in WhatsApp; no backend messaging service.
 - [~] Public `/terms`, `/privacy`, `/refund` pages linked from sign-in/signup; concise policy copy and themed layout. Typechecks/build pass; browser review and operator legal name/contact, retention details and policy approval pending before publication.
 - [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print; all report headers display Caninelogy without renaming workspace records or changing isolation. Car reports retry without Notes only when that column is missing, with an explicit warning. Dogs supports multi-selection, current profiles and grouped care/activity; missing category schema produces an incomplete-report warning. Fourteen API/SQLite/PDF tests pass, including pre/post-0029 car schemas; browser/print verification pending.
 - [x] Authentication UI and APIs (email/password)

@@ -6,6 +6,7 @@ import AcceptInvitePage from "./pages/AcceptInvitePage"
 import ComingSoonPage from "./pages/ComingSoonPage"
 import ReportsPage from "./pages/ReportsPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import ContactSupportPage from "./pages/ContactSupportPage"
 import K9FormPage from "./pages/K9FormPage"
 import K9RosterPage from "./pages/K9RosterPage"
 import LoginPage from "./pages/LoginPage"
@@ -53,6 +54,7 @@ export default function App() {
       <Route path="/privacy" element={<LegalPage kind="privacy" />} />
       <Route path="/refund" element={<LegalPage kind="refund" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/contact-support" element={<ContactSupportPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
       <Route path="/subscribe" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />

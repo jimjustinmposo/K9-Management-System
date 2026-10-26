@@ -412,6 +412,7 @@ function PolicyLinks({ signup = false }: { signup?: boolean }) {
       <Link to="/privacy">Privacy Notice</Link>
       {signup ? " and " : " · "}
       <Link to="/refund">Refund Policy</Link>{signup && "."}
+      {" · "}<Link to="/contact-support">Contact Support</Link>
     </p>
   )
 }
