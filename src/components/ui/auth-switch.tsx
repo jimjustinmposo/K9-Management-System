@@ -14,12 +14,15 @@ export default function AuthSwitch({
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [error, setError] = useState("")
   const [saving, setSaving] = useState(false)
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false)
+  const [policyError, setPolicyError] = useState(false)
   const navigate = useNavigate()
   const { refresh } = useAuth()
   const isSignUp = mode === "sign-up"
 
   const switchMode = (nextMode: AuthMode) => {
     setError("")
+    setPolicyError(false)
     setMode(nextMode)
   }
 
@@ -47,6 +50,13 @@ export default function AuthSwitch({
 
   const submitSignUp = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (!acceptedPolicies) {
+      setError("")
+      setPolicyError(true)
+      event.currentTarget.querySelector<HTMLInputElement>("#accept-policies")?.focus()
+      return
+    }
+    setPolicyError(false)
     setSaving(true)
     setError("")
     const form = new FormData(event.currentTarget)
@@ -333,7 +343,31 @@ export default function AuthSwitch({
                 <input name="password" type="password" placeholder="Password" minLength={6} autoComplete="new-password" required />
               </AuthField>
               <p className="auth-switch__hint">Use at least 6 characters.</p>
-              <PolicyLinks signup />
+              <div className="auth-switch__legal" style={{ display: "flex", alignItems: "flex-start", gap: 10, textAlign: "left" }}>
+                <input
+                  id="accept-policies"
+                  type="checkbox"
+                  checked={acceptedPolicies}
+                  aria-required="true"
+                  aria-invalid={policyError}
+                  aria-describedby={policyError ? "policy-error" : undefined}
+                  onChange={(event) => {
+                    setAcceptedPolicies(event.target.checked)
+                    if (event.target.checked) setPolicyError(false)
+                  }}
+                  style={{ width: 16, height: 16, flexShrink: 0, marginTop: 3, accentColor: "var(--auth-accent)", cursor: "pointer" }}
+                />
+                <label htmlFor="accept-policies">
+                  I agree to the <Link to="/terms" target="_blank" rel="noopener noreferrer">Terms of Service</Link> and acknowledge the{" "}
+                  <Link to="/privacy" target="_blank" rel="noopener noreferrer">Privacy Notice</Link> and{" "}
+                  <Link to="/refund" target="_blank" rel="noopener noreferrer">Refund Policy</Link>.
+                </label>
+              </div>
+              {policyError && (
+                <p id="policy-error" className="auth-switch__error" role="alert">
+                  Please accept the Terms of Service and acknowledge the Privacy Notice and Refund Policy before creating your account.
+                </p>
+              )}
               {isSignUp && error && (
                 <p className="auth-switch__error" role="alert">
                   {error}{error.toLowerCase().includes("already exists") && (
