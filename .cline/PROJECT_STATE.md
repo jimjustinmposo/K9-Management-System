@@ -6,11 +6,13 @@
 - Status: Core registers and owner-only Reports implemented; reports browser/print verification pending.
 
 ## Current Stack
+- Public website: local public homepage at `/` with K9 product details, existing displayed pricing, accurate metadata and no-JavaScript overview; operational routes remain authenticated. Typecheck/build verified, not deployed. Policy/contact pages await business details and approved policies; live catalog currency/prices remain unverified. On inspection, caninelogy.online returned HTTPS 200 and HTTP redirected to HTTPS; www did not resolve. Do not assume an SSL failure or change DNS without further evidence.
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
 - Backend: Cloudflare Pages Functions (functions/api/*) with D1 binding `DB`
 - Database: Cloudflare D1 (`k9_ops_db`), SQL migrations in `migrations/`
 - Storage fallback: localStorage when no Pages Functions backend (plain `vite dev`)
 - Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
+- Paddle readiness: checkout passes workspace Paddle customer ID to Retain and uses Initialize/Update; production webhooks dynamically enforce Paddle IPv4 /32 sources (five-minute cache, fail closed) plus signature checks. Five focused readiness tests and both TypeScript checks pass. Not deployed; sandbox round-trip and live account migration remain unverified; Paddle MCP servers unavailable in this session.
 
 ## Architecture
 - K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.

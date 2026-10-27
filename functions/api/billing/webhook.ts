@@ -2,6 +2,7 @@ import type { AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
 import { verifyPaddleSignature } from "../../_lib/paddle-signature"
 import { processBillingEvent } from "../../_lib/billing-webhook"
+import { isPaddleLiveIp } from "../../_lib/paddleIps"
 
 type PaddleSubscription = {
   id?: string
@@ -23,6 +24,15 @@ type PaddleEvent = {
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const secret = context.env.PADDLE_WEBHOOK_SECRET
   if (!secret) return json({ error: "Webhook endpoint is not configured" }, 503)
+
+  if (context.env.PADDLE_ENVIRONMENT === "production") {
+    try {
+      if (!(await isPaddleLiveIp(context.request)))
+        return json({ error: "Webhook source is not allowed" }, 403)
+    } catch {
+      return json({ error: "Webhook source verification unavailable" }, 503)
+    }
+  }
 
   const rawBody = await context.request.text()
   const signature = context.request.headers.get("Paddle-Signature") ?? ""

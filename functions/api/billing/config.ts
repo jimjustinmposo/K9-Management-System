@@ -10,10 +10,14 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   } catch {
     return json({ error: "New checkouts are currently unavailable" }, 503)
   }
+  const workspace = await context.env.DB.prepare(
+    "SELECT paddle_customer_id FROM workspaces WHERE id=?",
+  ).bind(session.workspace.id).first<{ paddle_customer_id: string | null }>()
   return json({
     data: {
       clientToken: context.env.PADDLE_CLIENT_TOKEN,
       environment: context.env.PADDLE_ENVIRONMENT,
+      customerId: workspace?.paddle_customer_id ?? null,
     },
   })
 }

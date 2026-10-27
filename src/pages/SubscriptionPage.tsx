@@ -6,12 +6,14 @@ import { apiRequest, useAuth } from "../lib/auth"
 type Interval = "month" | "year"
 
 type PaddleInstance = {
-  initialized?: boolean
+  Initialized?: boolean
   Environment: { set: (environment: "sandbox") => void }
   Initialize: (options: {
     token: string
+    pwCustomer: { id?: string }
     eventCallback: (event: { name: string }) => void
   }) => void
+  Update: (options: { pwCustomer: { id?: string }; eventCallback: (event: { name: string }) => void }) => void
   Checkout: { open: (options: { transactionId: string }) => void }
 }
 
@@ -70,17 +72,24 @@ export default function SubscriptionPage() {
       }
       const paddle = (window as Window & { Paddle?: PaddleInstance }).Paddle
       if (!paddle) throw new Error("Secure checkout did not initialize")
-      if (!paddle.initialized) {
+      const customerOptions = {
+        pwCustomer: typeof config.data.customerId === "string" && config.data.customerId.startsWith("ctm_")
+          ? { id: config.data.customerId as string }
+          : {},
+        eventCallback: (event: { name: string }) => {
+          if (event.name === "checkout.completed") void refresh()
+          if (event.name === "checkout.error")
+            setMessage("Checkout could not be completed. Please try again.")
+        },
+      }
+      if (!paddle.Initialized) {
         if (config.data.environment === "sandbox") paddle.Environment.set("sandbox")
         paddle.Initialize({
           token: config.data.clientToken,
-          eventCallback: (event) => {
-            if (event.name === "checkout.completed") void refresh()
-            if (event.name === "checkout.error")
-              setMessage("Checkout could not be completed. Please try again.")
-          },
+          ...customerOptions,
         })
-        paddle.initialized = true
+      } else {
+        paddle.Update(customerOptions)
       }
       paddle.Checkout.open({ transactionId: transaction.data.transactionId })
     } catch (error) {
