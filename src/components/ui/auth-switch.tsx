@@ -40,7 +40,7 @@ export default function AuthSwitch({
         }),
       })
       await refresh()
-      navigate("/", { replace: true })
+      navigate("/dashboard", { replace: true })
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Sign in failed")
     } finally {

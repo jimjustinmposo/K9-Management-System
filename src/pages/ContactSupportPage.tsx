@@ -58,6 +58,7 @@ export default function ContactSupportPage() {
         )}
       </div>
       <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-bold text-info">
+        <Link to="/" className="hover:underline">Home</Link>
         <Link to="/login" className="hover:underline">Back to sign in</Link>
         <Link to="/dashboard" className="hover:underline">Go to dashboard</Link>
       </div>

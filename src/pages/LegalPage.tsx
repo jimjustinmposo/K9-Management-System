@@ -5,7 +5,7 @@ const policies = {
   terms: {
     title: "Terms of Service",
     sections: [
-      ["Ownership and scope", "K9 Management System is owned and operated by Jim Justin Poso. These Terms of Service govern the use of the K9 Management System platform and services provided by Jim Justin Poso."],
+      ["Ownership and scope", "Caninelogy’s K9 Management System is owned and operated by Jim Justin M. Poso in the United Arab Emirates. These Terms of Service govern the use of the platform and services provided by Jim Justin M. Poso. For support, contact jimjustinmposo@gmail.com."],
       ["Using the service", "Caninelogy’s K9 Management System helps you organise K9 records, care and team activities. Use the service lawfully, keep your sign-in details secure and only upload information you are authorised to manage."],
       ["Your workspace", "You remain responsible for the accuracy of your records and the access you give team members. The service is an administrative tool, not a substitute for veterinary advice or professional judgement."],
       ["Subscriptions", "For paid plans, the price, billing interval and any trial are shown before purchase. Paddle processes purchases under its buyer terms. Recurring subscriptions renew until cancelled; cancellation and refund requests are separate actions."],
@@ -66,7 +66,7 @@ export default function LegalPage({ kind }: { kind: keyof typeof policies }) {
             <Link key={key} to={`/${key}`} className={linkClass} aria-current={key === kind ? "page" : undefined}>{value.title}</Link>
           ))}
         </nav>
-        <p className="mt-6 text-center text-sm"><Link to="/login" className={linkClass}>Back to sign in</Link></p>
+        <p className="mt-6 flex flex-wrap justify-center gap-5 text-sm"><Link to="/" className={linkClass}>Home</Link><Link to="/contact" className={linkClass}>Contact support</Link><Link to="/login" className={linkClass}>Back to sign in</Link></p>
       </div>
     </main>
   )

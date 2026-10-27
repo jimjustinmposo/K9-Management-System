@@ -1,25 +1,22 @@
+import { lazy, Suspense } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
 import { ProtectedRoute, useAuth } from "./lib/auth"
 import BoardingFormPage from "./pages/BoardingFormPage"
 import BoardingPage from "./pages/BoardingPage"
 import AcceptInvitePage from "./pages/AcceptInvitePage"
 import ComingSoonPage from "./pages/ComingSoonPage"
-import ReportsPage from "./pages/ReportsPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
 import ContactSupportPage from "./pages/ContactSupportPage"
-import K9FormPage from "./pages/K9FormPage"
 import K9RosterPage from "./pages/K9RosterPage"
 import LoginPage from "./pages/LoginPage"
 import LegalPage from "./pages/LegalPage"
 import RegisterPage from "./pages/RegisterPage"
 import SubscriptionPage from "./pages/SubscriptionPage"
 import TrainingPage from "./pages/TrainingPage"
-import UsersPage from "./pages/UsersPage"
 import MedicalFormPage from "./pages/MedicalFormPage"
 import { MedicalHomePage, MedicalListPage } from "./pages/MedicalPages"
 import HandlerFormPage from "./pages/HandlerFormPage"
 import HandlersPage from "./pages/HandlersPage"
-import TrainingLogPage from "./pages/TrainingLogPage"
 import TrainingFormPage from "./pages/TrainingFormPage"
 import FeedingPage from "./pages/FeedingPage"
 import FeedingFormPage from "./pages/FeedingFormPage"
@@ -38,6 +35,11 @@ import CarUsageFormPage from "./pages/CarUsageFormPage"
 import DashboardPage from "./pages/DashboardPage"
 import HomePage from "./pages/HomePage"
 
+const ReportsPage = lazy(() => import("./pages/ReportsPage"))
+const K9FormPage = lazy(() => import("./pages/K9FormPage"))
+const UsersPage = lazy(() => import("./pages/UsersPage"))
+const TrainingLogPage = lazy(() => import("./pages/TrainingLogPage"))
+
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
 )
@@ -49,19 +51,26 @@ function OwnerPage({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <Suspense fallback={<p role="status" className="p-6 text-center">Loading page…</p>}>
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/terms" element={<LegalPage kind="terms" />} />
       <Route path="/privacy" element={<LegalPage kind="privacy" />} />
+      <Route path="/privacy-policy" element={<LegalPage kind="privacy" />} />
       <Route path="/refund" element={<LegalPage kind="refund" />} />
+      <Route path="/refund-policy" element={<LegalPage kind="refund" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/contact-support" element={<ContactSupportPage />} />
+      <Route path="/contact" element={<ContactSupportPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
       <Route path="/subscribe" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
       <Route path="/subscription" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
       <Route path="/" element={<HomePage />} />
+      <Route path="/features" element={<HomePage page="features" />} />
+      <Route path="/pricing" element={<HomePage page="pricing" />} />
+      <Route path="/about" element={<HomePage page="about" />} />
       <Route path="/dashboard" element={protectedPage(<DashboardPage />)} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />
       <Route
@@ -149,5 +158,6 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/k9-roster" replace />} />
     </Routes>
+    </Suspense>
   )
 }
