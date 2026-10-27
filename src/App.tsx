@@ -64,8 +64,8 @@ export default function App() {
       <Route path="/contact" element={<ContactSupportPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/accept-invite" element={<AcceptInvitePage />} />
-      <Route path="/subscribe" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
-      <Route path="/subscription" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
+      <Route path="/subscribe" element={protectedPage(<SubscriptionPage />)} />
+      <Route path="/subscription" element={protectedPage(<SubscriptionPage />)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/features" element={<HomePage page="features" />} />

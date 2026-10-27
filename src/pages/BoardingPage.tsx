@@ -187,14 +187,12 @@ export default function BoardingPage() {
             </p>
           )}
         </div>
-        {session?.permissions.create && (
-          <Link
-            to="/boarding/new"
-            className="button-primary"
-          >
-            + New boarding record
-          </Link>
-        )}
+        <Link
+          to="/boarding/new"
+          className="button-primary"
+        >
+          + New boarding record
+        </Link>
       </div>
 
       <div className="mb-5 grid gap-3 sm:grid-cols-3">

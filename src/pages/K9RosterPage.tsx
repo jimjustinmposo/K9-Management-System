@@ -78,11 +78,11 @@ export default function K9RosterPage() {
           </p>
           {loadError && <p className="mt-2 text-xs font-bold text-warning">{loadError}</p>}
         </div>
-        {session?.permissions.create && <Link to="/k9-roster/new"
+        <Link to="/k9-roster/new"
           className="button-primary">
           <span className="text-lg leading-none text-gold">+</span>
           Add new record
-        </Link>}
+        </Link>
       </div>
 
       <Panel>

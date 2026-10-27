@@ -109,7 +109,7 @@ export function ProtectedRoute({
     return <Navigate to="/login" state={{ from: location.pathname }} replace />
   if (owner && session.role !== "owner") return <Navigate to="/" replace />
   if (requireWritable && !session.subscription.writable)
-    return <Navigate to="/" replace />
+    return <Navigate to="/subscribe" state={{ from: location.pathname }} replace />
   return <div className="contents" key={`${session.workspace.id}:${session.user.id}:${JSON.stringify(session.permissions)}:${JSON.stringify(session.subscription)}`}>{children}</div>
 }
 
