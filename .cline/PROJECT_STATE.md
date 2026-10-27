@@ -6,11 +6,7 @@
 - Status: Core registers and owner-only Reports implemented; reports browser/print verification pending.
 
 ## Current Stack
-- Membership: five active members plus owner; unexpired pending invites reserve seats. Shared Pages helper enforces create/invite/restore checks; Vite dev limit/counts match. Public copy/policy drafts updated; no trial implementation. Four mocked member-route tests and four public tests pass, plus both typechecks/build. No deployment/migrations. Existing count-then-write approach is not a concurrency-atomic quota; simultaneous seat allocations need separate hardening.
-- Policy review: `POLICY_DRAFTS.md` contains project-specific Terms, Privacy and Refund drafts plus source evidence and approval gates. Not published; no public legal pages changed in this drafting task. Retention/deletion, voluntary refund terms, business type, provider settings and privacy-request workflow require approval/verification.
-- Confirmed website copy: Jim Justin M. Poso, United Arab Emirates, jimjustinmposo@gmail.com; $41 USD/month and $443 USD/year, taxes calculated at checkout, owner/member access. Unsupported backup/monitoring/maintenance promises removed; technical support retained. Typechecks/build and 24 scoped tests pass. Owner explicitly declined trial implementation; no trial advertised or enabled. Catalog settings remain unverified and unchanged. Approved refund/privacy practices and business type remain missing; no deployment or billing logic changes.
-- Website verification audit (2026-10-27): homepage policy/contact navigation, legacy price-display alignment and narrow static security headers implemented locally; no billing/auth/config/migration changes or deployment. Typechecks/build and 20 billing/session tests pass. See `PADDLE_WEBSITE_READINESS.md` for legal/catalog approvals and browser/WAF verification still required. Current HTTPS probes returned 200 for apex, www and public policy/contact paths; apex HTTP redirected to HTTPS, superseding the earlier www observation below.
-- Public website: local public homepage at `/` with K9 product details, existing displayed pricing, accurate metadata and no-JavaScript overview; operational routes remain authenticated. Typecheck/build verified, not deployed. Policy/contact pages await business details and approved policies; live catalog currency/prices remain unverified. On inspection, caninelogy.online returned HTTPS 200 and HTTP redirected to HTTPS; www did not resolve. Do not assume an SSL failure or change DNS without further evidence.
+- Public website deployed: /features, /pricing, /about, /contact, /privacy-policy, /refund-policy all public. Static policy HTML files in public/ serve real content to crawlers. caninelogy.online passes strict TLS; cert expires 2027-01-24. PADDLE_CHECKOUT_ENABLED=true set as encrypted secret on both Production and Preview. Pending: production redeploy to activate the secret and merge paddle-migration into main.
 - Frontend: React 19 + TypeScript + Vite + Tailwind CSS v4, react-router-dom
 - Backend: Cloudflare Pages Functions (functions/api/*) with D1 binding `DB`
 - Database: Cloudflare D1 (`k9_ops_db`), SQL migrations in `migrations/`
@@ -44,12 +40,8 @@
 - [~] K9 Feeding page with searchable inventory-linked food selection, g/kg input stored in grams, and server-side inventory/stock validation; migration `0019_k9_feeding.sql` awaits application
 - [x] Workspace-scoped Food Inventory CRUD with usage calculated live from matching feeding food names (feeding grams converted to kg), row-level gram/kg restocking; migration `0023_food_inventory.sql` applied directly to remote D1
 - [x] Car Usage register with workspace-scoped CRUD, K9 association, driver/time/odometer fields, and persisted calculated distance; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely
-<<<<<<< HEAD
 - [x] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` applied to shared remote D1 on 2026-10-16.
-=======
-- [~] Shopping register with owner/member create and owner-only edit/delete; food purchases add kg to matching inventory or create a new item. Migration `0024_shopping.sql` is not yet applied to remote D1.
-- [~] In Season register with heat start/end tracking, workspace-scoped API, owner/member create and owner-only edit/delete, and computed Day 1/7/9/14/21/28 in-app reminders; migration `0025_in_season.sql` applied remotely.
->>>>>>> season
+- [x] In Season register with heat start/end tracking, workspace-scoped API, owner/member create and owner-only edit/delete, and computed Day 1/7/9/14/21/28 in-app reminders; migration `0025_in_season.sql` applied remotely.
 - [x] K9 Weights register with batch entry/history, persisted per-record difference, and workspace-specific persistent unsaved batch drafts with clear/unselect actions; migration `0021_k9weights_difference.sql` applied to remote D1
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 
@@ -102,15 +94,13 @@
 - Production secret bindings now resolve through the top-level Pages Wrangler config; deployed endpoint returns 403 for an intentionally incorrect secret (expected).
 
 ## Recent Changes
+- Build warnings: reproduced duplicate CSS/HTML emissions in Vite 8.0.5/Rolldown rc.12 native watch, including a plugin-free fixture. `build:watch` now serializes fresh builds using filesystem watchers; direct `vite build --watch` remains affected. Lazy-loaded Reports, K9 form, Users and Training Log routes reduce entry JS from 545.55 to 422.69 kB. Production build, initial watch build plus two file-triggered rebuilds, both typechecks and seven session tests pass. Browser route regression remains pending; no deployment or dependency changes.
 - Paddle migration remains NOT ready to deploy. Optional V2 billing path adds environment isolation, trusted checkout associations, atomic receipt/state batches and fixed legacy grants; migration 0030 and snapshot SQL are local only. 27 focused tests, typechecks/build pass; backup-copy SQLite rehearsal preserves workspace rows, integrity ok/no FK violations. Live checkout remains blocked; V2 not enabled remotely. D1 rehearsal, sandbox E2E, backfill/replay/reconciliation tooling and production verification pending; see PADDLE_MIGRATION.md.
 - Preserved sidebar scroll across page navigation; globally hid numeric spinner arrows. Car Usage uses Notes (migration `0029_car_usage_notes.sql` tested in isolated SQLite but NOT applied remotely). Added restricted boarding/grooming PATCH controls. Typecheck/build and 13 focused tests pass; browser verification pending.
 - Added persisted `km_used` to Car Usage with a backfill migration; create/edit APIs calculate it from KM end minus KM start.
 - Applied remote D1 migrations `0025_in_season.sql` through `0028_car_usage_km_used.sql`; verified no pending migrations and confirmed `k9_car_usage.km_used` exists.
-<<<<<<< HEAD
 - Applied additive migration `0024_shopping.sql` to shared remote D1; verified migration registry, Shopping table, and both indexes. No unrelated pending migrations or data changes.
-=======
-- Added In Season heat cycle tracking with computed in-app milestone reminders and additive SQL migration; typecheck and production build pass. Remote SQL check found the table absent; no schema change or deployment performed.
->>>>>>> season
+- Added In Season heat cycle tracking with computed in-app milestone reminders and additive SQL migration; typecheck and production build pass. `0025_in_season.sql` applied remotely.
 - Added Shopping register and auto-add food purchases to matching/new Food Inventory rows. Typecheck and production build pass; migration `0024_shopping.sql` awaits remote application.
 - Added Food Inventory CRUD and live feeding-consumption calculation; additive schema applied directly to shared remote D1. Local Pages D1 binding set to remote; no app deployment performed.
 - Added dependency-free frontend API GET caching on branch `perf/shared-api-cache`; auth/billing excluded, requests scoped by user/workspace, mutation invalidation and foreground revalidation included. Seven cache tests plus existing focused suites pass; browser navigation metrics are not yet measured.
@@ -152,7 +142,9 @@
 - Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
-- [ ] Complete Paddle Sandbox checkout and webhook round-trip. Do not enable live payments without approval.
+- [ ] **Complete Paddle migration** — gate for resubmission: finish worker integration, set `PADDLE_CHECKOUT_ENABLED=true`, re-enable checkout button in `SubscribePage.tsx`, run sandbox checkout + webhook round-trip.
+- [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean — 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
+
 
 ## Known Limitations
 - Reports require Pages Functions/D1 (no localStorage fallback). Complete dog history requires existing migrations including `0029_car_usage_notes.sql`; missing category schema is skipped with a preview/export warning, and unavailable food intake is not reported as zero. The pre-0029 failure is reproduced locally; the actual remote exception/migration state remains unverified. No remote migration or deployment performed. A report over 5,000 rows is rejected rather than truncated.

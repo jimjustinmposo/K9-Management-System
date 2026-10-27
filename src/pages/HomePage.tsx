@@ -66,7 +66,7 @@ export default function HomePage({ page = "home" }: { page?: "home" | "features"
         {(page === "home" || page === "pricing") && <section id="pricing" className="border-t border-line py-16" aria-labelledby="pricing-title">
           <p className="text-xs uppercase tracking-widest text-gold">Subscription plans</p>
           <SectionTitle id="pricing-title" style={{ fontSize: "2rem" }} className="mt-3">Choose your billing interval.</SectionTitle>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system for one owner and up to five active members. All prices are in USD. Taxes are calculated at checkout. New paid subscriptions are not available on this public page.</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system for one owner and up to five active members. All prices are in USD. Taxes are calculated at checkout.</p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {[{ name: "Monthly", amount: "$41", interval: "per month", detail: "Billed every month" }, { name: "Yearly", amount: "$443", interval: "per year", detail: "Billed yearly" }].map((plan) => (
               <article key={plan.name} className="rounded-xl border border-line bg-surface p-8">
