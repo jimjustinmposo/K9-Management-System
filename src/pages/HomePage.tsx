@@ -1,5 +1,20 @@
 import { Link } from "react-router-dom"
-import { ArrowUpRight, ClipboardList, Dog, HeartPulse, Users } from "lucide-react"
+import { ArrowUpRight, Check, ClipboardList, Dog, HeartPulse, Users } from "lucide-react"
+
+const planInclusions = [
+  "Full K9 Management System access",
+  "Cloud hosting",
+  "Database hosting and maintenance",
+  "Routine database optimization",
+  "Scheduled database backups",
+  "Security monitoring and updates",
+  "Bug fixes and system maintenance",
+  "Performance optimization",
+  "Technical support",
+  "Existing feature updates",
+  "SSL/HTTPS security",
+  "System availability monitoring",
+]
 
 const features = [
   { icon: Dog, title: "Know every K9", text: "Maintain individual dog profiles and keep weight, feeding and care records connected to the right animal." },
@@ -49,7 +64,31 @@ export default function HomePage() {
           <h2 id="pricing-title" style={{ fontSize: "2rem" }} className="mt-3">Choose your billing interval.</h2>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system. New paid subscriptions are not available on this public page.</p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
-            {[{ name: "Monthly", amount: "$41", interval: "per month", detail: "Billed every month" }, { name: "Yearly", amount: "$443", interval: "per year", detail: "Billed yearly" }].map((plan) => <article key={plan.name} className="rounded-xl border border-line bg-surface p-8"><h3>{plan.name}</h3><p className="my-5"><strong className="text-4xl font-semibold">{plan.amount}</strong><span className="ml-3 text-sm text-muted">{plan.interval}</span></p><p className="text-sm text-slate">{plan.detail}</p></article>)}
+            {[{ name: "Monthly", amount: "$41", interval: "per month", detail: "Billed every month" }, { name: "Yearly", amount: "$443", interval: "per year", detail: "Billed yearly" }].map((plan) => (
+              <article key={plan.name} className="rounded-xl border border-line bg-surface p-8">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3>{plan.name}</h3>
+                  {plan.name === "Yearly" && <span className="rounded-full bg-positive-soft px-3 py-1 text-xs font-semibold text-positive">10% discount</span>}
+                </div>
+                <p className="my-5"><strong className="text-4xl font-semibold">{plan.amount}</strong><span className="ml-3 text-sm text-muted">{plan.interval}</span></p>
+                <p className="text-sm text-slate">{plan.detail}</p>
+              </article>
+            ))}
+          </div>
+          <div className="app-panel mt-6 rounded-2xl border border-line bg-surface p-6 sm:p-8">
+            <h3 style={{ fontSize: "1.1rem" }}>What's included in both plans</h3>
+            <ul className="mt-6 grid gap-x-8 gap-y-4 sm:grid-cols-2">
+              {planInclusions.map((inclusion) => (
+                <li key={inclusion} className="flex items-start gap-3 text-sm leading-6 text-slate">
+                  <Check size={18} className="mt-1 shrink-0 text-positive" aria-hidden="true" />
+                  <span>{inclusion}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 border-t border-line pt-6">
+              <h3>Individual Access Plan</h3>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate">Provides complete access for one owner, perfect for solo operators who need full control of the system.</p>
+            </div>
           </div>
         </section>
       </main>
