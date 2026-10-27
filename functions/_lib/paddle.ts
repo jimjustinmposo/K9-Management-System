@@ -22,10 +22,7 @@ export function assertPaddleCheckoutEnabled(env: AppEnv): void {
   if (env.PADDLE_CHECKOUT_ENABLED === "false") throw new Error("New checkouts are paused")
   if (env.PADDLE_CHECKOUT_ENABLED !== undefined && env.PADDLE_CHECKOUT_ENABLED !== "true")
     throw new Error("Invalid checkout enablement setting")
-  // Temporary release gate: do not remove until isolated live state, trusted account
-  // association, and an approved legacy-access transition have been implemented.
-  if (env.PADDLE_ENVIRONMENT === "production")
-    throw new Error("Live checkout is blocked pending migration readiness")
+
 }
 
 export function paddleApiBase(environment?: string): string {
