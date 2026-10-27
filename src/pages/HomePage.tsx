@@ -16,21 +16,25 @@ const features = [
   { icon: Users, title: "Work as a team", text: "Maintain your handler directory and give workspace owners and members appropriate access to operational records." },
 ]
 
-export default function HomePage() {
+export default function HomePage({ page = "home" }: { page?: "home" | "features" | "pricing" | "about" }) {
+  const SectionTitle = page === "home" ? "h2" : "h1"
   return (
     <div className="min-h-screen bg-canvas text-ink">
       <a href="#product" className="sr-only focus:not-sr-only focus:block focus:p-4">Skip to product information</a>
       <header className="border-b border-line">
         <nav aria-label="Public navigation" className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5">
           <Link to="/" className="text-lg font-semibold tracking-wide">CANINELOGY<span className="ml-2 text-gold">/</span></Link>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#features">Features</a><a href="#pricing">Pricing</a>
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <Link to="/features" aria-current={page === "features" ? "page" : undefined}>Features</Link>
+            <Link to="/pricing" aria-current={page === "pricing" ? "page" : undefined}>Pricing</Link>
+            <Link to="/about" aria-current={page === "about" ? "page" : undefined}>About</Link>
+            <Link to="/contact">Contact</Link>
             <Link to="/login" className="button-primary">Sign in <ArrowUpRight size={16} aria-hidden="true" /></Link>
           </div>
         </nav>
       </header>
       <main id="product" className="mx-auto max-w-6xl px-6">
-        <section className="grid gap-12 border-b border-line py-16 md:grid-cols-[1.4fr_1fr] md:py-24" aria-labelledby="product-title">
+        {page === "home" && <section className="grid gap-12 border-b border-line py-16 md:grid-cols-[1.4fr_1fr] md:py-24" aria-labelledby="product-title">
           <div>
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-gold">K9 management software</p>
             <h1 id="product-title" style={{ fontSize: "clamp(2.5rem, 6vw, 4.5rem)", lineHeight: 1.05 }} className="max-w-2xl tracking-tight">More time for your dogs.<br /><span className="text-muted">Less scattered paperwork.</span></h1>
@@ -44,18 +48,25 @@ export default function HomePage() {
               {["K9 profiles & care history", "Training & handler records", "Medical & boarding management", "Owner reporting & team access"].map((item, index) => <li key={item} className="flex gap-4 py-4"><span className="font-mono text-gold">0{index + 1}</span>{item}</li>)}
             </ul>
           </aside>
-        </section>
-        <section id="features" className="py-16" aria-labelledby="features-title">
+        </section>}
+        {page === "about" && <section className="max-w-3xl py-16" aria-labelledby="about-title">
+          <p className="text-xs uppercase tracking-widest text-gold">K9 management software</p>
+          <h1 id="about-title" className="mt-3 text-3xl font-semibold">About Caninelogy</h1>
+          <p className="mt-6 text-base leading-8 text-slate">Caninelogy brings your K9 roster, training logs, medical records and daily care into one web-based workspace. Built for the people who manage dogs and the teams who care for them.</p>
+          <p className="mt-4 text-base leading-8 text-slate">Manage dog profiles, training, boarding and care records, with role-based access for workspace owners and members.</p>
+          <div className="mt-8 flex flex-wrap gap-5"><Link to="/features" className="button-primary">Explore features</Link><Link to="/contact" className="underline underline-offset-4">Contact support</Link></div>
+        </section>}
+        {(page === "home" || page === "features") && <section id="features" className="py-16" aria-labelledby="features-title">
           <p className="text-xs uppercase tracking-widest text-gold">Built around daily operations</p>
-          <h2 id="features-title" style={{ fontSize: "2rem" }} className="mt-3">A clear record. A coordinated team.</h2>
+          <SectionTitle id="features-title" style={{ fontSize: "2rem" }} className="mt-3">A clear record. A coordinated team.</SectionTitle>
           <div className="mt-9 grid gap-5 sm:grid-cols-2">
             {features.map(({ icon: Icon, title, text }) => <article key={title} className="rounded-xl border border-line bg-surface p-7"><Icon size={24} className="mb-6 text-gold" aria-hidden="true" /><h3 style={{ fontSize: "1.1rem" }}>{title}</h3><p className="mt-3 text-sm leading-7 text-slate">{text}</p></article>)}
           </div>
-        </section>
-        <section id="pricing" className="border-t border-line py-16" aria-labelledby="pricing-title">
+        </section>}
+        {(page === "home" || page === "pricing") && <section id="pricing" className="border-t border-line py-16" aria-labelledby="pricing-title">
           <p className="text-xs uppercase tracking-widest text-gold">Subscription plans</p>
-          <h2 id="pricing-title" style={{ fontSize: "2rem" }} className="mt-3">Choose your billing interval.</h2>
-           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system for one owner and up to five active members. All prices are in USD. Taxes are calculated at checkout. New paid subscriptions are not available on this public page.</p>
+          <SectionTitle id="pricing-title" style={{ fontSize: "2rem" }} className="mt-3">Choose your billing interval.</SectionTitle>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system for one owner and up to five active members. All prices are in USD. Taxes are calculated at checkout. New paid subscriptions are not available on this public page.</p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {[{ name: "Monthly", amount: "$41", interval: "per month", detail: "Billed every month" }, { name: "Yearly", amount: "$443", interval: "per year", detail: "Billed yearly" }].map((plan) => (
               <article key={plan.name} className="rounded-xl border border-line bg-surface p-8">
@@ -83,21 +94,17 @@ export default function HomePage() {
               <p className="mt-3 max-w-2xl text-sm leading-7 text-slate">Includes one owner and up to five active members with role-based permissions.</p>
             </div>
           </div>
-        </section>
+        </section>}
       </main>
       <footer className="border-t border-line px-6 py-7">
         <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 text-sm text-muted">
           <span>Caninelogy · K9 management software</span>
-          <nav aria-label="Public information" className="flex flex-wrap gap-x-5 gap-y-3">
-            {[
-              ["/terms", "Terms of Service"],
-              ["/privacy", "Privacy Notice"],
-              ["/refund", "Refund Policy"],
-              ["/contact-support", "Contact support"],
-              ["/login", "Customer sign in"],
-            ].map(([to, label]) => (
-              <Link key={to} to={to} className="rounded underline underline-offset-4 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">{label}</Link>
-            ))}
+          <nav aria-label="Policies and support" className="flex flex-wrap gap-x-5 gap-y-3">
+            <Link to="/terms" className="underline underline-offset-4">Terms and Conditions</Link>
+            <Link to="/privacy-policy" className="underline underline-offset-4">Privacy Policy</Link>
+            <Link to="/refund-policy" className="underline underline-offset-4">Refund and Cancellation Policy</Link>
+            <Link to="/contact" className="underline underline-offset-4">Contact support</Link>
+            <Link to="/login" className="underline underline-offset-4">Customer sign in</Link>
           </nav>
         </div>
       </footer>

@@ -66,7 +66,7 @@ export default function LegalPage({ kind }: { kind: keyof typeof policies }) {
             <Link key={key} to={`/${key}`} className={linkClass} aria-current={key === kind ? "page" : undefined}>{value.title}</Link>
           ))}
         </nav>
-        <p className="mt-6 text-center text-sm"><Link to="/login" className={linkClass}>Back to sign in</Link></p>
+        <p className="mt-6 flex flex-wrap justify-center gap-5 text-sm"><Link to="/" className={linkClass}>Home</Link><Link to="/contact" className={linkClass}>Contact support</Link><Link to="/login" className={linkClass}>Back to sign in</Link></p>
       </div>
     </main>
   )
