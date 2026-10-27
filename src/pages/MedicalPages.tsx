@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { useLatestLoad } from "../lib/useLatestLoad"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { medicalApi } from "../lib/medicalApi"
 import { useAuth } from "../lib/auth"
@@ -37,6 +37,7 @@ function MedicalCard({ kind }: { kind: Kind }) {
 export function MedicalListPage({ kind }: { kind: Kind }) {
   const PAGE_SIZE = 10
   const { session } = useAuth()
+  const navigate = useNavigate()
   const [items, setItems] = useState<(Medication | MedicalRecord | MedicalCondition)[]>([])
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
@@ -54,7 +55,7 @@ export function MedicalListPage({ kind }: { kind: Kind }) {
     catch (err) { setError(err instanceof Error ? err.message : "Could not delete entry.") }
   }
   return <AppShell title={config[kind].label + (kind === "records" ? "s" : "s")}><div className="mx-auto max-w-6xl space-y-5">
-    <div className="flex flex-wrap items-end justify-between gap-4"><div><Link to="/medical" className="text-xs font-medium text-positive">← Medical overview</Link><p className="mt-4 text-[10px] font-semibold uppercase tracking-[.12em] text-positive">{config[kind].eyebrow}</p><h2 className="mt-1 text-xl font-semibold text-ink">{config[kind].title}</h2></div>{session?.permissions.create && <Link to={config[kind].create} className="button-primary">+ Add {config[kind].label.toLowerCase()}</Link>}</div>
+    <div className="flex flex-wrap items-end justify-between gap-4"><div><Link to="/medical" className="text-xs font-medium text-positive">← Medical overview</Link><p className="mt-4 text-[10px] font-semibold uppercase tracking-[.12em] text-positive">{config[kind].eyebrow}</p><h2 className="mt-1 text-xl font-semibold text-ink">{config[kind].title}</h2></div><Link to={config[kind].create} className="button-primary">+ Add {config[kind].label.toLowerCase()}</Link></div>
     {kind === "medications" && <input aria-label="Search medications" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search medication name or category…" className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink outline-none focus:border-positive md:max-w-sm"/>}
     {error && <p role="alert" className="rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm text-danger">{error}</p>}
     <Panel><PanelHeader eyebrow="Clinical register" title={`${total} ${config[kind].label.toLowerCase()}${total === 1 ? "" : "s"}`} />{loading ? <p className="p-8 text-center text-sm text-muted">Loading records…</p> : total === 0 ? <p className="p-10 text-center text-sm text-muted">No entries yet. Add the first one when ready.</p> : <div className="divide-y divide-line">{items.map((item) => {
@@ -65,7 +66,7 @@ export function MedicalListPage({ kind }: { kind: Kind }) {
       const meta = isMed ? medication.dosage_guideline || "Dosage guideline not specified" : isRecord ? `${date(record.start_date)}${record.end_date ? ` – ${date(record.end_date)}` : " · Ongoing"}${record.administered_by ? ` · ${record.administered_by}` : ""}` : `Diagnosed ${date(condition.diagnosis_date)}`
       const id = item.id
       const editPath = `/medical/${kind}/${encodeURIComponent(id)}/edit`
-      return <article key={id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div className="min-w-0"><h3 className="truncate text-sm font-bold text-ink">{title}</h3><p className="mt-1 text-xs text-muted">{subtitle}</p><p className="mt-1 text-[11px] text-muted/80">{meta}</p></div><div className="flex shrink-0 items-center gap-2">{isRecord && <span className="rounded-full bg-positive-soft px-2.5 py-1 text-[10px] font-bold text-positive">Treatment</span>}{session?.permissions.edit && <Link className="button-edit" to={editPath}>Edit</Link>}{session?.permissions.delete && <button type="button" className="button-delete" onClick={() => void deleteItem(id)}>Delete</button>}</div></article>
+      return <article key={id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4"><div className="min-w-0"><h3 className="truncate text-sm font-bold text-ink">{title}</h3><p className="mt-1 text-xs text-muted">{subtitle}</p><p className="mt-1 text-[11px] text-muted/80">{meta}</p></div><div className="flex shrink-0 items-center gap-2">{isRecord && <span className="rounded-full bg-positive-soft px-2.5 py-1 text-[10px] font-bold text-positive">Treatment</span>}<Link className="button-edit" to={editPath}>Edit</Link><button type="button" className="button-delete" onClick={() => navigate("/subscribe", { replace: true })}>Delete</button></div></article>
     })}</div>}{!loading && total > 0 && <Pagination page={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1) }} label={config[kind].label.toLowerCase() + "s"} />}</Panel>
     <p className="text-xs text-muted">For veterinary use: team-entered notes are not a substitute for advice from a licensed veterinarian.</p>
   </div></AppShell>

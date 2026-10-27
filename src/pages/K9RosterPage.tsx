@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { AppShell, Panel } from "../components/AppShell";
 import { k9Api } from "../lib/k9Api";
 import { useAuth } from "../lib/auth";
@@ -20,7 +20,8 @@ function statusStyle(status: string): string {
 }
 
 export default function K9RosterPage() {
-  const { session } = useAuth();
+  const { session } = useAuth()
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { data: records = [], setData: setRecords, loading, error: loadError } = useCachedResource("/api/k9/view", readRoster);
   const [search, setSearch] = useState("");
@@ -115,10 +116,10 @@ export default function K9RosterPage() {
             <p className="mx-auto mt-1 max-w-sm text-xs leading-5 text-muted">
               Add your first K9 profile to start building the Cloudflare-connected roster.
             </p>
-            {session?.permissions.create && <Link to="/k9-roster/new"
-              className="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-xs font-bold text-white">
-              <span className="text-base leading-none text-gold">+</span> Add new record
-            </Link>}
+<Link to="/k9-roster/new"
+  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-navy px-5 py-3 text-xs font-bold text-white">
+  <span className="text-base leading-none text-gold">+</span> Add new record
+</Link>
           </div>
         ) : (
           <>
@@ -167,16 +168,15 @@ export default function K9RosterPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
-                      {session?.permissions.edit && <div className="flex justify-end gap-2">
-                        <Link to={`/k9-roster/${k9.id}/edit`}
-                          className="button-edit">
-                          Edit
-                        </Link>
-                        <button type="button" disabled={deletingId === k9.id} onClick={() => handleDelete(k9.id, k9.dogName)}
-                          className="button-delete disabled:opacity-50">
-                          {deletingId === k9.id ? "..." : "Delete"}
-                        </button>
-                      </div>}
+<div className="flex justify-end gap-2">
+  <Link to={`/k9-roster/${k9.id}/edit`} className="button-edit">
+    Edit
+  </Link>
+  <button type="button" disabled={deletingId === k9.id} onClick={() => navigate("/subscribe", { replace: true })}
+    className="button-delete disabled:opacity-50">
+    {deletingId === k9.id ? "..." : "Delete"}
+  </button>
+</div>
                     </td>
                   </tr>
                 ))}

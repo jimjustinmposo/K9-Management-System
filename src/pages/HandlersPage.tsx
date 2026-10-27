@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 import { useLatestLoad } from "../lib/useLatestLoad"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { AppShell, Panel, PanelHeader } from "../components/AppShell"
 import { useAuth } from "../lib/auth"
 import { handlersApi } from "../lib/handlersApi"
@@ -11,6 +11,7 @@ const PAGE_SIZE = 10
 
 export default function HandlersPage() {
   const { session } = useAuth()
+  const navigate = useNavigate()
   const [items, setItems] = useState<Handler[]>([])
   const [total, setTotal] = useState(0)
   const [search, setSearch] = useState("")
@@ -56,7 +57,7 @@ export default function HandlersPage() {
               <div className="grid size-11 shrink-0 place-items-center rounded-full border border-positive/20 bg-positive-soft text-sm font-black text-positive" aria-hidden="true">{handler.full_name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</div>
               <div className="min-w-0"><h3 className="truncate text-sm font-bold text-ink">{handler.full_name}{handler.nick_name && <span className="ml-2 text-xs font-medium text-muted">“{handler.nick_name}”</span>}</h3><p className="mt-1 text-xs font-semibold text-positive">{handler.position}</p><p className="mt-1 break-all text-xs text-muted">{handler.email} · {handler.phone}</p></div>
             </div>
-            <div className="flex shrink-0 items-center gap-2">{session?.permissions.edit && <Link className="button-edit" to={`/handlers/${encodeURIComponent(handler.id)}/edit`}>Edit</Link>}{session?.permissions.delete && <button type="button" className="button-delete" onClick={() => void remove(handler)}>Delete</button>}</div>
+            <div className="flex shrink-0 items-center gap-2"><Link className="button-edit" to={`/handlers/${encodeURIComponent(handler.id)}/edit`}>Edit</Link><button type="button" className="button-delete" onClick={() => navigate("/subscribe", { replace: true })}>Delete</button></div>
           </article>)}</div>}
         {!loading && total > 0 && <Pagination page={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={(size) => { setPageSize(size); setPage(1) }} label="handlers" />}
       </Panel>

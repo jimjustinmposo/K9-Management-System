@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 
-import { Link, useSearchParams } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { AppShell, Panel } from "../components/AppShell"
 
@@ -18,6 +18,7 @@ const PAGE_SIZE = 10
 
 export default function BoardingPage() {
   const { session } = useAuth()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 
   const { data: staysData = [], setData: setStaysData, loading, error, setError } = useCachedResource("/api/boarding/view", readBoarding)
@@ -282,14 +283,12 @@ export default function BoardingPage() {
                 ? "Try another search or status filter."
                 : "Start by selecting a registered K9 for its first stay."}
             </p>
-            {!staysData.length && session?.permissions.create && (
-              <Link
-                to="/boarding/new"
-                className="mt-4 inline-flex rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white"
-              >
-                Create boarding record
-              </Link>
-            )}
+            <Link
+              to="/boarding/new"
+              className="mt-4 inline-flex rounded-xl bg-navy px-4 py-2.5 text-sm font-bold text-white"
+            >
+              Create boarding record
+            </Link>
           </div>
         ) : (
           <>
@@ -345,16 +344,13 @@ export default function BoardingPage() {
                         <div className="flex flex-col gap-1.5">
                           <label
                             className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                              session?.permissions.create ? "cursor-pointer" : ""
+                              ""
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={record.status === "Boarding"}
-                              disabled={
-                                !session?.permissions.create ||
-                                updatingStatusId === record.id
-                              }
+                              disabled={updatingStatusId === record.id}
                               onChange={() =>
                                 void updateStatus(record, "Boarding")
                               }
@@ -365,16 +361,13 @@ export default function BoardingPage() {
                           </label>
                           <label
                             className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                              session?.permissions.create ? "cursor-pointer" : ""
+                              ""
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={record.status === "Checked Out"}
-                              disabled={
-                                !session?.permissions.create ||
-                                updatingStatusId === record.id
-                              }
+                              disabled={updatingStatusId === record.id}
                               onChange={() =>
                                 void updateStatus(record, "Checked Out")
                               }
@@ -387,24 +380,20 @@ export default function BoardingPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-2">
-                          {session?.permissions.edit && (
-                            <Link
-                              to={`/boarding/${record.id}/edit`}
-                              className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-bold text-info hover:bg-info-soft"
-                            >
-                              Edit
-                            </Link>
-                          )}
-                          {session?.permissions.delete && (
+<Link
+  to={`/boarding/${record.id}/edit`}
+  className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-bold text-info hover:bg-info-soft"
+>
+  Edit
+</Link>
                             <button
                               type="button"
                               disabled={deletingId === record.id}
-                              onClick={() => void remove(record)}
+                              onClick={() => navigate("/subscribe", { replace: true })}
                               className="rounded-lg border border-line px-3 py-1.5 text-[11px] font-bold text-danger hover:bg-danger-soft disabled:opacity-50"
                             >
                               Delete
                             </button>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -430,17 +419,14 @@ export default function BoardingPage() {
                     <div className="grid shrink-0 gap-1">
                       <label
                         className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                          session?.permissions.create ? "cursor-pointer" : ""
+                          ""
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={record.status === "Boarding"}
-                          disabled={
-                            !session?.permissions.create ||
-                            updatingStatusId === record.id
-                          }
-                          onChange={() => void updateStatus(record, "Boarding")}
+                          disabled={updatingStatusId === record.id}
+                          onChange={() => navigate("/subscribe", { replace: true })}
                           aria-label={`${record.k9.dogName} boarding`}
                           className="size-3.5 accent-emerald-600 disabled:cursor-not-allowed"
                         />
@@ -448,19 +434,14 @@ export default function BoardingPage() {
                       </label>
                       <label
                         className={`inline-flex items-center gap-1.5 text-[10px] font-semibold ${
-                          session?.permissions.create ? "cursor-pointer" : ""
+                          ""
                         }`}
                       >
                         <input
                           type="checkbox"
                           checked={record.status === "Checked Out"}
-                          disabled={
-                            !session?.permissions.create ||
-                            updatingStatusId === record.id
-                          }
-                          onChange={() =>
-                            void updateStatus(record, "Checked Out")
-                          }
+                          disabled={updatingStatusId === record.id}
+                          onChange={() => navigate("/subscribe", { replace: true })}
                           aria-label={`${record.k9.dogName} checked out`}
                           className="size-3.5 accent-emerald-600 disabled:cursor-not-allowed"
                         />
@@ -484,28 +465,21 @@ export default function BoardingPage() {
                       {record.ownerPhone}
                     </p>
                   )}
-                  {(session?.permissions.edit ||
-                    session?.permissions.delete) && (
                     <div className="mt-3 flex gap-2">
-                      {session?.permissions.edit && (
-                        <Link
-                          to={`/boarding/${record.id}/edit`}
-                          className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-info"
-                        >
-                          Edit
-                        </Link>
-                      )}
-                      {session?.permissions.delete && (
+                      <Link
+                        to={`/boarding/${record.id}/edit`}
+                        className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-info"
+                      >
+                        Edit
+                      </Link>
                         <button
                           type="button"
-                          onClick={() => void remove(record)}
+                          onClick={() => navigate("/subscribe", { replace: true })}
                           className="rounded-lg border border-line px-3 py-1.5 text-xs font-bold text-danger"
                         >
                           Delete
                         </button>
-                      )}
                     </div>
-                  )}
                 </article>
               ))}
             </div>
@@ -516,3 +490,4 @@ export default function BoardingPage() {
     </AppShell>
   )
 }
+

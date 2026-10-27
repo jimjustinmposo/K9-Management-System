@@ -231,11 +231,7 @@ export default function TodaysTaskPage() {
             <div className="mb-3 mt-7 flex items-center justify-between">
               <h3 className="text-sm font-bold">Schedule</h3>
               <button
-                onClick={() => {
-                  if (!session?.permissions.create) return
-                  setAdding(true)
-                }}
-                disabled={!session?.permissions.create}
+                onClick={() => navigate("/subscribe", { replace: true })}
                 className="flex items-center gap-1.5 rounded-full bg-[#e5ebdf] px-3 py-2 text-[10px] font-bold text-[#365e46]"
               >
                 <TaskIcon name="plus" className="size-3.5" />
@@ -249,12 +245,11 @@ export default function TodaysTaskPage() {
                   className="flex min-h-[65px] items-center gap-3 rounded-2xl border border-[#dfe3d8] bg-[#fafbf7] px-4 py-3 shadow-[0_5px_20px_rgba(44,66,43,0.02)]"
                 >
                   <button
-                    disabled={!session?.permissions.edit}
                     aria-label={`${
                       task.done ? "Mark incomplete" : "Mark complete"
                     }: ${task.title}`}
                     aria-pressed={task.done}
-                    onClick={() => toggleTask(task.id)}
+                    onClick={() => navigate("/subscribe", { replace: true })}
                     className={`grid size-[19px] shrink-0 place-items-center rounded-[6px] border disabled:cursor-not-allowed disabled:opacity-60 ${
                       task.done
                         ? "border-[#4d7b60] bg-[#4d7b60] text-white"
@@ -296,19 +291,15 @@ export default function TodaysTaskPage() {
                     <TaskIcon name="clock" className="size-3" />
                     {timeLabel(task.time)}
                   </span>
-                  {session?.permissions.delete && <button
+                  <button
                     type="button"
                     aria-label={`Delete task: ${task.title}`}
                     title="Delete task"
-                    onClick={() =>
-                      setTasks((previous) =>
-                        previous.filter((item) => item.id !== task.id),
-                      )
-                    }
+                    onClick={() => navigate("/subscribe", { replace: true })}
                     className="grid size-8 shrink-0 place-items-center rounded-lg text-[#92998a] transition hover:bg-[#fce2dd] hover:text-[#b65a46]"
                   >
                     <TaskIcon name="trash" className="size-4" />
-                  </button>}
+                  </button>
                 </div>
               ))}
               {!dayTasks.length && (
@@ -428,9 +419,8 @@ export default function TodaysTaskPage() {
                     {timeLabel(nextTask.time)}
                   </span>
                   <button
-                    disabled={!session?.permissions.edit}
-                    onClick={() => toggleTask(nextTask.id)}
-                    className="rounded-full bg-[#f5f6ee] px-3.5 py-2 text-[9px] font-bold text-[#365e46] hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={() => navigate("/subscribe", { replace: true })}
+                    className="rounded-full bg-[#f5f6ee] px-3.5 py-2 text-[9px] font-bold text-[#365e46] hover:bg-white"
                   >
                     Mark done
                   </button>

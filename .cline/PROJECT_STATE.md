@@ -27,7 +27,7 @@
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
 - [x] Vite local-test sessions have active subscription and owner write permissions; Cloudflare subscription enforcement is unchanged
-- [x] View-only (read-only) workspaces surface write buttons ("Add record"); clicking a write action redirects to /subscribe to pay for a subscription before write features are available.
+- [x] View-only (read-only) workspaces surface all write buttons (create/edit/delete/add-stock/status-toggle) project-wide; clicking any write action redirects to /subscribe to pay for a subscription before write features are available.
 - [x] Owner-only user administration with member password reset, archive/restore, permanent delete, and session invalidation
 - [x] Developer-secret password reset page and server-side password update
 - [x] Workspace-scoped K9 Operations Dashboard at `/dashboard` and root route; live operational KPIs, alerts, upcoming season/boarding events, training totals, quick actions, and recent activity via existing APIs/cache
