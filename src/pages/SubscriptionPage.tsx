@@ -25,16 +25,9 @@ const prices = {
 const benefits = [
   "Full K9 Management System access",
   "Cloud hosting",
-  "Database hosting and maintenance",
-  "Routine database optimization",
-  "Scheduled database backups",
-  "Security monitoring and updates",
-  "Bug fixes and system maintenance",
-  "Performance optimization",
+  "Owner and member access",
   "Technical support",
-  "Existing feature updates",
   "SSL/HTTPS security",
-  "System availability monitoring",
 ]
 
 export default function SubscriptionPage() {
@@ -215,8 +208,8 @@ export default function SubscriptionPage() {
                     <Icon name="shield" className="size-5" />
                   </span>
                   <div>
-                    <p className="text-[11px] font-extrabold">Individual Access Plan</p>
-                    <p className="mt-1 text-[8px] leading-4 text-muted">Provides complete access for one owner, perfect for solo operators who need full control of the system.</p>
+                    <p className="text-[11px] font-extrabold">Owner and Member Access</p>
+                    <p className="mt-1 text-[8px] leading-4 text-muted">Includes one owner and up to five active members with role-based permissions.</p>
                   </div>
                 </div>
               </div>
@@ -245,6 +238,7 @@ export default function SubscriptionPage() {
                   )}
                 </div>
               </div>
+              <p className="py-3 text-xs text-muted">All prices are in USD. Taxes are calculated at checkout.</p>
               {message && <p role="alert" className="py-4 text-[10px] font-bold leading-5 text-danger">{message}</p>}
               <button
                 type="button"

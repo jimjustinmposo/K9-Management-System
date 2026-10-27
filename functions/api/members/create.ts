@@ -5,22 +5,7 @@ import {
   type AppEnv,
 } from "../../_lib/auth"
 import { clean, id, json } from "../../_lib/http"
-
-async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
-  const members = await db
-    .prepare(
-      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member' AND archived_at IS NULL",
-    )
-    .bind(workspaceId)
-    .first<{ count: number }>()
-  const pending = await db
-    .prepare(
-      "SELECT COUNT(*) count FROM invitations WHERE workspace_id=? AND status='pending' AND expires_at>?",
-    )
-    .bind(workspaceId, new Date().toISOString())
-    .first<{ count: number }>()
-  return Number(members?.count ?? 0) + Number(pending?.count ?? 0)
-}
+import { MEMBER_LIMIT, seatCount } from "../../_lib/member-seats"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageMembers")
@@ -46,8 +31,8 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
         .first()
     )
       return json({ error: "This email already belongs to an account" }, 409)
-    if ((await seatCount(context.env.DB, session.workspace.id)) >= 3)
-      return json({ error: "Your plan includes 3 member accounts" }, 409)
+    if ((await seatCount(context.env.DB, session.workspace.id)) >= MEMBER_LIMIT)
+      return json({ error: `Your plan includes ${MEMBER_LIMIT} member accounts` }, 409)
 
     const now = new Date().toISOString()
     const userId = id()

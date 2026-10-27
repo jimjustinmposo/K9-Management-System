@@ -117,7 +117,7 @@ function devAuthApiPlugin(): Plugin {
           if (users.has(email)) return send(409, { error: 'This email already belongs to an account' })
           const workspaceId = sessionUser.workspaceId || sessionUser.id
           const memberCount = [...users.values()].filter(user => user.workspaceId === workspaceId && user.role === 'member' && !user.archivedAt).length
-          if (memberCount >= 3) return send(409, { error: 'Your plan includes 3 member accounts' })
+          if (memberCount >= 5) return send(409, { error: 'Your plan includes 5 member accounts' })
           const member: DevUser = {
             id: randomUUID(), email, name, workspaceName: sessionUser.workspaceName,
             workspaceId, role: 'member', createdAt: new Date().toISOString(),
@@ -135,7 +135,7 @@ function devAuthApiPlugin(): Plugin {
             data: {
               members: [...users.values()].filter(user => (user.workspaceId || (user.role === 'member' ? '' : user.id)) === workspaceId).map(user => ({ id: user.id, name: user.name, email: user.email, role: user.role ?? 'owner', created_at: user.createdAt || new Date().toISOString(), archived_at: user.archivedAt || null })),
               invitations: [],
-              seats: { included: 3, used: 0, extra: 0 },
+              seats: { included: 5, used: [...users.values()].filter(user => user.workspaceId === workspaceId && user.role === 'member' && !user.archivedAt).length, extra: 0 },
             },
           })
         }
@@ -154,6 +154,8 @@ function devAuthApiPlugin(): Plugin {
           if (req.method === 'PUT') {
             const body = await readBody()
             if (typeof body.archived !== 'boolean') return send(400, { error: 'Archived must be true or false' })
+            if (!body.archived && target.archivedAt && [...users.values()].filter(user => user.workspaceId === target.workspaceId && user.role === 'member' && !user.archivedAt).length >= 5)
+              return send(409, { error: 'Your plan includes 5 member accounts' })
             target.archivedAt = body.archived ? new Date().toISOString() : null
             persistUsers()
             if (body.archived) for (const [session, email] of sessions) if (email === target.email) sessions.delete(session)

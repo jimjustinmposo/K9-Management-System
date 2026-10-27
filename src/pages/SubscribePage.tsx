@@ -5,8 +5,8 @@ import { useAuth } from "../lib/auth"
 type Interval = "month" | "year"
 
 const plans = {
-  month: { amount: "AED 150", period: "month" },
-  year: { amount: "AED 1,620", period: "year" },
+  month: { amount: "$41", period: "month" },
+  year: { amount: "$443", period: "year" },
 } satisfies Record<Interval, { amount: string; period: string }>
 
 export default function SubscribePage() {
@@ -17,7 +17,7 @@ export default function SubscribePage() {
   return (
     <AuthLayout
       title="Activate Sentinel"
-      subtitle={`Choose billing for ${session?.workspace.name ?? "your workspace"}. Your owner account and 3 members are included.`}
+      subtitle={`Choose billing for ${session?.workspace.name ?? "your workspace"}. One owner and up to five active members are included. All prices are in USD. Taxes are calculated at checkout.`}
     >
       <div className="mt-6 grid grid-cols-2 rounded-xl bg-canvas p-1">
         {(["month", "year"] as const).map((value) => (
@@ -56,11 +56,11 @@ export default function SubscribePage() {
         </p>
         {interval === "year" && (
           <p className="mt-1 text-[11px] font-semibold text-positive">
-            AED 135 per month, billed yearly
+            $443 billed yearly
           </p>
         )}
         <ul className="mt-5 space-y-2 text-xs text-slate">
-          <li>✓ Owner plus 3 member accounts</li>
+          <li>✓ One owner and up to five active members</li>
           <li>✓ Full K9 operations workspace</li>
           <li>✓ Secure role-based access</li>
           <li>✓ Monthly or yearly billing</li>

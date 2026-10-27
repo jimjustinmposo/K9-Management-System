@@ -5,6 +5,7 @@ import {
   type AppEnv,
 } from "../../_lib/auth"
 import { json } from "../../_lib/http"
+import { MEMBER_LIMIT, seatCount } from "../../_lib/member-seats"
 
 export const onRequestPatch: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageMembers")
@@ -52,11 +53,14 @@ export const onRequestPut: PagesFunction<AppEnv> = async (context) => {
     return json({ error: "Archived must be true or false" }, 400)
 
   const member = await context.env.DB.prepare(
-    "SELECT user_id FROM memberships WHERE user_id=? AND workspace_id=? AND role='member'",
+    "SELECT user_id,archived_at FROM memberships WHERE user_id=? AND workspace_id=? AND role='member'",
   )
     .bind(target, session.workspace.id)
-    .first()
+    .first<{ user_id: string; archived_at: string | null }>()
   if (!member) return json({ error: "Member not found" }, 404)
+
+  if (!body.archived && member.archived_at && (await seatCount(context.env.DB, session.workspace.id)) >= MEMBER_LIMIT)
+    return json({ error: `Your plan includes ${MEMBER_LIMIT} member accounts` }, 409)
 
   const archivedAt = body.archived ? new Date().toISOString() : null
   await context.env.DB.prepare(

@@ -8,21 +8,7 @@ import {
 import { sendEmail } from "../../_lib/email"
 import { appUrl, clean, id, json } from "../../_lib/http"
 
-async function seatCount(db: D1Database, workspaceId: string): Promise<number> {
-  const members = await db
-    .prepare(
-      "SELECT COUNT(*) count FROM memberships WHERE workspace_id=? AND role='member' AND archived_at IS NULL",
-    )
-    .bind(workspaceId)
-    .first<any>()
-  const pending = await db
-    .prepare(
-      "SELECT COUNT(*) count FROM invitations WHERE workspace_id=? AND status='pending' AND expires_at>?",
-    )
-    .bind(workspaceId, new Date().toISOString())
-    .first<any>()
-  return Number(members?.count ?? 0) + Number(pending?.count ?? 0)
-}
+import { MEMBER_LIMIT, seatCount } from "../../_lib/member-seats"
 
 export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "viewAdmin")
@@ -44,7 +30,7 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
     data: {
       members: members.results,
       invitations: invites.results,
-      seats: { included: 3, used, extra: 0 },
+      seats: { included: MEMBER_LIMIT, used, extra: 0 },
     },
   })
 }
@@ -79,8 +65,8 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
       return json({ error: "An invitation is already pending" }, 409)
     const nextCount =
       (await seatCount(context.env.DB, session.workspace.id)) + 1
-    if (nextCount > 3)
-      return json({ error: "Your plan includes 3 member accounts" }, 409)
+    if (nextCount > MEMBER_LIMIT)
+      return json({ error: `Your plan includes ${MEMBER_LIMIT} member accounts` }, 409)
     const token = randomToken()
     const now = new Date()
     const inviteId = id()

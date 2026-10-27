@@ -4,16 +4,9 @@ import { ArrowUpRight, Check, ClipboardList, Dog, HeartPulse, Users } from "luci
 const planInclusions = [
   "Full K9 Management System access",
   "Cloud hosting",
-  "Database hosting and maintenance",
-  "Routine database optimization",
-  "Scheduled database backups",
-  "Security monitoring and updates",
-  "Bug fixes and system maintenance",
-  "Performance optimization",
+  "Owner and member access",
   "Technical support",
-  "Existing feature updates",
   "SSL/HTTPS security",
-  "System availability monitoring",
 ]
 
 const features = [
@@ -62,7 +55,7 @@ export default function HomePage() {
         <section id="pricing" className="border-t border-line py-16" aria-labelledby="pricing-title">
           <p className="text-xs uppercase tracking-widest text-gold">Subscription plans</p>
           <h2 id="pricing-title" style={{ fontSize: "2rem" }} className="mt-3">Choose your billing interval.</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system. New paid subscriptions are not available on this public page.</p>
+           <p className="mt-4 max-w-2xl text-sm leading-7 text-slate">Both plans include access to the K9 management system for one owner and up to five active members. All prices are in USD. Taxes are calculated at checkout. New paid subscriptions are not available on this public page.</p>
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {[{ name: "Monthly", amount: "$41", interval: "per month", detail: "Billed every month" }, { name: "Yearly", amount: "$443", interval: "per year", detail: "Billed yearly" }].map((plan) => (
               <article key={plan.name} className="rounded-xl border border-line bg-surface p-8">
@@ -86,13 +79,28 @@ export default function HomePage() {
               ))}
             </ul>
             <div className="mt-8 border-t border-line pt-6">
-              <h3>Individual Access Plan</h3>
-              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate">Provides complete access for one owner, perfect for solo operators who need full control of the system.</p>
+              <h3>Owner and Member Access</h3>
+              <p className="mt-3 max-w-2xl text-sm leading-7 text-slate">Includes one owner and up to five active members with role-based permissions.</p>
             </div>
           </div>
         </section>
       </main>
-      <footer className="border-t border-line px-6 py-7"><div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 text-sm text-muted"><span>Caninelogy · K9 management software</span><Link to="/login" className="underline underline-offset-4">Customer sign in</Link></div></footer>
+      <footer className="border-t border-line px-6 py-7">
+        <div className="mx-auto flex max-w-6xl flex-wrap justify-between gap-4 text-sm text-muted">
+          <span>Caninelogy · K9 management software</span>
+          <nav aria-label="Public information" className="flex flex-wrap gap-x-5 gap-y-3">
+            {[
+              ["/terms", "Terms of Service"],
+              ["/privacy", "Privacy Notice"],
+              ["/refund", "Refund Policy"],
+              ["/contact-support", "Contact support"],
+              ["/login", "Customer sign in"],
+            ].map(([to, label]) => (
+              <Link key={to} to={to} className="rounded underline underline-offset-4 hover:text-gold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">{label}</Link>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </div>
   )
 }
