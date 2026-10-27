@@ -1,7 +1,7 @@
 {
-  "description": "Enhance your productivity with a customizable dashboard featuring weather updates, calendar events, and task management tools for seamless organization.",
+  "description": "Caninelogy is web-based K9 management software for dog profiles, training logs, medical records, boarding, feeding and team operations.",
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,

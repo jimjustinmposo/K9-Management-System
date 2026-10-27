@@ -34,6 +34,7 @@ import GroomingFormPage from "./pages/GroomingFormPage"
 import CarUsagePage from "./pages/CarUsagePage"
 import CarUsageFormPage from "./pages/CarUsageFormPage"
 import DashboardPage from "./pages/DashboardPage"
+import HomePage from "./pages/HomePage"
 
 const protectedPage = (page: React.ReactNode) => (
   <ProtectedRoute>{page}</ProtectedRoute>
@@ -54,7 +55,7 @@ export default function App() {
       <Route path="/subscribe" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
       <Route path="/subscription" element={protectedPage(<OwnerPage><SubscriptionPage /></OwnerPage>)} />
       <Route path="/account" element={<Navigate to="/" replace />} />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/" element={<HomePage />} />
       <Route path="/dashboard" element={protectedPage(<DashboardPage />)} />
       <Route path="/k9-roster" element={protectedPage(<K9RosterPage />)} />
       <Route

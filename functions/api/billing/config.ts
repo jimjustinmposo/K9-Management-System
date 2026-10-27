@@ -6,10 +6,14 @@ export const onRequestGet: PagesFunction<AppEnv> = async (context) => {
   if (isResponse(session)) return session
   if (!context.env.PADDLE_CLIENT_TOKEN)
     return json({ error: "Paddle checkout is not configured" }, 503)
+  const workspace = await context.env.DB.prepare(
+    "SELECT paddle_customer_id FROM workspaces WHERE id=?",
+  ).bind(session.workspace.id).first<{ paddle_customer_id: string | null }>()
   return json({
     data: {
       clientToken: context.env.PADDLE_CLIENT_TOKEN,
       environment: context.env.PADDLE_ENVIRONMENT,
+      customerId: workspace?.paddle_customer_id ?? null,
     },
   })
 }
