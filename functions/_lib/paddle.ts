@@ -48,10 +48,15 @@ export async function paddleRequest<T>(
     redirect: "error",
   })
   const result = (await response.json().catch(() => null)) as
-    | { data?: T; error?: { detail?: string; message?: string } }
+    | { data?: T; error?: { code?: string; detail?: string; message?: string } }
     | null
   if (!response.ok || !result?.data) {
-    console.error("Paddle API request failed", response.status)
+    console.error("Paddle API request failed", {
+      status: response.status,
+      code: result?.error?.code,
+      message: result?.error?.message,
+      detail: result?.error?.detail,
+    })
     throw new Error("Paddle request failed")
   }
   return result.data

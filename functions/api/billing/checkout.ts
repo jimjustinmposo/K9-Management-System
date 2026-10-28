@@ -89,8 +89,8 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
       )
 
       return json({ data: { transactionId: transaction.id } }, 201)
-    } catch {
-      console.error("Paddle checkout transaction request failed")
+    } catch (error) {
+      console.error("Paddle checkout transaction request failed", error)
 
       return json({ error: "Unable to start checkout right now" }, 502)
     }
