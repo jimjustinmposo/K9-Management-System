@@ -70,7 +70,9 @@ test("API wrapper pins host, authorization, version and rejects redirects", asyn
     assert.equal(calls[0].url, "https://sandbox-api.paddle.com/transactions");
     assert.equal(calls[0].init.headers.get("Authorization"), `Bearer ${env.PADDLE_API_KEY}`);
     assert.equal(calls[0].init.headers.get("Paddle-Version"), "1");
-    assert.equal(calls[0].init.redirect, "error");
+    assert.equal(calls[0].init.redirect, "manual");
+    globalThis.fetch = async () => new Response(null, { status: 302, headers: { Location: "https://untrusted.example" } });
+    await assert.rejects(paddleRequest(env, "/transactions", { method: "GET" }), /redirected/);
     await assert.rejects(paddleRequest(env, "//untrusted.example", {}));
     assert.equal(calls.length, 1);
   } finally { globalThis.fetch = original; }

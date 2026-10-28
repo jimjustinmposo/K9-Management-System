@@ -45,8 +45,10 @@ export async function paddleRequest<T>(
   const response = await fetch(`${paddleApiBase(env.PADDLE_ENVIRONMENT)}${path}`, {
     ...init,
     headers,
-    redirect: "error",
+    redirect: "manual",
   })
+  if (response.status >= 300 && response.status < 400)
+    throw new Error("Paddle API unexpectedly redirected the request")
   const result = (await response.json().catch(() => null)) as
     | { data?: T; error?: { code?: string; detail?: string; message?: string } }
     | null
