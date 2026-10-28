@@ -195,7 +195,7 @@ export default function SubscriptionPage() {
                 <ul className="mt-5 space-y-4">
                   {benefits.map((benefit) => (
                     <li key={benefit} className="flex items-start gap-3 text-[10px] leading-5 text-slate">
-                      <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-positive-soft text-[9px] font-black text-positive">✓</span>
+                      <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-positive-soft text-[9px] font-black text-positive">Γ£ô</span>
                       {benefit}
                     </li>
                   ))}
@@ -246,7 +246,7 @@ export default function SubscriptionPage() {
                 disabled={pending || !session?.permissions.manageBilling}
                 className="flex w-full items-center justify-center rounded-xl bg-navy px-4 py-3.5 text-xs font-bold text-white hover:bg-navy-light disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {pending ? "Please wait…" : hasManageableSubscription ? "Manage billing" : subscriptionStatus === "canceled" ? "Subscribe again" : "Continue to secure checkout"}
+                {pending ? "Please waitΓÇª" : hasManageableSubscription ? "Manage billing" : subscriptionStatus === "canceled" ? "Subscribe again" : "Continue to secure checkout"}
               </button>
               {!session?.permissions.manageBilling && (
                 <p className="mt-3 text-center text-[9px] text-muted">Only the workspace owner can manage billing.</p>

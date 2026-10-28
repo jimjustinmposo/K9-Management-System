@@ -3,7 +3,7 @@ pages_build_output_dir = "dist"
 compatibility_date = "2025-05-01"
 
 [vars]
-APP_URL = "https://martina-k9-management-system.pages.dev"
+APP_URL = "https://caninelogy.online"
 
 [[d1_databases]]
 database_id = "a67e5d3b-d14f-44b0-92c8-ee708c85a642"
