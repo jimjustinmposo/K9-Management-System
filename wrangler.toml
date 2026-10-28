@@ -2,6 +2,9 @@ name = "martina-k9-management-system"
 pages_build_output_dir = "dist"
 compatibility_date = "2025-05-01"
 
+[observability]
+enabled = true
+
 [vars]
 APP_URL = "https://caninelogy.online"
 
