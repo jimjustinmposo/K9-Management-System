@@ -12,7 +12,7 @@
 - Database: Cloudflare D1 (`k9_ops_db`), SQL migrations in `migrations/`
 - Storage fallback: localStorage when no Pages Functions backend (plain `vite dev`)
 - Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
-- Paddle readiness: checkout passes workspace Paddle customer ID to Retain and uses Initialize/Update; production webhooks dynamically enforce Paddle IPv4 /32 sources (five-minute cache, fail closed) plus signature checks. Five focused readiness tests and both TypeScript checks pass. Not deployed; sandbox round-trip and live account migration remain unverified; Paddle MCP servers unavailable in this session.
+- Paddle readiness: checkout passes workspace Paddle customer ID to Retain and uses Initialize/Update; production webhooks dynamically enforce Paddle IPv4 /32 sources (five-minute cache, fail closed) plus signature checks. Five focused readiness tests and both TypeScript checks pass. Not deployed; sandbox round-trip and live account migration remain unverified. VS Code workspace Paddle MCP config is at `.vscode/mcp.json`; sandbox key is prompted securely, and the previously exposed sandbox key requires revocation.
 
 ## Architecture
 - K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.

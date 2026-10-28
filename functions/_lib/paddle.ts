@@ -22,8 +22,8 @@ export function assertPaddleCheckoutEnabled(env: AppEnv): void {
   if (env.PADDLE_CHECKOUT_ENABLED === "false") throw new Error("New checkouts are paused")
   if (env.PADDLE_CHECKOUT_ENABLED !== undefined && env.PADDLE_CHECKOUT_ENABLED !== "true")
     throw new Error("Invalid checkout enablement setting")
-
 }
+
 
 export function paddleApiBase(environment?: string): string {
   if (environment === "sandbox") return "https://sandbox-api.paddle.com"

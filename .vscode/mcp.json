@@ -1,0 +1,23 @@
+{
+  "servers": {
+    "paddle-live": {
+      "type": "http",
+      "url": "https://mcp.paddle.com/mcp"
+    },
+    "paddle-sandbox": {
+      "type": "http",
+      "url": "https://sandbox-mcp.paddle.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${input:paddle-sandbox-api-key}"
+      }
+    }
+  },
+  "inputs": [
+    {
+      "id": "paddle-sandbox-api-key",
+      "type": "promptString",
+      "description": "Paddle sandbox API key",
+      "password": true
+    }
+  ]
+}

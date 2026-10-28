@@ -1,0 +1,11 @@
+"mcp.servers": {
+  "paddle-sandbox": {
+    "url": "https://sandbox-mcp.paddle.com/mcp",
+    "headers": {
+      "Authorization": ""
+    }
+  },
+  "paddle-live": {
+    "url": "https://mcp.paddle.com/mcp"
+  }
+}
