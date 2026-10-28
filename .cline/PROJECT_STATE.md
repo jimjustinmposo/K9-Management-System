@@ -12,7 +12,7 @@
 - Database: Cloudflare D1 (`k9_ops_db`), SQL migrations in `migrations/`
 - Storage fallback: localStorage when no Pages Functions backend (plain `vite dev`)
 - Billing: Paddle Billing API server-side, Sandbox environment configured by Worker bindings/secrets
-- Paddle readiness: checkout passes workspace Paddle customer ID to Retain and uses Initialize/Update; production webhooks dynamically enforce Paddle IPv4 /32 sources (five-minute cache, fail closed) plus signature checks. Five focused readiness tests and both TypeScript checks pass. Not deployed; sandbox round-trip and live account migration remain unverified. VS Code workspace Paddle MCP config is at `.vscode/mcp.json`; sandbox key is prompted securely, and the previously exposed sandbox key requires revocation.
+- Paddle readiness: checkout passes workspace Paddle customer ID to Retain and uses Initialize/Update; production webhooks dynamically enforce Paddle IPv4 /32 sources (five-minute cache, fail closed) plus signature checks. Phase 1 source audit found no tracked real Paddle credentials; `.env` and `.dev.vars` are ignored, and production rejects `LOCAL_DEV_FULL_ACCESS=true`. Phase 2 installed pnpm 10.34.3 dependencies and passed 13 focused Paddle readiness/safety tests, typecheck, and production build. Sandbox round-trip, credential rotation, live account migration, and deployment remain unverified. VS Code workspace Paddle MCP config is at `.vscode/mcp.json`; any previously exposed sandbox key still requires revocation in Paddle.
 
 ## Architecture
 - K9 APIs support localStorage fallback when Pages Functions are unavailable; dog-linked operational records use per-K9 filtered, paginated Pages Function queries with local paging fallback for boarding. Handler, training, and medical registers support bounded pagination.
@@ -143,7 +143,7 @@
 - Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
-- [ ] **Complete Paddle migration** ΓÇö gate for resubmission: finish worker integration, set `PADDLE_CHECKOUT_ENABLED=true`, re-enable checkout button in `SubscribePage.tsx`, run sandbox checkout + webhook round-trip.
+- [~] **Complete Paddle migration** ΓÇö Phases 1–2 source audit and local validation complete; rotate any previously exposed sandbox credential, finish live account setup, verify checkout/webhook round-trip, and deploy before accepting payments.
 - [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean ΓÇö 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
 
 

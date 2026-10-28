@@ -68,7 +68,7 @@ test("billing config preserves the live checkout gate before reading customer da
     "../../_lib/http": { json: (body, status = 200) => Response.json(body, { status }) },
   });
   const response = await api.onRequestGet({ env: {
-    PADDLE_CLIENT_TOKEN: "live_public", PADDLE_ENVIRONMENT: "production", PADDLE_API_KEY: "pdl_live_apikey_private",
+    PADDLE_CLIENT_TOKEN: "live_public", PADDLE_ENVIRONMENT: "production", PADDLE_API_KEY: "pdl_live_apikey_private", PADDLE_CHECKOUT_ENABLED: "false",
     PADDLE_MONTHLY_PRICE_ID: `pri_${"a".repeat(26)}`, PADDLE_YEARLY_PRICE_ID: `pri_${"b".repeat(26)}`,
   } });
   assert.equal(response.status, 503);

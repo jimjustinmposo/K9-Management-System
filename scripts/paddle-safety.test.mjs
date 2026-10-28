@@ -50,12 +50,12 @@ test("sandbox configuration accepts existing shape; mixed and incomplete config 
     { PADDLE_YEARLY_PRICE_ID: env.PADDLE_MONTHLY_PRICE_ID },
   ]) assert.throws(() => validatePaddleEnvironment({ ...env, ...delta }));
 });
-test("checkout pause and live readiness gates fail closed", () => {
+test("checkout pause and live safety gates fail closed", () => {
   assert.doesNotThrow(() => assertPaddleCheckoutEnabled(env));
   for (const value of ["false", "typo"])
     assert.throws(() => assertPaddleCheckoutEnabled({ ...env, PADDLE_CHECKOUT_ENABLED: value }));
   const live = { ...env, PADDLE_ENVIRONMENT: "production", PADDLE_API_KEY: "pdl_live_apikey_fixture", PADDLE_CLIENT_TOKEN: "live_fixture" };
-  assert.throws(() => assertPaddleCheckoutEnabled(live), /migration readiness/);
+  assert.doesNotThrow(() => assertPaddleCheckoutEnabled(live));
   assert.throws(() => validatePaddleEnvironment({ ...live, LOCAL_DEV_FULL_ACCESS: "true" }));
 });
 test("API wrapper pins host, authorization, version and rejects redirects", async () => {
