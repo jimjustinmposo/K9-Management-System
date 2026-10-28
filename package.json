@@ -27,6 +27,7 @@
     "format": "oxfmt"
   },
   "dependencies": {
+    "@paddle/paddle-js": "^1.6.5",
     "dodopayments": "^2.54.0",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.9",

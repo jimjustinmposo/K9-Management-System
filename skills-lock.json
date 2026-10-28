@@ -5,22 +5,22 @@
       "source": "developer.paddle.com",
       "sourceUrl": "https://developer.paddle.com/",
       "sourceType": "well-known",
-      "computedHash": "23760461444c8fde6e1f973fa0074054c0d139ece1b8e2564b20a3269e3c08c4",
-      "wellKnownDigest": "sha256:062270a7172e3cc629e751ef48a143e1189673f39ac7011a23d9fd283aa2ef69"
+      "computedHash": "4f55e581d5ceee52a1e44041e5d12b4d701c90882d7e4897081a937d5525a022",
+      "wellKnownDigest": "sha256:abd1b1a1f179369ca16d57122c0f043ce2ff2bec3d9118bdb5dc1d434dcca8f0"
     },
     "paddle-subscription-sync": {
       "source": "developer.paddle.com",
       "sourceUrl": "https://developer.paddle.com/",
       "sourceType": "well-known",
-      "computedHash": "ef06c0ef713ae9f9db59068b8135a2ae433c31ecc88e2ac154605d05e382995f",
-      "wellKnownDigest": "sha256:f7a7f5a01bed6245fc122bf9251938ad04104bf72d39dfe3e59a0625a9cb053b"
+      "computedHash": "b02afd4fc8100793b021c242540fdf4d44f91cbd9ee31d8115dc6bf0bb0eeea6",
+      "wellKnownDigest": "sha256:8b54a76d86d7966a90b81e767cdcb0c932044e61bf2e1048ca5711fa2910827f"
     },
     "paddle-webhooks": {
       "source": "developer.paddle.com",
       "sourceUrl": "https://developer.paddle.com/",
       "sourceType": "well-known",
-      "computedHash": "9d020ce32fb1e9eb8440e18610d21f5d78c63c14665dd11934510928f0b5d9a6",
-      "wellKnownDigest": "sha256:c64d7bb6ed7f44aa1f60fb38fb96c72980009f1c8f438aefbdfd6138298fe5cb"
+      "computedHash": "a8b682f5340444818684f2fb7ebd9a428f6fcfb48149ae131499aa44fc1eb1b7",
+      "wellKnownDigest": "sha256:3a3a77b87977266db461b84dea86a996f33594e42ff6a51ecec1b93e481e52a8"
     }
   }
 }

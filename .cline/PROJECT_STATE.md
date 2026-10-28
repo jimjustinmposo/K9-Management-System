@@ -47,18 +47,18 @@
 - [x] Register pages limit displayed rows to 10 or 20 per page; handler, training, and medical lists use bounded API pagination. Select controls use searchable dropdowns.
 
 ## Database
-- `k9_roster` — K9 records (id, dog_name, breed, status, microchip, lineage...)
-- Five `k9_training_*` tables — per-discipline date/note records with workspace-scoped K9 and handler foreign keys; migration `0017_training_logs.sql`.
-- `boarding_records` — workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
+- `k9_roster` ΓÇö K9 records (id, dog_name, breed, status, microchip, lineage...)
+- Five `k9_training_*` tables ΓÇö per-discipline date/note records with workspace-scoped K9 and handler foreign keys; migration `0017_training_logs.sql`.
+- `boarding_records` ΓÇö workspace-scoped boarding stays linked by `k9_id` to `k9_roster`; migration `0013_boarding.sql`
 - Boarding pricing columns (`currency`, `price_per_day`, `total_amount`) are added by migration `0014_boarding_pricing.sql`; checked-out totals are calculated server-side.
-- `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` — workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
-- `k9_handlers` — workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
-- `k9feeding` — workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
-- `k9weights` — workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
-- `k9_food_inventory` — workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
-- `k9_seasons` — workspace-scoped heat cycle dates and notes linked to `k9_roster`; migration `0025_in_season.sql` applied remotely.
-- `k9_grooming` — workspace-scoped grooming records linked to `k9_roster`; migration `0026_grooming.sql` applied remotely.
-- `k9_car_usage` — workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings, and persisted `km_used`; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely.
+- `k9_medications`, `k9_medical_records`, and `k9_medical_conditions` ΓÇö workspace-scoped medical formulary, treatment history, and conditions; migration `0015_medical.sql` (not yet applied).
+- `k9_handlers` ΓÇö workspace-scoped handler contact records; migration `0016_handlers.sql` (applied to local D1 only).
+- `k9feeding` ΓÇö workspace-scoped feeding logs linked to K9 and handler records; migration `0019_k9_feeding.sql` (not applied).
+- `k9weights` ΓÇö workspace-scoped K9 weight history with nullable difference from the preceding dated record; migrations `0020_k9_weights.sql` and `0021_k9weights_difference.sql` (applied to remote D1).
+- `k9_food_inventory` ΓÇö workspace-scoped stock entries in kg; `used` and `remaining` are computed from case-insensitive trimmed matches against `k9feeding.food` at read time. Schema applied directly to remote D1; migration ledger status not updated.
+- `k9_seasons` ΓÇö workspace-scoped heat cycle dates and notes linked to `k9_roster`; migration `0025_in_season.sql` applied remotely.
+- `k9_grooming` ΓÇö workspace-scoped grooming records linked to `k9_roster`; migration `0026_grooming.sql` applied remotely.
+- `k9_car_usage` ΓÇö workspace-scoped vehicle usage logs linked to `k9_roster`, with driver, times, odometer readings, and persisted `km_used`; migrations `0027_car_usage.sql` and `0028_car_usage_km_used.sql` applied remotely.
 
 ## API
 - GET/POST `/api/k9`, GET/PUT/DELETE `/api/k9/:id`
@@ -71,8 +71,8 @@
 - GET/POST `/api/feeding`, GET/PUT/DELETE `/api/feeding/:id`; workspace-scoped feeding records linked to K9 and handler rosters.
 - GET/POST `/api/food-inventory`, GET/PUT/DELETE `/api/food-inventory/:id`; workspace-scoped stock records with computed usage and balance.
 - GET/POST `/api/car-usage`, GET/PUT/DELETE `/api/car-usage/:id`; workspace-scoped trip logs; create permitted to owner/member, edit/delete owner-only.
-- GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` — owner-only member administration and direct member account creation
-- POST `/api/auth/developer-reset` — verifies `DEV_SECRET_PASS` and resets password by account email
+- GET/POST `/api/members`, POST `/api/members/create`, PATCH/DELETE `/api/members/:id` ΓÇö owner-only member administration and direct member account creation
+- POST `/api/auth/developer-reset` ΓÇö verifies `DEV_SECRET_PASS` and resets password by account email
 - Legacy POST `/api/auth/forgot-password` and `/api/auth/reset-password` remain implemented but are no longer exposed in frontend routes
 
 ## Important Decisions
@@ -114,7 +114,7 @@
 - Added K9 Feeding page, workspace-scoped CRUD API, and migration `0019_k9_feeding.sql`; remote D1 migration is pending approval/application.
 - Added K9 weight history difference tracking, removed record nickname editing, and applied migration `0021_k9weights_difference.sql` to remote D1.
 - Connected K9 feeding food selection to Food Inventory, added g/kg amount entry with gram persistence, and enforced inventory existence and available-stock validation on create/edit.
-- Renamed the Food Inventory create action to “New food” and added per-entry restocking in grams or kilograms, accumulating stock on the existing record.
+- Renamed the Food Inventory create action to ΓÇ£New foodΓÇ¥ and added per-entry restocking in grams or kilograms, accumulating stock on the existing record.
 - Added feeding records to the K9 operational-relationships panel with workspace-scoped per-dog API filtering and incremental pagination.
 - Persisted selected dogs and unsaved weights/date across refresh, navigation, and logout; added a Clear list action.
 - Added shared searchable dropdown and pagination controls; wired bounded handler, training, and medical register queries. Boarding and K9 roster pages use client-side pagination over loaded lists.
@@ -143,8 +143,8 @@
 - Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
-- [ ] **Complete Paddle migration** — gate for resubmission: finish worker integration, set `PADDLE_CHECKOUT_ENABLED=true`, re-enable checkout button in `SubscribePage.tsx`, run sandbox checkout + webhook round-trip.
-- [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean — 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
+- [ ] **Complete Paddle migration** ΓÇö gate for resubmission: finish worker integration, set `PADDLE_CHECKOUT_ENABLED=true`, re-enable checkout button in `SubscribePage.tsx`, run sandbox checkout + webhook round-trip.
+- [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean ΓÇö 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
 
 
 ## Known Limitations
