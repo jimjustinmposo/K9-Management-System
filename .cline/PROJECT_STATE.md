@@ -21,8 +21,8 @@
 - Roster, boarding, and dashboard restore fresh mapped records synchronously on navigation; mounted views reload after invalidation. No persistent API cache was added; remote changes may remain unseen until expiry/reload. Dashboard Refresh clears source caches.
 
 ## Implemented Features
-- [~] Public `/contact-support` page with developer phone/email and a whitespace-guarded, URL-encoded WhatsApp message composer; linked from login, forgot-password and sidebar. Typecheck/build pass; real-device WhatsApp handoff pending. Users confirm Send in WhatsApp; no backend messaging service.
-- [~] Public `/terms`, `/privacy`, `/refund` pages linked from sign-in/signup; concise policy copy and themed layout. Typechecks/build pass; browser review and operator legal name/contact, retention details and policy approval pending before publication.
+- [~] Public `/contact-support` page with developer phone/email and a whitespace-guarded, URL-encoded WhatsApp message composer; standalone static `/contact-support.html` now serves crawlers and verification. Real-device WhatsApp handoff pending; no backend messaging service.
+- [~] Public `/terms`, `/privacy`, `/refund` pages linked from sign-in/signup; standalone static aliases `/terms-of-service.html`, `/privacy.html`, and `/refund.html` now contain full content instead of meta-refresh shells. Operator legal review, retention details, and policy approval remain pending.
 - [~] Owner-only Reports use AppShell/Panel layout with period filters and PDF/print; all report headers display Caninelogy without renaming workspace records or changing isolation. Car reports retry without Notes only when that column is missing, with an explicit warning. Dogs supports multi-selection, current profiles and grouped care/activity; missing category schema produces an incomplete-report warning. Fourteen API/SQLite/PDF tests pass, including pre/post-0029 car schemas; browser/print verification pending.
 - [x] Authentication UI and APIs (email/password)
 - [x] Vite local-test auth/member account persistence across dev-server restarts (server-side hashed credentials)
@@ -143,7 +143,7 @@
 - Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
-- [~] **Complete Paddle migration** ΓÇö Phases 1–2 source audit and local validation complete; rotate any previously exposed sandbox credential, finish live account setup, verify checkout/webhook round-trip, and deploy before accepting payments.
+- [~] **Complete Paddle migration** — Code-side public verification aliases and Paddle safety checks are complete. Sandbox credential rotation, live catalog/account setup, live notification destination, domain approval, checkout/webhook round-trip, and deployment remain pending before accepting payments.
 - [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean ΓÇö 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
 
 
