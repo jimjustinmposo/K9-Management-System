@@ -34,6 +34,18 @@ export function assertPaddleCheckoutEnabled(env: AppEnv): void {
     throw new Error("Invalid checkout enablement setting")
 }
 
+export function paddleCheckoutConfigMessage(error: unknown): string {
+  if (!(error instanceof Error)) return "Paddle checkout configuration is invalid"
+  if (error.message === "New checkouts are paused") return "New checkouts are paused in the production configuration"
+  if (error.message === "Invalid checkout enablement setting") return "PADDLE_CHECKOUT_ENABLED must be exactly true"
+  if (error.message === "PADDLE_ENVIRONMENT must be sandbox or production") return "PADDLE_ENVIRONMENT must be production for this deployment"
+  if (error.message === "Paddle API key does not match the configured environment") return "The live Paddle API key is missing or does not start with pdl_live_apikey_"
+  if (error.message === "Paddle client token does not match the configured environment") return "The live Paddle client token is missing or does not start with live_"
+  if (error.message === "Configure distinct Paddle monthly and yearly prices") return "Configure distinct live monthly and yearly Paddle price IDs"
+  if (error.message === "Local full access must not be enabled with live billing") return "LOCAL_DEV_FULL_ACCESS must be false in production"
+  return "Paddle checkout configuration is invalid"
+}
+
 
 export function paddleApiBase(environment?: string): string {
   if (environment === "sandbox") return "https://sandbox-api.paddle.com"

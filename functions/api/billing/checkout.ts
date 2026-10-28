@@ -2,7 +2,7 @@ import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 
 import { json } from "../../_lib/http"
 
-import { assertPaddleCheckoutEnabled, paddleRequest } from "../../_lib/paddle"
+import { assertPaddleCheckoutEnabled, paddleCheckoutConfigMessage, paddleRequest } from "../../_lib/paddle"
 
 import { createBillingCheckout } from "../../_lib/billing-checkout"
 
@@ -14,8 +14,8 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
 
     try {
       assertPaddleCheckoutEnabled(context.env)
-    } catch {
-      return json({ error: "New checkouts are currently unavailable" }, 503)
+    } catch (error) {
+      return json({ error: paddleCheckoutConfigMessage(error) }, 503)
     }
 
     let interval: "month" | "year"
