@@ -48,10 +48,24 @@ export default function SubscriptionPage() {
     setMessage("")
     try {
       const config = await apiRequest("/api/billing/config")
+      if (
+        !config?.data ||
+        (config.data.environment !== "sandbox" && config.data.environment !== "production") ||
+        typeof config.data.clientToken !== "string"
+      ) {
+        throw new Error("Paddle checkout configuration is incomplete")
+      }
+      const expectedTokenPrefix = config.data.environment === "sandbox" ? "test_" : "live_"
+      if (!config.data.clientToken.startsWith(expectedTokenPrefix)) {
+        throw new Error(`Paddle client token does not match ${config.data.environment} mode`)
+      }
       const transaction = await apiRequest("/api/billing/checkout", {
         method: "POST",
         body: JSON.stringify({ interval }),
       })
+      if (!/^txn_[a-z0-9]{26}$/.test(transaction?.data?.transactionId ?? "")) {
+        throw new Error("Paddle did not return a valid checkout transaction")
+      }
       const paddleWindow = window as Window & { Paddle?: PaddleInstance }
       if (!paddleWindow.Paddle) {
         const script = document.createElement("script")
@@ -84,7 +98,11 @@ export default function SubscriptionPage() {
       } else {
         paddle.Update(customerOptions)
       }
-      paddle.Checkout.open({ transactionId: transaction.data.transactionId })
+      try {
+        paddle.Checkout.open({ transactionId: transaction.data.transactionId })
+      } catch {
+        throw new Error("Paddle checkout could not open. Check the browser console for the Paddle error.")
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Unable to start checkout")
     } finally {

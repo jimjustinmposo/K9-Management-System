@@ -143,7 +143,7 @@
 - Apply migration `0017_training_logs.sql` to remote D1 before using training logs in production; migrations `0015_medical.sql` and `0016_handlers.sql` also remain pending remotely.
 - [ ] Verify a real password reset using the configured secret and a known account.
 - [ ] Verify owner-driven password reset against an existing member account.
-- [~] **Complete Paddle migration** — Code-side public verification aliases and Paddle safety checks are complete. Sandbox credential rotation, live catalog/account setup, live notification destination, domain approval, checkout/webhook round-trip, and deployment remain pending before accepting payments.
+- [~] **Complete Paddle migration** — Code-side public verification aliases, checkout/portal diagnostics, and Paddle safety checks are complete. Sandbox credential rotation, live catalog/account setup, live notification destination, domain approval, checkout/webhook round-trip, and deployment remain pending before accepting payments.
 - [x] Paddle rejection fixes deployed (2026-10-27): static policy HTML files added to `public/` for all six policy paths; `_redirects` updated with passthrough rules before SPA catch-all; noscript "not available" line removed from `index.html`; policy nav links added to noscript block; `SubscribePage.tsx` currency changed from AED 150/1,620 to $41/$443 USD; yearly savings copy updated; "not available" sentence removed from `HomePage.tsx` pricing section. Build clean ΓÇö 2187 modules, no errors. Pending: deploy to Cloudflare Pages.
 
 

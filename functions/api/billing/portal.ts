@@ -1,6 +1,6 @@
 import { isResponse, requireSession, type AppEnv } from "../../_lib/auth"
 import { json } from "../../_lib/http"
-import { paddleRequest } from "../../_lib/paddle"
+import { PaddleApiError, paddleRequest } from "../../_lib/paddle"
 
 export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
   const session = await requireSession(context, "manageBilling")
@@ -34,8 +34,15 @@ export const onRequestPost: PagesFunction<AppEnv> = async (context) => {
         }),
       },
     )
-    return json({ data: { url: portal.urls.general.overview } })
-  } catch {
+    const url = portal.urls.general.overview
+    if (typeof url !== "string" || !url.startsWith("https://customer-portal.paddle.com/"))
+      return json({ error: "Paddle returned an invalid billing portal link" }, 502)
+    return json({ data: { url } })
+  } catch (error) {
+    if (error instanceof PaddleApiError && error.status === 403)
+      return json({ error: "The Paddle API key needs customer_portal_session.write permission" }, 502)
+    if (error instanceof PaddleApiError && error.status === 404)
+      return json({ error: "The Paddle billing customer or subscription was not found" }, 502)
     return json({ error: "Unable to open billing management right now" }, 502)
   }
 }

@@ -1,5 +1,15 @@
 import type { AppEnv } from "./auth"
 
+export class PaddleApiError extends Error {
+  constructor(
+    readonly status: number,
+    readonly code?: string,
+  ) {
+    super("Paddle API request failed")
+    this.name = "PaddleApiError"
+  }
+}
+
 export function validatePaddleEnvironment(env: AppEnv): void {
   paddleApiBase(env.PADDLE_ENVIRONMENT)
   const sandbox = env.PADDLE_ENVIRONMENT === "sandbox"
@@ -59,7 +69,7 @@ export async function paddleRequest<T>(
       message: result?.error?.message,
       detail: result?.error?.detail,
     })
-    throw new Error("Paddle request failed")
+    throw new PaddleApiError(response.status, result?.error?.code)
   }
   return result.data
 }
